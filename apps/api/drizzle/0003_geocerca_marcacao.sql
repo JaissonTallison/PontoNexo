@@ -1,0 +1,2 @@
+ALTER TABLE "punch_records" ADD COLUMN "geofence_id" uuid;--> statement-breakpoint
+ALTER TABLE "punch_records" ADD CONSTRAINT "punch_records_geofence_id_geofences_id_fk" FOREIGN KEY ("geofence_id") REFERENCES "public"."geofences"("id") ON DELETE no action ON UPDATE no action;

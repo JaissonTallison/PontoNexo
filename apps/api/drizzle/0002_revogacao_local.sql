@@ -1,0 +1,3 @@
+ALTER TABLE "employee_work_locations" ADD COLUMN "revoked_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "employee_work_locations" ADD COLUMN "revoked_by_user_id" uuid;--> statement-breakpoint
+ALTER TABLE "employee_work_locations" ADD CONSTRAINT "employee_work_locations_revoked_by_user_id_users_id_fk" FOREIGN KEY ("revoked_by_user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;

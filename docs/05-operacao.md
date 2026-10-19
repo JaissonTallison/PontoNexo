@@ -1,0 +1,40 @@
+# Instalação, execução e operação
+
+## Requisitos
+Node 24, pnpm 11, Docker, ImageMagick (só para a marca).
+
+## Primeira execução
+```bash
+pnpm install
+pnpm chaves:gerar          # cria .env a partir do .env.example e gera as chaves (nunca versione o .env)
+pnpm infra:up              # PostgreSQL 17 (:5572) e Mailpit (:5575 SMTP, :5576 web)
+pnpm build:shared
+pnpm db:migrate            # migrações (papel dono)
+pnpm db:seed               # dados FICTÍCIOS; senha PontoNexo2026
+pnpm dev                   # API :5570 (/api/docs) e web :5571
+```
+Usuários do seed: `titular@`, `gestor@`, `contador@`, `maria@`, `jose@pontonexo.local`.
+`pnpm --filter @pontonexo/api db:reset` recria o banco de desenvolvimento (só local).
+
+## Variáveis de ambiente
+Ver `.env.example` (comentado). Em produção: `NODE_ENV=production`, `COOKIE_SECURE=true` (obrigatório), `TRUST_PROXY=true` atrás de proxy, `WEB_ORIGIN` com o domínio HTTPS, SMTP real, chaves geradas por `pnpm chaves:gerar` guardadas num cofre.
+
+## Banco
+- Dois papéis: dono (migrações) e `pontonexo_app` (aplicação, sujeito a RLS, sem UPDATE/DELETE em registros). Em produção, crie `pontonexo_app` com LOGIN e senha antes de migrar.
+- Migrações em `apps/api/drizzle/` (0001 = segurança: gatilhos, RLS, funções).
+
+## Verificação (rodar uma por vez)
+```bash
+node scripts/verificar-codigo.mjs
+pnpm typecheck
+pnpm test                       # 23 unitários (shared) + 39 integração (API, banco real recriado)
+pnpm test:e2e                   # requer API e web no ar com seed; PW_CHROMIUM=<binário> se o navegador do Playwright não estiver baixado
+scripts/testar-restauracao.sh   # backup cifrado → restauração em banco novo → compara contagens e cadeia de hash
+```
+
+## Produção (sugestão)
+- HTTPS no proxy (Caddy/Nginx) com HSTS; API e web atrás do mesmo domínio (`/api` → API).
+- `chrony` ativo no host, apontando para a.ntp.br/b.ntp.br; o painel mostra as medições.
+- Backup diário: `scripts/backup.sh` via cron, cópia fora do servidor, teste de restauração mensal com `scripts/testar-restauracao.sh`.
+- Monitorar `GET /api/health/ready` (banco e relógio).
+- Logs em JSON (`NODE_ENV=production`), sem dados pessoais.

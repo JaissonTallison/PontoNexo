@@ -1,0 +1,30 @@
+{
+  "name": "pontonexo",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.3.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "infra:up": "docker compose up -d --wait",
+    "infra:down": "docker compose down",
+    "build": "pnpm -r --workspace-concurrency=1 build",
+    "build:shared": "pnpm --filter @pontonexo/shared build",
+    "dev": "pnpm build:shared && pnpm -r --parallel --filter @pontonexo/api --filter @pontonexo/web dev",
+    "typecheck": "pnpm -r --workspace-concurrency=1 typecheck",
+    "test": "pnpm -r --workspace-concurrency=1 test",
+    "test:e2e": "pnpm --filter @pontonexo/web test:e2e",
+    "verificar:codigo": "node scripts/verificar-codigo.mjs",
+    "verificar": "node scripts/verificar-codigo.mjs && pnpm typecheck && pnpm test",
+    "db:generate": "pnpm --filter @pontonexo/api db:generate",
+    "db:migrate": "pnpm --filter @pontonexo/api db:migrate",
+    "db:seed": "pnpm --filter @pontonexo/api db:seed",
+    "chaves:gerar": "node scripts/gerar-chaves.mjs",
+    "brand:svg": "python3 scripts/brand/build_svgs.py",
+    "brand:export": "python3 scripts/brand/export_rasters.py"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

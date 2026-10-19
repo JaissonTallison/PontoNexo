@@ -1,0 +1,37 @@
+# Infraestrutura local de desenvolvimento. Produção: ver docs/05-operacao.md.
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-pontonexo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pontonexo_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-pontonexo}
+      APP_DB_USER: ${APP_DB_USER:-pontonexo_app}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:-pontonexo_app_dev}
+    ports:
+      - "5572:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Captura os e-mails de recuperação de senha em desenvolvimento.
+  mailpit:
+    image: axllent/mailpit:v1.27
+    restart: unless-stopped
+    ports:
+      - "5575:1025"
+      - "5576:8025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:

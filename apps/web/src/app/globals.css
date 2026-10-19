@@ -1,0 +1,109 @@
+@import 'tailwindcss';
+
+/*
+ * Tokens do PontoNexo (guia: docs/06-interface.md).
+ * Paleta sóbria, cantos de 8 px, sem degradê, sem pontos coloridos de status.
+ * Contraste medido (WCAG): texto 17.2:1, texto-2 10.4:1, texto-3 6.5:1, atenção 5.0:1, perigo 6.6:1,
+ * ação 5.5:1 sobre branco; branco sobre marca 17.9:1; ação sobre ação-suave 4.8:1. Todos ≥ 4,5:1.
+ */
+@theme {
+  --font-sans: var(--font-plex), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --color-marca: #000f4b;
+  --color-marca-2: #0b2466;
+  --color-marca-3: #1d3a80;
+  --color-acao: #0f766e;
+  --color-acao-hover: #0b5f59;
+  --color-acao-suave: #e6f4f2;
+  --color-marcador: #fe9a02;
+  --color-atencao: #b45309;
+  --color-atencao-suave: #fdf6ec;
+  --color-perigo: #b42318;
+  --color-perigo-suave: #fdf1f0;
+  --color-fundo: #f4f7fa;
+  --color-card: #ffffff;
+  --color-texto: #0f1c2a;
+  --color-texto-2: #334155;
+  --color-texto-3: #52606d;
+  --color-borda: #d9e2ec;
+  --color-borda-forte: #bcccdc;
+  --color-zebra: #f6f8fb;
+  --color-realce: #eef3f8;
+
+  --radius-pn: 8px;
+  --shadow-card: 0 1px 2px rgb(16 42 67 / 0.05), 0 4px 12px rgb(16 42 67 / 0.06);
+  --shadow-barra: 0 1px 3px rgb(16 42 67 / 0.08);
+  --shadow-flutuante: 0 8px 24px rgb(16 42 67 / 0.14);
+
+  --text-xs: 12.5px;
+  --text-sm: 14px;
+  --text-base: 15px;
+  --text-md: 17px;
+  --text-lg: 19px;
+  --text-xl: 23px;
+  --text-2xl: 28px;
+}
+
+html {
+  font-size: 15px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-fundo);
+  color: var(--color-texto);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.5;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-acao);
+  outline-offset: 2px;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Impressão: A4, sem cabeçalho/rodapé do navegador (margem zero na página, respiro dentro do documento) */
+@page {
+  size: A4;
+  margin: 0;
+}
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    color: #000;
+    font-size: 9pt;
+  }
+  .espelho-impressao {
+    padding: 12mm 12mm 10mm;
+  }
+  .espelho-impressao thead {
+    display: table-header-group;
+  }
+  .espelho-impressao tr {
+    break-inside: avoid;
+  }
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
