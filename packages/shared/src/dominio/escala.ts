@@ -29,7 +29,8 @@ export interface HolidayDef {
   name: string;
 }
 
-export type ExpectedKind = 'workday' | 'rest' | 'holiday' | 'no_schedule';
+/** not_started: dia de trabalho antes da primeira marcação do funcionário (não conta falta nem horas previstas) */
+export type ExpectedKind = 'workday' | 'rest' | 'holiday' | 'no_schedule' | 'not_started';
 
 export interface ExpectedDay {
   date: string;

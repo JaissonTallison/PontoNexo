@@ -182,14 +182,14 @@ export default function MeusRegistros() {
             {data.closing?.status === 'closed' ? <p className="text-sm text-texto-2">Mês fechado pelo empregador.</p> : null}
             <ul className="space-y-2">
               {days.map((d) => {
-                const off = (d.expected.kind === 'rest' || d.expected.kind === 'holiday' || d.expected.kind === 'no_schedule') && !d.punches.length;
+                const off = (d.expected.kind === 'rest' || d.expected.kind === 'holiday' || d.expected.kind === 'no_schedule' || d.expected.kind === 'not_started') && !d.punches.length;
                 if (off) {
                   return (
                     <li key={d.date} className="flex items-center justify-between px-4 py-1.5 text-sm text-texto-3">
                       <span>
                         {WEEKDAY[isoWeekday(d.date)]} {formatDateBR(d.date).slice(0, 5)}
                       </span>
-                      <span>{d.expected.kind === 'holiday' ? (d.expected.holidayName ?? 'Feriado') : 'Folga'}</span>
+                      <span>{d.expected.kind === 'holiday' ? (d.expected.holidayName ?? 'Feriado') : d.expected.kind === 'not_started' ? 'Antes do início do ponto' : 'Folga'}</span>
                     </li>
                   );
                 }

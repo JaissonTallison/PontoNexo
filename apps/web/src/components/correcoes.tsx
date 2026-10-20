@@ -35,7 +35,12 @@ export function describeCorrection(c: CorrectionView, tz: string, simple = false
 }
 
 export function CorrectionList({ items, tz, onDecide, showEmployee, simple = false }: { items: CorrectionView[]; tz: string; onDecide?: (c: CorrectionView) => void; showEmployee?: boolean; simple?: boolean }) {
-  if (!items.length) return <Empty title="Nenhuma solicitação" />;
+  if (!items.length)
+    return simple ? (
+      <Empty title="Você ainda não fez nenhum pedido" description="Toque em Novo pedido se precisar ajustar o ponto ou pedir algo sobre seus dados." />
+    ) : (
+      <Empty title="Nenhuma solicitação" />
+    );
   return (
     <ul className="divide-y divide-borda">
       {items.map((c) => (

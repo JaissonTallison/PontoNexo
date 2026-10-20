@@ -76,7 +76,7 @@ export default function Correcoes() {
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2">
         <h1 className="text-xl font-bold text-marca">Meus pedidos</h1>
-        <Link href="/app/corrigir" className="inline-flex h-11 items-center gap-1.5 rounded-[8px] bg-marca px-4 font-semibold text-white shadow-card active:brightness-110">
+        <Link href="/app/correcoes/novo" className="inline-flex h-11 items-center gap-1.5 rounded-[8px] bg-marca px-4 font-semibold text-white shadow-card active:brightness-110">
           <Plus size={18} aria-hidden />
           Novo pedido
         </Link>

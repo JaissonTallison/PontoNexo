@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, desc, eq, gte, inArray, lte, lt, or, isNull } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, isNull, lt, lte, or, sql } from 'drizzle-orm';
 import {
   addDays,
   calculatePeriod,
@@ -129,13 +129,22 @@ export class TimesheetService {
       .map((t) => ({ id: t.id, type: t.punchType!, at: t.effectiveTime! }));
     const justified = new Set(allTreatments.filter((t) => t.kind === 'absence_justification' && t.absenceDate).map((t) => t.absenceDate!));
 
+    // início do ponto: dia da primeira marcação (original ou incluída por ajuste aprovado).
+    // Antes dele, dia de trabalho sem registro não é falta: o funcionário ainda não usava o sistema.
+    const [firstPunch] = await tx.select({ at: sql<Date | null>`min(${punchRecords.serverTime})` }).from(punchRecords).where(eq(punchRecords.employeeId, employeeId));
+    const firstInclusion = allTreatments.filter((t) => t.kind === 'inclusion' && t.effectiveTime).reduce<Date | null>((m, t) => (!m || t.effectiveTime! < m ? t.effectiveTime! : m), null);
+    const firstAt = [firstPunch?.at ? new Date(firstPunch.at) : null, firstInclusion].filter((d): d is Date => d !== null).sort((a, b) => a.getTime() - b.getTime())[0];
+    const trackingStart = firstAt ? localDate(firstAt, tz) : localDate(new Date(), tz);
+
     const sched = await loadScheduleContext(tx, employeeId);
     const holidays = await loadHolidays(tx, employerId, addDays(first, -2), addDays(lastDay, 1));
     // dias fora do contrato não têm jornada prevista
     const inContract = (d: string) => !contract || (d >= contract.startDate && (contract.endDate === null || d <= contract.endDate));
     const expected = (d: string) => {
       const e = resolveExpectedDay(d, sched.assignments, sched.schedules, holidays);
-      return inContract(d) ? e : { ...e, kind: 'no_schedule' as const, expectedSeconds: 0 };
+      if (!inContract(d)) return { ...e, kind: 'no_schedule' as const, expectedSeconds: 0 };
+      if (e.kind === 'workday' && d < trackingStart) return { ...e, kind: 'not_started' as const, expectedSeconds: 0 };
+      return e;
     };
 
     const eff = effectivePunches(

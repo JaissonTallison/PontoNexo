@@ -57,3 +57,6 @@ Nenhum fornecedor foi escolhido; nada está simulado como se existisse.
 2. Se exigido REP-P: contratar fornecedor certificado e escrever o adaptador; ou registrar o programa no INPI e cumprir o Anexo IX (AFD/AEJ, CAdES/PAdES, atestado técnico).
 3. Validar com contador as regras de cálculo marcadas como referência (compensação, limites, intervalo acima de 6 h, Súmula 60 do TST sobre prorrogação noturna — não implementada).
 4. Revisar com o encarregado (DPO) o aviso de privacidade (`packages/shared/src/dominio/privacidade.ts`).
+
+## Início do registro no sistema (20/10/2026)
+Dias de trabalho **antes da primeira marcação** do funcionário (original ou incluída por ajuste aprovado) aparecem como "Antes do início do ponto": sem jornada prevista, sem falta e sem horas negativas. Motivo: quem implanta o sistema com o funcionário já trabalhando não tem registro desses dias, e ausência de registro não é prova de falta. A partir da primeira marcação, dia de trabalho sem registro volta a contar como falta normalmente. Se houve falta real antes disso, o empregador registra pelo ajuste "Justificar ausência" ou fora do sistema.

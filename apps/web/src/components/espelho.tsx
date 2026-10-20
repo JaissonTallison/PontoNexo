@@ -29,7 +29,9 @@ const expectedText = (d: TimesheetView['days'][number]) =>
       ? `Feriado: ${d.expected.holidayName}`
       : d.expected.kind === 'rest'
         ? 'Descanso'
-        : 'Sem escala';
+        : d.expected.kind === 'not_started'
+          ? 'Antes do início do ponto'
+          : 'Sem escala';
 
 export function Totals({ t }: { t: TimesheetView }) {
   const items: Array<[string, string]> = [

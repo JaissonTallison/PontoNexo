@@ -8,6 +8,7 @@ function expected(d: TimesheetView['days'][number]) {
   if (d.expected.kind === 'workday') return `${d.expected.start}–${d.expected.end}`;
   if (d.expected.kind === 'holiday') return 'Feriado';
   if (d.expected.kind === 'rest') return 'Descanso';
+  if (d.expected.kind === 'not_started') return 'Antes do início do ponto';
   return '—';
 }
 
