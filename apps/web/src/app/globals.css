@@ -28,7 +28,7 @@
   --color-texto-3: #52606d;
   --color-borda: #d9e2ec;
   --color-borda-forte: #bcccdc;
-  --color-zebra: #eef2f8;
+  --color-zebra: #f7f9fc;
   --color-marca-suave: #e8edf7;
   /* blocos 1–4 do ponto: cores vivas, branco ≥ 4,5:1 */
   --color-bloco-entrada: #047857;
@@ -171,4 +171,33 @@ html.app-sem-barra::-webkit-scrollbar,
 }
 .leaflet-container {
   font-family: var(--font-sans);
+}
+
+/* Rolagem do menu lateral: fina, dentro do fundo marinho, na cor da marca. */
+.menu-rolagem {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-marca-3) transparent;
+}
+.menu-rolagem::-webkit-scrollbar {
+  width: 6px;
+}
+.menu-rolagem::-webkit-scrollbar-track {
+  background: transparent;
+}
+.menu-rolagem::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background: var(--color-marca-3);
+}
+
+/* Rolagem das telas do painel: dentro da área de conteúdo, abaixo da barra superior, discreta. */
+.conteudo-rolagem {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-borda-forte) transparent;
+}
+.conteudo-rolagem::-webkit-scrollbar {
+  width: 8px;
+}
+.conteudo-rolagem::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background: var(--color-borda-forte);
 }

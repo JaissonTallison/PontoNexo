@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { MonthNav } from '@/components/espelho';
 import { useSession } from '@/components/session';
 import { Button, Card, DataTable, Empty, ErrorState, Loading, Notice, PageHeader, useConfirm } from '@/components/ui';
+import { SECAO } from '@/components/secoes';
 import { api, ApiError } from '@/lib/api';
 import { duracao, mesAnterior, mesAtual, nomeMes, plural } from '@/lib/formato';
 import { useResource } from '@/lib/hooks';
@@ -62,8 +63,9 @@ export default function Fechamento() {
 
   return (
     <div>
-      <PageHeader
+      <PageHeader {...SECAO.fechamento}
         title="Folha do mês"
+        back={{ href: '/painel', label: 'Início' }}
         alert={blocked && s.data?.ended ? `${plural(blocked, 'funcionário tem', 'funcionários têm')} pedido de ajuste para decidir antes do fechamento` : null}
         actions={
           <>
@@ -103,6 +105,7 @@ export default function Fechamento() {
           <ErrorState message={s.error.message} onRetry={s.reload} />
         ) : (
           <DataTable
+            pageSize={20}
             rows={rows}
             rowKey={(r) => r.employeeId}
             empty={<Empty title="Nenhum funcionário com contrato neste mês" />}

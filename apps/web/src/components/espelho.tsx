@@ -75,13 +75,13 @@ export function TimesheetTable({ t }: { t: TimesheetView }) {
       <table className="w-full min-w-[760px] border-collapse text-sm">
         <thead>
           <tr className="border-b border-borda text-left text-texto-2">
-            <th className="px-2 py-2">Dia</th>
-            <th className="px-2 py-2">Previsto</th>
-            <th className="px-2 py-2">Marcações</th>
-            <th className="px-2 py-2 text-right">Trabalhado</th>
-            <th className="px-2 py-2 text-right">Excedente</th>
-            <th className="px-2 py-2 text-right">Falta</th>
-            <th className="px-2 py-2">Ocorrências</th>
+            <th className="px-3 py-2">Dia</th>
+            <th className="px-3 py-2">Previsto</th>
+            <th className="px-3 py-2">Marcações</th>
+            <th className="px-3 py-2 text-right">Trabalhado</th>
+            <th className="px-3 py-2 text-right">Excedente</th>
+            <th className="px-3 py-2 text-right">Falta</th>
+            <th className="px-3 py-2">Ocorrências</th>
           </tr>
         </thead>
         <tbody>
@@ -90,11 +90,11 @@ export function TimesheetTable({ t }: { t: TimesheetView }) {
             const info = d.issues.filter((i) => INFO_ISSUES.has(i.code));
             return (
               <tr key={d.date} className="border-b border-borda align-top even:bg-zebra hover:bg-realce">
-                <td className="px-2 py-2 whitespace-nowrap tabular">
+                <td className="px-3 py-2 whitespace-nowrap tabular">
                   {formatDateBR(d.date).slice(0, 5)} <span className="text-texto-3">{weekdayShort(d.date)}</span>
                 </td>
-                <td className="px-2 py-2 text-texto-2">{expectedText(d)}</td>
-                <td className="px-2 py-2">
+                <td className="px-3 py-2 text-texto-2">{expectedText(d)}</td>
+                <td className="px-3 py-2">
                   <span className="font-mono tabular">
                     {d.punches.map((p) => (
                       <span key={p.ref} title={PUNCH_TYPE_LABEL[p.type]} className={`mr-2 ${p.source === 'inclusion' ? 'text-acao' : ''}`}>
@@ -110,10 +110,10 @@ export function TimesheetTable({ t }: { t: TimesheetView }) {
                   ))}
                   {d.justified ? <Tone tone="ok">Abonado</Tone> : null}
                 </td>
-                <td className="px-2 py-2 text-right tabular">{d.workedSeconds ? duracao(d.workedSeconds) : '—'}</td>
-                <td className="px-2 py-2 text-right tabular">{d.overtimeSeconds ? duracao(d.overtimeSeconds) : d.restOrHolidaySeconds ? duracao(d.restOrHolidaySeconds) : '—'}</td>
-                <td className="px-2 py-2 text-right tabular">{d.deficitSeconds ? <Tone tone="error">{duracao(d.deficitSeconds)}</Tone> : '—'}</td>
-                <td className="px-2 py-2">
+                <td className="px-3 py-2 text-right tabular">{d.workedSeconds ? duracao(d.workedSeconds) : '—'}</td>
+                <td className="px-3 py-2 text-right tabular">{d.overtimeSeconds ? duracao(d.overtimeSeconds) : d.restOrHolidaySeconds ? duracao(d.restOrHolidaySeconds) : '—'}</td>
+                <td className="px-3 py-2 text-right tabular">{d.deficitSeconds ? <Tone tone="error">{duracao(d.deficitSeconds)}</Tone> : '—'}</td>
+                <td className="px-3 py-2">
                   {issues.map((i) => (
                     <div key={i.code} className="text-atencao">
                       {DAY_ISSUE_LABEL[i.code]}

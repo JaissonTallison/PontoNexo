@@ -6,6 +6,7 @@ import { RevisarCorrecoes } from '@/components/revisar-correcoes';
 import { RevisarOcorrencias } from '@/components/revisar-ocorrencias';
 import { useSession } from '@/components/session';
 import { PageHeader } from '@/components/ui';
+import { SECAO } from '@/components/secoes';
 import { useResource } from '@/lib/hooks';
 
 type Aba = 'ajustes' | 'ocorrencias';
@@ -26,7 +27,7 @@ function Revisar() {
 
   return (
     <div>
-      <PageHeader title="Para revisar" />
+      <PageHeader {...SECAO.revisar} title="Para revisar" back={{ href: '/painel', label: 'Início' }} />
       <div role="tablist" aria-label="O que revisar" className="mb-4 flex gap-1 border-b border-borda">
         {visible.map((t) => (
           <button

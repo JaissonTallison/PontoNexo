@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useSession } from '@/components/session';
 import { Card, DataTable, Empty, ErrorState, Input, Loading, PageHeader, Pagination, Segmented, Toolbar, Tone } from '@/components/ui';
+import { SECAO } from '@/components/secoes';
 import { qs } from '@/lib/api';
 import { useResource } from '@/lib/hooks';
 
@@ -38,7 +39,8 @@ export default function Funcionarios() {
 
   return (
     <div>
-      <PageHeader
+      <PageHeader {...SECAO.funcionarios}
+        back={{ href: '/painel', label: 'Início' }}
         title="Funcionários"
         actions={
           can('employees.write') ? (

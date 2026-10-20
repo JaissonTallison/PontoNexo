@@ -232,7 +232,7 @@ function TopBar({ onMenu, collapsed, badges }: { onMenu: () => void; collapsed: 
             aria-expanded={userOpen}
             aria-label="Menu do usuário"
           >
-            <span className="flex size-9 items-center justify-center rounded-[8px] bg-marca text-sm font-bold text-white" aria-hidden>
+            <span className="flex size-9 items-center justify-center rounded-[8px] bg-marca-suave text-sm font-bold text-marca" aria-hidden>
               {initials}
             </span>
             <span className="hidden text-left md:block">
@@ -271,6 +271,11 @@ function Shell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const badges = useResource<DashboardBadges>(`/dashboard/badges?_=${encodeURIComponent(path)}`);
+  // o conteúdo rola dentro do <main>: ao trocar de tela, volta ao topo (o Next só faz isso com a janela)
+  const mainRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    mainRef.current?.scrollTo(0, 0);
+  }, [path]);
   const inAdvanced = GROUPS.some((g) => g.advanced && g.items.some((i) => path.startsWith(i.href)));
   const [moreOpen, setMoreOpen] = useState(inAdvanced);
   useEffect(() => {
@@ -349,7 +354,7 @@ function Shell({ children }: { children: ReactNode }) {
   };
   const nav = (mini: boolean) => (
     <nav aria-label="Menu principal" className="flex h-full flex-col">
-      <div className={`flex items-center ${mini ? 'justify-center px-2 py-5' : 'px-5 py-6'}`}>
+      <div className={`flex shrink-0 items-center ${mini ? 'justify-center px-2 py-5' : 'px-5 py-6'}`}>
         <Link href="/painel" aria-label="PontoNexo · Início">
           {mini ? (
             <img src="/brand/pontonexo-simbolo-fundo-escuro.svg" alt="PontoNexo" className="h-11 w-auto" />
@@ -358,7 +363,8 @@ function Shell({ children }: { children: ReactNode }) {
           )}
         </Link>
       </div>
-      <div className={`flex-1 space-y-4 ${mini ? 'px-2' : 'px-3'}`}>
+      {/* só a lista rola; logo e rodapé ficam parados */}
+      <div className={`menu-rolagem min-h-0 flex-1 space-y-4 overflow-y-auto pb-3 ${mini ? 'px-2' : 'px-3'}`} onScroll={() => setTip(null)}>
         {groups.map((g) => {
           const shown = !g.advanced || mini || moreOpen;
           return (
@@ -382,12 +388,12 @@ function Shell({ children }: { children: ReactNode }) {
           );
         })}
       </div>
-      {mini ? null : <p className="px-5 py-4 text-xs text-white/60">Registro conforme LC 150/2015, art. 12. Sem certificação REP-P.</p>}
+      {mini ? null : <p className="shrink-0 border-t border-white/10 px-5 py-4 text-xs text-white/60">Registro conforme LC 150/2015, art. 12. Sem certificação REP-P.</p>}
     </nav>
   );
   return (
-    <div className={`min-h-screen print:block ${collapsed ? 'lg:grid lg:grid-cols-[76px_1fr]' : 'lg:grid lg:grid-cols-[264px_1fr]'}`}>
-      <aside className="sticky top-0 hidden h-screen overflow-y-auto bg-marca lg:block print:hidden" onScroll={() => setTip(null)}>
+    <div className={`h-dvh overflow-hidden print:block print:h-auto print:overflow-visible ${collapsed ? 'lg:grid lg:grid-cols-[76px_1fr]' : 'lg:grid lg:grid-cols-[264px_1fr]'}`}>
+      <aside className="sticky top-0 hidden h-screen overflow-hidden bg-marca lg:block print:hidden">
         {nav(collapsed)}
       </aside>
       {collapsed && tip ? (
@@ -399,7 +405,7 @@ function Shell({ children }: { children: ReactNode }) {
       {open ? (
         <div className="fixed inset-0 z-30 lg:hidden">
           <div className="absolute inset-0 bg-marca/40" onClick={() => setOpen(false)} />
-          <aside className="absolute inset-y-0 left-0 w-[280px] overflow-y-auto bg-marca">
+          <aside className="absolute inset-y-0 left-0 w-[280px] overflow-hidden bg-marca">
             <button className="absolute top-3 right-3 rounded-[8px] p-1 text-white" onClick={() => setOpen(false)} aria-label="Fechar menu">
               <X size={20} />
             </button>
@@ -407,9 +413,12 @@ function Shell({ children }: { children: ReactNode }) {
           </aside>
         </div>
       ) : null}
-      <div className="min-w-0">
+      {/* a barra superior fica fixa; só o conteúdo rola, com a barra de rolagem abaixo dela */}
+      <div className="flex h-dvh min-w-0 flex-col print:block print:h-auto">
         <TopBar onMenu={toggle} collapsed={collapsed} badges={badges.data} />
-        <main className="px-4 py-5 lg:px-6 print:p-0">{children}</main>
+        <main ref={mainRef} className="conteudo-rolagem min-h-0 flex-1 overflow-y-auto px-4 py-5 lg:px-6 print:overflow-visible print:p-0">
+          {children}
+        </main>
       </div>
     </div>
   );

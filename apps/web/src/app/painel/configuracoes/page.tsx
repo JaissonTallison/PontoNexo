@@ -3,6 +3,7 @@ import { ROLE_LABEL, type IntegrationView } from '@pontonexo/shared';
 import { useEffect, useState } from 'react';
 import { useSession } from '@/components/session';
 import { Button, Card, Checkbox, DataTable, Dialog, Input, Notice, PageHeader, Segmented, Select, Tone } from '@/components/ui';
+import { SECAO } from '@/components/secoes';
 import { api, ApiError } from '@/lib/api';
 import { dataHora } from '@/lib/formato';
 import { useResource } from '@/lib/hooks';
@@ -36,7 +37,7 @@ export default function Configuracoes() {
 
   return (
     <div>
-      <PageHeader title="Configurações" />
+      <PageHeader {...SECAO.configuracoes} title="Usuários e dados" back={{ href: '/painel', label: 'Início' }} />
       <div className="mb-4"><Segmented label="Seção" value={tab} onChange={setTab} options={[{ value: 'empregador', label: 'Empregador' }, { value: 'usuarios', label: 'Usuários' }, { value: 'integracoes', label: 'Integrações' }, { value: 'hora', label: 'Hora oficial' }]} /></div>
       {msg ? <div className="mb-3"><Notice tone={msg.tone}>{msg.text}</Notice></div> : null}
 
@@ -64,7 +65,7 @@ export default function Configuracoes() {
 
       {tab === 'usuarios' ? (
         <Card title="Quem acessa o painel" actions={<Button size="sm" onClick={() => setInvite({ ...invite, open: true })}>Convidar</Button>}>
-          <DataTable rows={(users.data ?? []).filter((u) => u.role !== 'employee')} rowKey={(u) => u.id} columns={[
+          <DataTable pageSize={10} rows={(users.data ?? []).filter((u) => u.role !== 'employee')} rowKey={(u) => u.id} columns={[
             { key: 'n', header: 'Nome', cell: (u) => <span className="font-semibold">{u.name}{u.isSelf ? ' (você)' : ''}</span> },
             { key: 'e', header: 'E-mail', cell: (u) => u.email },
             { key: 'p', header: 'Papel', cell: (u) => ROLE_LABEL[u.role] },
@@ -78,7 +79,7 @@ export default function Configuracoes() {
       {tab === 'integracoes' ? (
         <Card title="Webhooks" actions={<Button size="sm" onClick={() => setHook({ ...hook, open: true })}>Novo webhook</Button>}>
           <p className="mb-3 text-sm text-texto-2">Eventos assinados com HMAC-SHA256 (cabeçalho x-pontonexo-signature). Não há integração pronta com REP-P certificado.</p>
-          <DataTable rows={ints.data ?? []} rowKey={(i) => i.id} columns={[
+          <DataTable pageSize={10} rows={ints.data ?? []} rowKey={(i) => i.id} columns={[
             { key: 'n', header: 'Nome', cell: (i) => <span className="font-semibold">{i.name}</span> },
             { key: 'u', header: 'Endereço', cell: (i) => <span className="break-all font-mono text-xs">{i.url}</span> },
             { key: 'e', header: 'Eventos', cell: (i) => i.events.join(', ') },
@@ -90,7 +91,7 @@ export default function Configuracoes() {
 
       {tab === 'hora' ? (
         <Card title="Medições do relógio do servidor">
-          <DataTable rows={checks.data ?? []} rowKey={(c) => c.id} columns={[
+          <DataTable pageSize={10} rows={checks.data ?? []} rowKey={(c) => c.id} columns={[
             { key: 'q', header: 'Quando', cell: (c) => <span className="font-mono tabular">{dataHora(c.checkedAt, tz, true)}</span> },
             { key: 's', header: 'Servidor', cell: (c) => c.server },
             { key: 'o', header: 'Diferença', cell: (c) => (c.ok ? <span className="tabular">{c.offsetMs} ms</span> : <Tone tone="error">{c.error}</Tone>) },

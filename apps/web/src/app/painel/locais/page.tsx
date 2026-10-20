@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { useSession } from '@/components/session';
 import { Button, Card, DataTable, Dialog, Empty, ErrorState, Input, Loading, Notice, PageHeader, Select, Tone } from '@/components/ui';
+import { SECAO } from '@/components/secoes';
 import { api, ApiError } from '@/lib/api';
 import { hojeLocal } from '@/lib/formato';
 import { useResource } from '@/lib/hooks';
@@ -86,8 +87,9 @@ export default function Locais() {
 
   return (
     <div>
-      <PageHeader
+      <PageHeader {...SECAO.locais}
         title="Casa e locais"
+        back={{ href: '/painel', label: 'Início' }}
         actions={
           can('locations.write') ? (
             <Button
@@ -110,6 +112,7 @@ export default function Locais() {
           <ErrorState message={error.message} onRetry={reload} />
         ) : (
           <DataTable
+            pageSize={10}
             rows={data ?? []}
             rowKey={(r) => r.id}
             empty={<Empty title="Nenhum local cadastrado" description="Cadastre a residência e os locais externos autorizados, cada um com sua cerca virtual." />}

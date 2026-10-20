@@ -122,20 +122,23 @@ export function Card({ title, actions, children, className = '' }: { title?: str
 }
 
 /** Cabeçalho da página: título e ações. A linha de alerta só aparece quando algo pede ação. */
-export function PageHeader({ title, actions, alert, back }: { title: string; actions?: ReactNode; alert?: string | null; back?: { href: string; label: string } }) {
+export function PageHeader({ title, actions, alert, back, description }: { title: string; actions?: ReactNode; alert?: string | null; back?: { href: string; label: string }; description?: string }) {
   return (
     <div className="mb-5">
       {back ? (
-        <Link href={back.href} className="mb-2 inline-flex items-center gap-1.5 text-sm font-semibold text-marca-3 hover:text-marca print:hidden">
+        <Link href={back.href} className="mb-3 inline-flex h-9 items-center gap-1.5 rounded-[8px] bg-realce px-3 text-sm font-semibold text-marca hover:bg-borda print:hidden">
           <ArrowLeft size={16} aria-hidden />
           {back.label}
         </Link>
       ) : null}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold text-marca">{title}</h1>
+        <div className="min-w-0">
+          <h1 className="text-2xl leading-tight font-bold text-marca">{title}</h1>
+          {description ? <p className="mt-0.5 text-texto-2 print:hidden">{description}</p> : null}
+        </div>
         {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
       </div>
-      {alert ? <p className="mt-1 text-sm font-semibold text-perigo">{alert}</p> : null}
+      {alert ? <p className="mt-2 text-sm font-semibold text-perigo">{alert}</p> : null}
     </div>
   );
 }
@@ -196,7 +199,9 @@ export interface Column<T> {
 }
 
 /** Tabela zebrada; no celular vira cartões com rótulo e valor. */
-export function DataTable<T>({ rows, columns, rowKey, onRowClick, empty }: { rows: T[]; columns: Column<T>[]; rowKey: (r: T) => string; onRowClick?: (r: T) => void; empty?: ReactNode }) {
+export function DataTable<T>({ rows: all, columns, rowKey, onRowClick, empty, pageSize }: { rows: T[]; columns: Column<T>[]; rowKey: (r: T) => string; onRowClick?: (r: T) => void; empty?: ReactNode; /** pagina no navegador listas que a API devolve inteiras */ pageSize?: number }) {
+  const paged = usePaged(all, pageSize ?? Math.max(all.length, 1));
+  const rows = paged.rows;
   if (!rows.length) return <>{empty ?? <Empty title="Nada por aqui ainda" />}</>;
   return (
     <>
@@ -250,6 +255,7 @@ export function DataTable<T>({ rows, columns, rowKey, onRowClick, empty }: { row
           </li>
         ))}
       </ul>
+      {pageSize ? paged.pager : null}
     </>
   );
 }
@@ -405,4 +411,15 @@ export function useConfirm() {
     </Dialog>
   );
   return { ask, dialog };
+}
+
+/** Paginação no navegador para listas que a API devolve inteiras (locais, feriados, pedidos LGPD…). */
+export function usePaged<T>(rows: T[], pageSize = 10) {
+  const [page, setPage] = useState(1);
+  const pages = Math.max(1, Math.ceil(rows.length / pageSize));
+  const current = Math.min(page, pages);
+  return {
+    rows: rows.slice((current - 1) * pageSize, current * pageSize),
+    pager: <Pagination page={current} pageSize={pageSize} total={rows.length} onPage={setPage} />,
+  };
 }

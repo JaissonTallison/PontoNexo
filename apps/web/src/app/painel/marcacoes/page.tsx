@@ -5,6 +5,7 @@ import { ReceiptDocument } from '@/components/comprovante';
 import { EmployeeSelect } from '@/components/filtros';
 import { useSession } from '@/components/session';
 import { Button, Card, DataTable, Dialog, Empty, ErrorState, Input, Loading, PageHeader, Pagination, Segmented, Toolbar, Tone } from '@/components/ui';
+import { SECAO } from '@/components/secoes';
 import { api, qs } from '@/lib/api';
 import { dataHora } from '@/lib/formato';
 import { useResource } from '@/lib/hooks';
@@ -26,7 +27,7 @@ export default function Marcacoes() {
 
   return (
     <div>
-      <PageHeader title="Marcações" />
+      <PageHeader {...SECAO.marcacoes} title="Marcações" back={{ href: '/painel', label: 'Início' }} />
       <Card>
         <Toolbar>
           <div className="w-full sm:w-64">

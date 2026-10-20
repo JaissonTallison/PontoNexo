@@ -2,7 +2,8 @@
 import { DATA_REQUEST_KIND_LABEL, type DataRequestView, type RetentionPolicyView } from '@pontonexo/shared';
 import { useState } from 'react';
 import { useSession } from '@/components/session';
-import { Button, Card, Dialog, Empty, ErrorState, Input, Loading, Notice, PageHeader, Select, Textarea, Tone } from '@/components/ui';
+import { Button, Card, Dialog, Empty, ErrorState, Input, Loading, Notice, PageHeader, Select, Textarea, Tone, usePaged } from '@/components/ui';
+import { SECAO } from '@/components/secoes';
 import { api, ApiError } from '@/lib/api';
 import { dataCurta, plural } from '@/lib/formato';
 import { useResource } from '@/lib/hooks';
@@ -13,6 +14,7 @@ export default function Privacidade() {
   const { me, can } = useSession();
   const tz = me.timezone;
   const reqs = useResource<DataRequestView[]>('/data-requests');
+  const reqsPage = usePaged(reqs.data ?? [], 10);
   const ret = useResource<RetentionPolicyView[]>(can('settings.manage') ? '/settings/retention' : null);
   const [answering, setAnswering] = useState<DataRequestView | null>(null);
   const [answer, setAnswer] = useState({ status: 'answered' as 'answered' | 'denied', response: '' });
@@ -22,14 +24,15 @@ export default function Privacidade() {
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Privacidade (LGPD)" alert={overdue ? `${plural(overdue, 'pedido vencido', 'pedidos vencidos')} sem resposta` : null} />
+      <PageHeader {...SECAO.privacidade} title="Privacidade (LGPD)" back={{ href: '/painel', label: 'Início' }} alert={overdue ? `${plural(overdue, 'pedido vencido', 'pedidos vencidos')} sem resposta` : null} />
       {msg ? <Notice tone={msg.tone}>{msg.text}</Notice> : null}
       <Card title="Pedidos dos titulares">
         {reqs.loading && !reqs.data ? <Loading /> : reqs.error ? <ErrorState message={reqs.error.message} onRetry={reqs.reload} /> : !reqs.data?.length ? (
           <Empty title="Nenhum pedido" description="Funcionários pedem acesso, correção, cópia ou eliminação pelo app." />
         ) : (
+          <>
           <ul className="divide-y divide-borda">
-            {reqs.data.map((r) => {
+            {reqsPage.rows.map((r) => {
               const late = r.status === 'open' && new Date(r.dueAt).getTime() < Date.now();
               return (
                 <li key={r.id} className="flex flex-wrap items-start justify-between gap-2 py-3">
@@ -46,6 +49,8 @@ export default function Privacidade() {
               );
             })}
           </ul>
+          {reqsPage.pager}
+          </>
         )}
       </Card>
       {ret.data ? (

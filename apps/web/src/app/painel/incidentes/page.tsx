@@ -3,6 +3,7 @@ import { INCIDENT_KIND_LABEL, INCIDENT_KINDS, INCIDENT_SEVERITY, INCIDENT_SEVERI
 import { useState } from 'react';
 import { useSession } from '@/components/session';
 import { Button, Card, Checkbox, Dialog, Empty, ErrorState, Input, Loading, Notice, PageHeader, Pagination, Select, Textarea, Tone } from '@/components/ui';
+import { SECAO } from '@/components/secoes';
 import { api, ApiError, qs } from '@/lib/api';
 import { dataHora } from '@/lib/formato';
 import { useResource } from '@/lib/hooks';
@@ -33,7 +34,7 @@ export default function Incidentes() {
 
   return (
     <div>
-      <PageHeader title="Incidentes" actions={<Button onClick={() => setOpen(true)}>Registrar incidente</Button>} />
+      <PageHeader {...SECAO.incidentes} title="Incidentes" back={{ href: '/painel', label: 'Início' }} actions={<Button onClick={() => setOpen(true)}>Registrar incidente</Button>} />
       <p className="mb-4 max-w-3xl text-texto-2">
         Registre falhas, acessos indevidos, perda de aparelho ou vazamento. Incidentes com dados pessoais podem exigir comunicação à ANPD e aos titulares (LGPD, art. 48): veja o procedimento em docs/03-lgpd.md.
       </p>

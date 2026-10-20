@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
 import { useSession } from '@/components/session';
 import { Button, Card, Checkbox, Input, Notice, PageHeader, Select } from '@/components/ui';
+import { SECAO } from '@/components/secoes';
 import { api, ApiError } from '@/lib/api';
 import { hojeLocal } from '@/lib/formato';
 import { useResource } from '@/lib/hooks';
@@ -114,7 +115,7 @@ export default function NovoFuncionario() {
 
   return (
     <div className="max-w-[760px]">
-      <PageHeader title="Novo funcionário" back={{ href: '/painel/funcionarios', label: 'Funcionários' }} />
+      <PageHeader {...SECAO.novoFuncionario} title="Novo funcionário" back={{ href: '/painel/funcionarios', label: 'Funcionários' }} />
       <Stepper step={step} />
 
       {step === 0 ? (

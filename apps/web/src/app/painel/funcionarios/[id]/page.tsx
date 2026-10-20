@@ -15,6 +15,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
 import { useSession } from '@/components/session';
 import { Button, Card, Checkbox, DescList, Dialog, ErrorState, Input, Loading, Notice, PageHeader, Select, Textarea, Tone } from '@/components/ui';
+import { SECAO } from '@/components/secoes';
 import { api, ApiError } from '@/lib/api';
 import { dataHora, hojeLocal } from '@/lib/formato';
 import { useResource } from '@/lib/hooks';
@@ -140,7 +141,7 @@ function Detalhe() {
 
   return (
     <div className="space-y-4">
-      <PageHeader
+      <PageHeader {...SECAO.funcionario}
         back={{ href: '/painel/funcionarios', label: 'Funcionários' }}
         title={e.fullName}
         alert={missing.length ? `Falta configurar: ${missing.join(', ')}` : null}

@@ -7,6 +7,7 @@ import { PrintableTimesheet } from '@/components/espelho-impressao';
 import { EmployeeSelect } from '@/components/filtros';
 import { useSession } from '@/components/session';
 import { Button, Card, Dialog, Empty, ErrorState, Loading, Notice, PageHeader, Textarea, Tone, useConfirm } from '@/components/ui';
+import { SECAO } from '@/components/secoes';
 import { api, ApiError, qs } from '@/lib/api';
 import { dataHora, mesAnterior, mesAtual, nomeMes } from '@/lib/formato';
 import { useResource } from '@/lib/hooks';
@@ -54,7 +55,7 @@ function Espelho() {
     <div>
       {sheet.data && employeeId ? <PrintableTimesheet t={sheet.data} /> : null}
       <div className="print:hidden">
-      <PageHeader
+      <PageHeader {...SECAO.espelho}
         title="Espelho por funcionário"
         back={{ href: '/painel/fechamento', label: 'Folha do mês' }}
         actions={

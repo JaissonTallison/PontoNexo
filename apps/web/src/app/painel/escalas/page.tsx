@@ -2,7 +2,8 @@
 import { formatDateBR, formatDuration, weekdayShort } from '@pontonexo/shared';
 import { useState } from 'react';
 import { useSession } from '@/components/session';
-import { Button, Card, Checkbox, Dialog, Empty, ErrorState, Input, Loading, Notice, PageHeader, Select, Segmented, Tone } from '@/components/ui';
+import { Button, Card, Checkbox, Dialog, Empty, ErrorState, Input, Loading, Notice, PageHeader, Select, Segmented, Tone, usePaged } from '@/components/ui';
+import { SECAO } from '@/components/secoes';
 import { api, ApiError } from '@/lib/api';
 import { useResource } from '@/lib/hooks';
 
@@ -35,6 +36,8 @@ export default function Escalas() {
   const [year, setYear] = useState(new Date().getFullYear());
   const s = useResource<Sched[]>('/schedules');
   const h = useResource<Holiday[]>(`/holidays?year=${year}`);
+  const schedPage = usePaged(s.data ?? [], 6);
+  const holPage = usePaged(h.data ?? [], 15);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: '', kind: 'weekly' as 'weekly' | 'cycle_12x36', cycleAnchorDate: '', cycleStart: '19:00', cycleEnd: '07:00', cycleBreakMinutes: 60 });
   const [days, setDays] = useState<Record<number, { on: boolean; start: string; end: string; breakMinutes: number }>>(Object.fromEntries(WEEK.map((w) => [w, { on: w <= 5, start: '08:00', end: '17:00', breakMinutes: 60 }])));
@@ -61,7 +64,7 @@ export default function Escalas() {
 
   return (
     <div>
-      <PageHeader title="Escalas e feriados" actions={can('schedules.write') && tab === 'escalas' ? <Button onClick={() => setOpen(true)}>Nova escala</Button> : null} />
+      <PageHeader {...SECAO.escalas} title="Horários e feriados" back={{ href: '/painel', label: 'Início' }} actions={can('schedules.write') && tab === 'escalas' ? <Button onClick={() => setOpen(true)}>Nova escala</Button> : null} />
       <div className="mb-4">
         <Segmented label="Seção" value={tab} onChange={setTab} options={[{ value: 'escalas', label: 'Escalas' }, { value: 'feriados', label: 'Feriados' }]} />
       </div>
@@ -71,7 +74,7 @@ export default function Escalas() {
           {s.loading && !s.data ? <Loading /> : s.error ? <ErrorState message={s.error.message} onRetry={s.reload} /> : (s.data ?? []).length === 0 ? (
             <Card><Empty title="Nenhuma escala" description="A escala define a jornada prevista de cada dia. Ela é a base para apontar excedentes, faltas e atrasos." /></Card>
           ) : (
-            (s.data ?? []).map((x) => (
+            schedPage.rows.map((x) => (
               <Card
                 key={x.id}
                 title={x.name}
@@ -110,6 +113,7 @@ export default function Escalas() {
               </Card>
             ))
           )}
+          <div className="lg:col-span-2">{schedPage.pager}</div>
         </div>
       ) : (
         <Card
@@ -126,7 +130,7 @@ export default function Escalas() {
           }
         >
           <ul className="divide-y divide-borda">
-            {(h.data ?? []).map((x) => (
+            {holPage.rows.map((x) => (
               <li key={`${x.date}${x.name}`} className="flex flex-wrap items-center justify-between gap-2 py-2">
                 <span>
                   <span className="tabular">{formatDateBR(x.date)}</span> <span className="text-texto-3">{weekdayShort(x.date)}</span> · <span className="font-semibold">{x.name}</span>
@@ -142,6 +146,7 @@ export default function Escalas() {
               </li>
             ))}
           </ul>
+          {holPage.pager}
           {can('schedules.write') ? (
             <div className="mt-4 grid gap-2 border-t border-borda pt-4 sm:grid-cols-[160px_1fr_160px_auto] sm:items-end">
               <Input label="Data" type="date" value={hol.date} onChange={(e) => setHol({ ...hol, date: e.target.value })} error={fields.date} />

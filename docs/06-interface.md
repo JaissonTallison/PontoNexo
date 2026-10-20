@@ -20,3 +20,4 @@ Público majoritariamente idoso: linguagem do dia a dia, poucas decisões por te
 - **Folha do mês:** todos os funcionários numa tabela, "Fechar o mês de todos" (pula quem tem pedido pendente e diz o motivo) e exportação para o contador.
 - **Casa e locais:** mapa (Leaflet + OpenStreetMap) com busca de endereço; toque ou arraste o marcador e veja o raio.
 - **Confirmações** usam `useConfirm()` (`components/ui.tsx`), nunca `window.confirm`. CPF e celular com máscara (`lib/mascara.ts`).
+- **Cabeçalho das telas (19/10/2026):** título + uma frase curta dizendo para que serve a tela, sem ícone (testado e removido: não combinou); frases centralizadas em `components/secoes.ts`. Toda tela tem "← Início" (ou a tela anterior) e as listas longas são paginadas (`usePaged` / `DataTable pageSize`).

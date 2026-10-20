@@ -1,10 +1,11 @@
 'use client';
 import { GEO_STATUS_LABEL, PUNCH_TYPE_LABEL, type DashboardTodayRow, type DashboardView, type SetupStatus } from '@pontonexo/shared';
-import { AlertTriangle, ArrowRight, CalendarCheck, Check, ClipboardCheck, Download, FileClock, ListChecks, ShieldCheck, Siren, UserCheck, UserPlus, Users } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CalendarCheck, Check, ChevronRight, ClipboardCheck, Download, FileClock, ListChecks, ShieldCheck, Siren, UserCheck, UserPlus, Users } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { useSession } from '@/components/session';
-import { Empty, ErrorState, Loading } from '@/components/ui';
+import { SECAO } from '@/components/secoes';
+import { Empty, ErrorState, Loading, PageHeader } from '@/components/ui';
 import { duracao, hora, mesAnterior, mesAtual, nomeMes, plural } from '@/lib/formato';
 import { useResource } from '@/lib/hooks';
 
@@ -46,13 +47,20 @@ const STATE: Record<DashboardTodayRow['state'], { text: string; tone: string }> 
   off: { text: 'Folga', tone: 'text-texto-3' },
 };
 
-function QuickAction({ href, icon: Icon, label }: { href: string; icon: typeof Users; label: string }) {
-  return (
-    <Link href={href} className="cartao-3d flex items-center gap-3 rounded-[8px] bg-card px-4 py-3 font-semibold text-marca transition-transform hover:-translate-y-0.5">
-      <Icon size={20} className="text-marca-3" aria-hidden />
-      {label}
-    </Link>
+/** Atalho no mesmo formato das pendências: ícone, título, explicação e seta. */
+function QuickAction({ href, icon: Icon, label, hint, download = false }: { href: string; icon: typeof Users; label: string; hint: string; download?: boolean }) {
+  const cls = 'group flex items-center gap-3 rounded-[8px] border border-borda px-3 py-3 hover:border-borda-forte hover:bg-realce';
+  const body = (
+    <>
+      <Icon size={20} className="shrink-0 text-marca-3" aria-hidden />
+      <span className="min-w-0 flex-1">
+        <span className="block font-semibold text-texto">{label}</span>
+        <span className="block text-xs text-texto-3">{hint}</span>
+      </span>
+      <ChevronRight size={18} className="shrink-0 text-texto-3 group-hover:text-marca" aria-hidden />
+    </>
   );
+  return <li>{download ? <a href={href} className={cls}>{body}</a> : <Link href={href} className={cls}>{body}</Link>}</li>;
 }
 
 const MISSING_LABEL: Record<SetupStatus['pending'][number]['missing'][number], string> = {
@@ -137,8 +145,8 @@ export default function VisaoGeral() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <h1 className="text-2xl font-bold text-marca">Início</h1>
+      <div>
+        <PageHeader title="Início" {...SECAO.inicio} />
         {data.clockStatus !== 'synced' ? <p className="text-sm text-atencao">{data.clockStatus === 'drift' ? 'Relógio do servidor com defasagem: as marcações seguem registradas e sinalizadas.' : 'Sincronização do relógio em verificação.'}</p> : null}
       </div>
 
@@ -187,28 +195,28 @@ export default function VisaoGeral() {
               <table className="w-full min-w-[520px] text-sm">
                 <thead>
                   <tr className="border-b border-borda text-left text-texto-3">
-                    <th className="py-2 pr-2 font-semibold">Funcionário</th>
-                    <th className="py-2 pr-2 font-semibold">Situação</th>
-                    <th className="py-2 pr-2 font-semibold">Entrada</th>
-                    <th className="py-2 pr-2 text-right font-semibold">Horas hoje</th>
-                    <th className="py-2 text-right font-semibold">Ocorrências</th>
+                    <th className="px-3 py-2 font-semibold">Funcionário</th>
+                    <th className="px-3 py-2 font-semibold">Situação</th>
+                    <th className="px-3 py-2 font-semibold">Entrada</th>
+                    <th className="px-3 py-2 text-right font-semibold">Horas hoje</th>
+                    <th className="px-3 py-2 text-right font-semibold">Ocorrências</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.today.map((r) => (
                     <tr key={r.employeeId} className="border-b border-borda last:border-0 even:bg-zebra hover:bg-realce">
-                      <td className="py-2.5 pr-2">
+                      <td className="px-3 py-2.5">
                         <Link href={`/painel/funcionarios/${r.employeeId}`} className="font-semibold text-texto hover:underline">
                           {r.fullName}
                         </Link>
                       </td>
-                      <td className={`py-2.5 pr-2 font-semibold ${STATE[r.state].tone}`}>{STATE[r.state].text}</td>
-                      <td className="py-2.5 pr-2 font-semibold tabular">{r.firstIn ? hora(r.firstIn, tz) : '—'}</td>
-                      <td className="py-2.5 pr-2 text-right tabular">
+                      <td className={`px-3 py-2.5 font-semibold whitespace-nowrap ${STATE[r.state].tone}`}>{STATE[r.state].text}</td>
+                      <td className="px-3 py-2.5 font-semibold tabular">{r.firstIn ? hora(r.firstIn, tz) : '—'}</td>
+                      <td className="px-3 py-2.5 text-right whitespace-nowrap tabular">
                         <span className="font-semibold">{r.workedSeconds ? duracao(r.workedSeconds) : '—'}</span>
                         {r.expectedSeconds ? <span className="block text-xs text-texto-3">de {duracao(r.expectedSeconds)}</span> : null}
                       </td>
-                      <td className={`py-2.5 text-right font-semibold tabular ${r.alerts ? 'text-atencao' : 'text-texto-3'}`}>{r.alerts || '—'}</td>
+                      <td className={`px-3 py-2.5 text-right font-semibold tabular ${r.alerts ? 'text-atencao' : 'text-texto-3'}`}>{r.alerts || '—'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -261,19 +269,15 @@ export default function VisaoGeral() {
           )}
         </Panel>
 
-        <section className="min-w-0">
-          <h2 className="mb-2 text-md font-bold text-marca">Atalhos</h2>
-          <div className="grid gap-2">
-            {can('employees.write') ? <QuickAction href="/painel/funcionarios/novo" icon={UserPlus} label="Cadastrar funcionário" /> : null}
-            <QuickAction href="/painel/fechamento" icon={ClipboardCheck} label="Folha e fechamento do mês" />
+        <Panel title="Atalhos">
+          <ul className="space-y-2">
+            {can('employees.write') ? <QuickAction href="/painel/funcionarios/novo" icon={UserPlus} label="Cadastrar funcionário" hint="Passo a passo com dados, contrato, horário e local" /> : null}
+            <QuickAction href="/painel/fechamento" icon={ClipboardCheck} label="Folha e fechamento do mês" hint="Resumo de todos e fechamento de uma vez" />
             {can('exports.run') ? (
-              <a href={`/api/exports/summary.csv?month=${mesAnterior(mesAtual(tz))}`} className="cartao-3d flex items-center gap-3 rounded-[8px] bg-card px-4 py-3 font-semibold text-marca transition-transform hover:-translate-y-0.5">
-                <Download size={20} className="text-marca-3" aria-hidden />
-                Exportar o mês passado para o contador
-              </a>
+              <QuickAction href={`/api/exports/summary.csv?month=${mesAnterior(mesAtual(tz))}`} icon={Download} label="Exportar o mês passado" hint="Planilha (CSV) para o contador" download />
             ) : null}
-          </div>
-        </section>
+          </ul>
+        </Panel>
       </div>
     </div>
   );

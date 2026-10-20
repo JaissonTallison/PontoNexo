@@ -3,6 +3,7 @@ import type { AuditEventView, AuditVerification, Page } from '@pontonexo/shared'
 import { useState } from 'react';
 import { useSession } from '@/components/session';
 import { Button, Card, DataTable, Empty, ErrorState, Input, Loading, Notice, PageHeader, Pagination, Segmented, Toolbar } from '@/components/ui';
+import { SECAO } from '@/components/secoes';
 import { api, errorMessage, qs } from '@/lib/api';
 import { dataHora } from '@/lib/formato';
 import { useResource } from '@/lib/hooks';
@@ -23,7 +24,8 @@ export default function Auditoria() {
 
   return (
     <div>
-      <PageHeader
+      <PageHeader {...SECAO.auditoria}
+        back={{ href: '/painel', label: 'Início' }}
         title="Auditoria"
         actions={
           <Button

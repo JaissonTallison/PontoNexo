@@ -263,9 +263,10 @@ def build() -> None:
         top = (sh - block_h) / 2 + 6
         base = top + cap
         wm, ww = wordmark(p, x0, base, size)
-        _, tw = text_path(MEDIUM, TAGLINE, 0, 0, tag_size, 0.12)
+        # espaçamento menor = letra maior na mesma largura (legível no menu do painel)
+        _, tw = text_path(MEDIUM, TAGLINE, 0, 0, tag_size, 0.03)
         tag_size = tag_size * ww / tw  # tagline com a mesma largura do nome
-        tag, _ = text_path(MEDIUM, TAGLINE, x0 + 4, base + 46 + cap_height(MEDIUM, tag_size), tag_size, 0.12)
+        tag, _ = text_path(MEDIUM, TAGLINE, x0 + 4, base + 46 + cap_height(MEDIUM, tag_size), tag_size, 0.03)
         d, g = symbol_group(p, "h", 0, -SYM_Y0 * sym_scale, sym_scale)
         write(
             SVG / "logo-horizontal" / f"pontonexo-logo-horizontal{suffix}.svg",
