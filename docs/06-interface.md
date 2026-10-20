@@ -22,11 +22,7 @@ Público majoritariamente idoso: linguagem do dia a dia, poucas decisões por te
 - **Confirmações** usam `useConfirm()` (`components/ui.tsx`), nunca `window.confirm`. CPF e celular com máscara (`lib/mascara.ts`).
 - **Cabeçalho das telas (19/10/2026):** título + uma frase curta dizendo para que serve a tela, sem ícone (testado e removido: não combinou); frases centralizadas em `components/secoes.ts`. Toda tela tem "← Início" (ou a tela anterior) e as listas longas são paginadas (`usePaged` / `DataTable pageSize`).
 
-## Explicação de primeiro uso (19/10/2026)
-- `components/guia.tsx`: boas-vindas no primeiro acesso e, na primeira vez em cada tela, **uma dica por vez** presa ao elemento (contorno laranja + balão com "Ouvir", "Entendi" e "Não mostrar mais dicas"). Não bloqueia o uso.
-- "Ouvir" usa a voz do próprio aparelho (`speechSynthesis`, pt-BR); nada sai do aparelho.
-- O que já foi visto fica no `localStorage` por usuário (`pn_guia_<app|painel>_<id>`). "Rever as dicas" em Ajuda zera. Os testes e2e desligam com `pn_guia_off=1` (global-setup); `e2e/guia.spec.ts` testa o guia ligado.
-- Painel: dicas do menu, do botão de recolher, da letra maior, do sino e da conta; cada tela tem a dica com o texto `help` de `components/secoes.ts`, reunido em `/painel/ajuda`.
-- App: dicas do relógio, dos 4 blocos, do dia, do sino e da barra de baixo; em cada aba, dica presa ao botão da aba.
+## Ajuda, responsividade e botões (20/10/2026)
+- As boas-vindas e as dicas automáticas de primeiro uso foram **retiradas** a pedido do cliente (não ficaram boas). Ficaram só as páginas de ajuda, abertas quando a pessoa procura: "Ajuda e explicações" no painel (textos em `components/secoes.ts`) e "Como usar o app" no funcionário, com o botão "Ouvir" (`components/ouvir.tsx`, voz do próprio aparelho).
 - **Responsividade:** tabelas viram cartões pela largura do próprio card (`@container`), não da tela. Auditoria de todas as telas do painel em 360, 390, 768, 820, 1024, 1280, 1366, 1920 e 2560 px: sem rolagem lateral nem tabela cortada.
 - Botões de ação com ícone (lucide, 18 px) à esquerda do texto; "Salvar e continuar" com a seta à direita.

@@ -56,7 +56,7 @@ async function linkDoEmail(page: Page, to: string): Promise<string> {
   return `${u.pathname}${u.search}`;
 }
 
-/** Contexto com o guia de primeiro uso desligado (o guia tem teste próprio). */
+/** Contexto de navegador de um usuário (celular com GPS na casa, ou computador). */
 async function novoContexto(browser: Browser, baseURL: string, celular: boolean): Promise<BrowserContext> {
   const ctx = await browser.newContext({
     ...(celular ? devices['Pixel 7'] : { viewport: { width: 1366, height: 860 } }),
@@ -65,7 +65,6 @@ async function novoContexto(browser: Browser, baseURL: string, celular: boolean)
     timezoneId: 'America/Sao_Paulo',
     ...(celular ? { geolocation: { ...CASA, accuracy: 12 }, permissions: ['geolocation'] } : {}),
   });
-  await ctx.addInitScript(() => localStorage.setItem('pn_guia_off', '1'));
   return ctx;
 }
 

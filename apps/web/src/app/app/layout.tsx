@@ -6,17 +6,16 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { PunchContextProvider, usePunchContext } from '@/components/ponto-context';
 import { useOnline } from '@/lib/hooks';
 import { offlineQueue } from '@/lib/offline';
-import { GuideProvider, Tip } from '@/components/guia';
 import { PrivacyGate } from '@/components/privacidade';
 import { SessionProvider, useSession } from '@/components/session';
 import { Empty } from '@/components/ui';
 
 const TABS = [
-  { href: '/app', label: 'Ponto', icon: Clock, help: '' },
-  { href: '/app/historico', label: 'Registros', icon: CalendarDays, help: 'Aqui aparecem todos os dias do mês, com as horas que você trabalhou. Toque em um dia para ver os detalhes.' },
-  { href: '/app/corrigir', label: 'Esqueci', icon: CircleHelp, help: 'Esqueceu de marcar ou marcou errado? Responda as perguntas e envie. Seu empregador vê o pedido e responde.' },
-  { href: '/app/correcoes', label: 'Pedidos', icon: Inbox, help: 'Aqui ficam os seus pedidos e as respostas do empregador. Quando ele pedir a sua confirmação, ela aparece aqui também.' },
-  { href: '/app/conta', label: 'Perfil', icon: UserRound, help: 'Seus dados, sua senha, a configuração deste celular e a Ajuda, com a explicação de tudo.' },
+  { href: '/app', label: 'Ponto', icon: Clock },
+  { href: '/app/historico', label: 'Registros', icon: CalendarDays },
+  { href: '/app/corrigir', label: 'Esqueci', icon: CircleHelp },
+  { href: '/app/correcoes', label: 'Pedidos', icon: Inbox },
+  { href: '/app/conta', label: 'Perfil', icon: UserRound },
 ];
 
 /** Conexão, marcações guardadas sem internet e avisos que pedem resposta do funcionário. */
@@ -46,7 +45,6 @@ function HeaderStatus({ path }: { path: string }) {
           {queued ? <span className="block">{queued === 1 ? '1 para enviar' : `${queued} para enviar`}</span> : null}
         </span>
       ) : null}
-      <Tip id="app.sino" order={4} title="Avisos" text="Quando o seu empregador responder um pedido ou precisar da sua confirmação, aparece um número aqui. Toque para ver.">
       <Link href="/app/correcoes" className="relative flex h-11 w-11 items-center justify-center rounded-[8px] text-white active:bg-white/10" aria-label={avisos ? `${avisos} ${avisos === 1 ? 'aviso novo' : 'avisos novos'}` : 'Avisos'}>
         <Bell size={24} aria-hidden />
         {avisos ? (
@@ -55,7 +53,6 @@ function HeaderStatus({ path }: { path: string }) {
           </span>
         ) : null}
       </Link>
-      </Tip>
     </span>
   );
 }
@@ -74,7 +71,7 @@ function Shell({ children }: { children: ReactNode }) {
 
   const tabs = (
     <ul className="mx-auto grid max-w-[640px] grid-cols-5">
-      {TABS.map(({ href, label, icon: Icon, help }) => {
+      {TABS.map(({ href, label, icon: Icon }) => {
         const active = isActive(href);
         const link = (
           <Link
@@ -89,14 +86,7 @@ function Shell({ children }: { children: ReactNode }) {
         );
         return (
           <li key={href}>
-            {/* primeira visita a cada aba: dica presa ao botão dela */}
-            {active && help ? (
-              <Tip id={`app.aba.${label}`} order={10} title={label} text={help}>
-                {link}
-              </Tip>
-            ) : (
-              link
-            )}
+            {link}
           </li>
         );
       })}
@@ -104,17 +94,6 @@ function Shell({ children }: { children: ReactNode }) {
   );
 
   return (
-    <GuideProvider
-      scope="app"
-      welcome={{
-        title: `Olá, ${firstName}! Este é o seu ponto`,
-        paragraphs: [
-          'Neste app você marca a hora que chega, as pausas e a hora que vai embora.',
-          'Vamos mostrar cada parte da tela, uma de cada vez. Toque em "Entendi" para seguir.',
-          'Se preferir, toque em "Ouvir" e o celular lê a explicação para você.',
-        ],
-      }}
-    >
     <div className="min-h-screen pb-[calc(76px+env(safe-area-inset-bottom))] print:p-0">
       <header className="sticky top-0 z-20 flex items-center gap-3 bg-marca px-4 py-2.5 print:hidden">
         <img src="/brand/pontonexo-simbolo-fundo-escuro.svg" alt="" className="h-10 w-auto shrink-0" />
@@ -126,16 +105,9 @@ function Shell({ children }: { children: ReactNode }) {
       </header>
       <main className="mx-auto w-full max-w-[640px] px-4 py-4 print:max-w-none print:p-0">{children}</main>
       <nav aria-label="Navegação" className="fixed inset-x-0 bottom-0 z-20 bg-marca pb-[env(safe-area-inset-bottom)] print:hidden">
-        {path === '/app' ? (
-          <Tip id="app.menu" order={5} title="Barra de baixo" text="Ponto: marcar a hora. Registros: suas horas do mês. Esqueci: pedir ajuste quando esquecer de marcar. Pedidos: as respostas do empregador. Perfil: seus dados, senha e ajuda.">
-            {tabs}
-          </Tip>
-        ) : (
-          tabs
-        )}
+        {tabs}
       </nav>
     </div>
-    </GuideProvider>
   );
 }
 
