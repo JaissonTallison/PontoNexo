@@ -15,13 +15,13 @@ test('funcionária marca entrada pelo celular e recebe comprovante', async ({ pa
   await expect(page).toHaveURL(/\/app$/);
   const ciente = page.getByRole('button', { name: 'Li e estou ciente' });
   if (await ciente.isVisible().catch(() => false)) await ciente.click();
-  const botao = page.getByRole('button', { name: /Registrar entrada|Iniciar intervalo|Encerrar intervalo|Registrar saída/ }).first();
+  const botao = page.getByRole('button', { name: /registrar agora/ }).first();
   await botao.click();
-  await expect(page.getByRole('dialog')).toContainText('Dentro do raio do local');
-  await page.getByRole('button', { name: 'Confirmar registro' }).click();
-  await expect(page.getByText(/registrada às/)).toBeVisible();
-  await page.getByRole('link', { name: 'Ver comprovante' }).click();
-  await expect(page.getByText('Comprovante de Registro de Ponto do Trabalhador')).toBeVisible();
+  await expect(page.getByRole('dialog')).toContainText('Você está no local de trabalho');
+  await page.getByRole('button', { name: 'Sim, registrar' }).click();
+  await expect(page.getByText(/registrad[ao] às/)).toBeVisible();
+  await page.getByRole('link', { name: 'Ver comprovante', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Autenticidade' })).toBeVisible();
   const scroll = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(scroll).toBeLessThanOrEqual(0);
 });
@@ -35,9 +35,11 @@ test('empregadora vê pendências, marcações e espelho', async ({ page }, info
   await page.getByRole('navigation').getByRole('link', { name: 'Marcações' }).click();
   await expect(page.getByRole('cell', { name: /Maria Aparecida/ }).first()).toBeVisible();
   await page.getByRole('navigation').getByRole('link', { name: 'Espelho e fechamento' }).click();
-  await expect(page.getByLabel('Funcionário').locator('option', { hasText: 'Maria Aparecida' })).toHaveCount(1);
-  await page.getByLabel('Funcionário').selectOption({ label: 'Maria Aparecida Souza (fictícia)' });
-  await expect(page.getByText('Resumo').or(page.getByText('Dia a dia'))).toBeVisible();
+  // a lista de funcionários chega depois da página; repete a escolha até o espelho carregar
+  await expect(async () => {
+    await page.getByLabel('Funcionário').selectOption({ label: 'Maria Aparecida Souza (fictícia)' });
+    await expect(page.getByRole('heading', { name: 'Dia a dia' })).toBeVisible({ timeout: 3_000 });
+  }).toPass({ timeout: 20_000 });
   await page.getByRole('navigation').getByRole('link', { name: 'Correções' }).click();
   await expect(page.getByText(/Incluir saída/)).toBeVisible();
 });

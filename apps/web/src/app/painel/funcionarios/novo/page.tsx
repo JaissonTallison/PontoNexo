@@ -31,7 +31,7 @@ export default function NovoFuncionario() {
 
   return (
     <div className="max-w-[720px]">
-      <PageHeader title="Novo funcionário" />
+      <PageHeader title="Novo funcionário" back={{ href: '/painel/funcionarios', label: 'Funcionários' }} />
       <Card>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">

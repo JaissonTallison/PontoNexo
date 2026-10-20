@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/ui';
 export default function Conta() {
   return (
     <div className="max-w-[720px]">
-      <PageHeader title="Minha conta" />
+      <PageHeader title="Minha conta" back={{ href: '/painel', label: 'Visão geral' }} />
       <AccountPanel />
     </div>
   );

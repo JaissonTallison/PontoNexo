@@ -23,13 +23,15 @@ const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'Referrer-Policy', value: 'same-origin' },
   { key: 'X-Frame-Options', value: 'DENY' },
-  // geolocalização só nesta origem e só quando o usuário toca para marcar
-  { key: 'Permissions-Policy', value: 'geolocation=(self), camera=(), microphone=(), payment=(), usb=()' },
+  // geolocalização e microfone só nesta origem e só quando o usuário toca (marcar / falar o motivo)
+  { key: 'Permissions-Policy', value: 'geolocation=(self), microphone=(self), camera=(), payment=(), usb=()' },
 ];
 
 const config: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
+  // sem o botão flutuante do modo dev: ele cobria o sino e a barra do app (erros continuam aparecendo)
+  devIndicators: false,
   async rewrites() {
     return [{ source: '/api/:path*', destination: `${api}/api/:path*` }];
   },

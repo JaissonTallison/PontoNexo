@@ -3,7 +3,7 @@
  * Cada mudança de conteúdo exige nova versão: o funcionário registra ciência de novo.
  * Texto-base sujeito a revisão do encarregado (DPO) / advogado do empregador.
  */
-export const PRIVACY_NOTICE_VERSION = '2026-10-19';
+export const PRIVACY_NOTICE_VERSION = '2026-10-19.2';
 
 export const PRIVACY_NOTICE: Array<{ title: string; body: string }> = [
   {
@@ -23,7 +23,9 @@ export const PRIVACY_NOTICE: Array<{ title: string; body: string }> = [
     title: 'O que não é coletado',
     body:
       'Não há rastreamento contínuo nem em segundo plano, reconhecimento facial, biometria, fotos, contatos ou dados de outros aplicativos. ' +
-      'O navegador não informa o nome da rede Wi-Fi, e o sistema não tenta obtê-lo.',
+      'O navegador não informa o nome da rede Wi-Fi, e o sistema não tenta obtê-lo. ' +
+      'Se você usar o botão “Falar o motivo”, a fala é transformada em texto pelo serviço de voz do próprio celular (Google ou Apple); ' +
+      'o PontoNexo recebe só o texto, nunca o áudio. O uso é opcional: você pode escrever ou escolher uma resposta pronta.',
   },
   {
     title: 'Bases legais',

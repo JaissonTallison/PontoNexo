@@ -1,7 +1,7 @@
 // PontoNexo · service worker
 // Guarda só a "casca" do app (páginas e arquivos estáticos) para abrir sem internet.
 // Nunca guarda respostas da API: marcação sem conexão fica na fila local (IndexedDB) e é enviada depois.
-const CACHE = 'pontonexo-v1';
+const CACHE = 'pontonexo-v2';
 const SHELL = ['/app', '/entrar', '/offline.html', '/icon.svg', '/manifest.webmanifest'];
 
 self.addEventListener('install', (event) => {

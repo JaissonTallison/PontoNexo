@@ -29,6 +29,12 @@
   --color-borda: #d9e2ec;
   --color-borda-forte: #bcccdc;
   --color-zebra: #f6f8fb;
+  --color-marca-suave: #e8edf7;
+  /* blocos 1–4 do ponto: cores vivas, branco ≥ 4,5:1 */
+  --color-bloco-entrada: #047857;
+  --color-bloco-pausa: #1d4ed8;
+  --color-bloco-retorno: #c2410c;
+  --color-bloco-saida: #dc2626;
   --color-realce: #eef3f8;
 
   --radius-pn: 8px;
@@ -106,4 +112,14 @@ button {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+}
+
+/* App do funcionário: rolagem sem barra visível, como em aplicativo (rolagem por toque, roda e teclado continua) */
+html.app-sem-barra,
+.sem-barra {
+  scrollbar-width: none;
+}
+html.app-sem-barra::-webkit-scrollbar,
+.sem-barra::-webkit-scrollbar {
+  display: none;
 }

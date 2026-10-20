@@ -3,7 +3,7 @@ import { DATA_REQUEST_KIND_LABEL, DATA_REQUEST_KINDS, type DataRequestKind, type
 import { useState } from 'react';
 import { PrivacyNoticeText } from '@/components/privacidade';
 import { useSession } from '@/components/session';
-import { Button, Card, Notice, Select, Textarea, Tone } from '@/components/ui';
+import { BackBar, Button, Card, Notice, Select, Textarea, Tone } from '@/components/ui';
 import { api, ApiError } from '@/lib/api';
 import { dataCurta } from '@/lib/formato';
 import { useResource } from '@/lib/hooks';
@@ -34,7 +34,7 @@ export default function Privacidade() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold text-marca">Privacidade</h1>
+      <BackBar title="Meus dados e privacidade" fallback="/app/conta" />
       <Card title="Seus dados">
         <p className="text-texto-2">Baixe uma cópia completa: cadastro, marcações com localização, comprovantes, correções e fechamentos.</p>
         <a href="/api/me/data-export" className="mt-3 inline-flex h-9 items-center rounded-[8px] border border-borda-forte px-4 font-semibold text-marca hover:bg-realce">

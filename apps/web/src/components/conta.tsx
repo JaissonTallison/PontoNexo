@@ -9,10 +9,10 @@ import { useSession } from './session';
 import { Button, Card, Input, Notice } from './ui';
 
 /** Conta: troca de senha, sessões abertas, troca de empregador e saída. Usado no app e no painel. */
-export function AccountPanel() {
+export function AccountPanel({ simple = false }: { simple?: boolean }) {
   const { me } = useSession();
   const router = useRouter();
-  const sessions = useResource<SessionView[]>('/auth/sessions');
+  const sessions = useResource<SessionView[]>(simple ? null : '/auth/sessions');
   const [pw, setPw] = useState({ currentPassword: '', newPassword: '' });
   const [fields, setFields] = useState<Record<string, string>>({});
   const [msg, setMsg] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null);
@@ -73,6 +73,7 @@ export function AccountPanel() {
           <Button onClick={changePassword}>Salvar nova senha</Button>
         </div>
       </Card>
+      {simple ? null : (
       <Card title="Sessões abertas">
         <ul className="divide-y divide-borda">
           {(sessions.data ?? []).map((s) => (
@@ -100,6 +101,7 @@ export function AccountPanel() {
           ))}
         </ul>
       </Card>
+      )}
     </div>
   );
 }

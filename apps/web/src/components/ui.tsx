@@ -1,5 +1,7 @@
 'use client';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useId, useRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 
 /* Classes comuns: mudar aqui muda o sistema inteiro. */
@@ -120,9 +122,15 @@ export function Card({ title, actions, children, className = '' }: { title?: str
 }
 
 /** Cabeçalho da página: título e ações. A linha de alerta só aparece quando algo pede ação. */
-export function PageHeader({ title, actions, alert }: { title: string; actions?: ReactNode; alert?: string | null }) {
+export function PageHeader({ title, actions, alert, back }: { title: string; actions?: ReactNode; alert?: string | null; back?: { href: string; label: string } }) {
   return (
     <div className="mb-5">
+      {back ? (
+        <Link href={back.href} className="mb-2 inline-flex items-center gap-1.5 text-sm font-semibold text-marca-3 hover:text-marca print:hidden">
+          <ArrowLeft size={16} aria-hidden />
+          {back.label}
+        </Link>
+      ) : null}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold text-marca">{title}</h1>
         {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
@@ -335,5 +343,26 @@ export function DescList({ items }: { items: Array<[string, ReactNode]> }) {
         </div>
       ))}
     </dl>
+  );
+}
+
+/**
+ * Barra de voltar para telas internas do app. Volta para a tela anterior do histórico;
+ * se a pessoa chegou direto (link), vai para `fallback`.
+ */
+export function BackBar({ title, fallback }: { title: string; fallback: string }) {
+  const router = useRouter();
+  return (
+    <div className="mb-4 flex items-center gap-2 print:hidden">
+      <button
+        type="button"
+        onClick={() => (window.history.length > 1 ? router.back() : router.push(fallback))}
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] bg-card text-marca shadow-card active:bg-realce"
+        aria-label="Voltar"
+      >
+        <ArrowLeft size={22} aria-hidden />
+      </button>
+      <h1 className="truncate text-xl font-bold text-marca">{title}</h1>
+    </div>
   );
 }

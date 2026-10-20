@@ -1,9 +1,11 @@
 'use client';
 import type { ClosingView, CorrectionView, Page } from '@pontonexo/shared';
 import { useState } from 'react';
-import { CorrectionForm, CorrectionList, DecisionDialog } from '@/components/correcoes';
+import { Plus } from 'lucide-react';
+import Link from 'next/link';
+import { CorrectionList, DecisionDialog } from '@/components/correcoes';
 import { useSession } from '@/components/session';
-import { Button, Card, ErrorState, Loading, Notice, Segmented, Textarea, Tone } from '@/components/ui';
+import { Button, Card, ErrorState, Loading, Notice, Pagination, Segmented, Textarea, Tone } from '@/components/ui';
 import { api, errorMessage } from '@/lib/api';
 import { dataHora, nomeMes } from '@/lib/formato';
 import { useResource } from '@/lib/hooks';
@@ -56,8 +58,9 @@ function ClosingAck({ c, tz, onDone }: { c: ClosingView; tz: string; onDone: () 
 export default function Correcoes() {
   const { me } = useSession();
   const tz = me.timezone;
-  const [tab, setTab] = useState<'pedidos' | 'novo' | 'fechamentos'>('pedidos');
-  const list = useResource<Page<CorrectionView>>('/me/corrections?status=all&pageSize=50');
+  const [tab, setTab] = useState<'pedidos' | 'fechamentos'>('pedidos');
+  const [page, setPage] = useState(1);
+  const list = useResource<Page<CorrectionView>>(`/me/corrections?status=all&pageSize=10&page=${page}`);
   const closings = useResource<ClosingView[]>('/me/closings');
   const [deciding, setDeciding] = useState<CorrectionView | null>(null);
   const [done, setDone] = useState<string | null>(null);
@@ -67,37 +70,32 @@ export default function Correcoes() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold text-marca">Correções</h1>
-      {awaiting.length ? <Notice tone="warn">{awaiting.length === 1 ? 'O empregador propôs 1 ajuste que precisa da sua resposta.' : `O empregador propôs ${awaiting.length} ajustes que precisam da sua resposta.`}</Notice> : null}
+      <div className="flex items-center justify-between gap-2">
+        <h1 className="text-xl font-bold text-marca">Meus pedidos</h1>
+        <Link href="/app/corrigir" className="inline-flex h-11 items-center gap-1.5 rounded-[8px] bg-marca px-4 font-semibold text-white shadow-card active:brightness-110">
+          <Plus size={18} aria-hidden />
+          Novo pedido
+        </Link>
+      </div>
+      {awaiting.length ? <Notice tone="warn">{awaiting.length === 1 ? 'Seu empregador pediu 1 ajuste. Confira e responda.' : `Seu empregador pediu ${awaiting.length} ajustes. Confira e responda.`}</Notice> : null}
       <Segmented
         label="Seções"
         value={tab}
         onChange={setTab}
         options={[
           { value: 'pedidos', label: 'Pedidos' },
-          { value: 'novo', label: 'Novo pedido' },
           { value: 'fechamentos', label: pendingAcks ? `Fechamentos (${pendingAcks})` : 'Fechamentos' },
         ]}
       />
       {done ? <Notice tone="ok">{done}</Notice> : null}
       {tab === 'pedidos' ? (
-        <Card>{list.loading && !list.data ? <Loading /> : list.error ? <ErrorState message={list.error.message} onRetry={list.reload} /> : <CorrectionList items={list.data?.items ?? []} tz={tz} onDecide={setDeciding} />}</Card>
-      ) : null}
-      {tab === 'novo' ? (
-        <Card title="Pedir correção">
-          <p className="mb-3 text-sm text-texto-2">Sua marcação original nunca é apagada. O empregador analisa o pedido e a decisão fica registrada.</p>
-          <CorrectionForm
-            tz={tz}
-            onDone={() => {
-              setDone('Pedido enviado. Acompanhe a decisão em Pedidos.');
-              setTab('pedidos');
-              list.reload();
-            }}
-          />
-        </Card>
+        <Card>{list.loading && !list.data ? <Loading /> : list.error ? <ErrorState message={list.error.message} onRetry={list.reload} /> : <>
+              <CorrectionList items={list.data?.items ?? []} tz={tz} onDecide={setDeciding} simple />
+              {list.data ? <Pagination page={list.data.page} pageSize={list.data.pageSize} total={list.data.total} onPage={setPage} /> : null}
+            </>}</Card>
       ) : null}
       {tab === 'fechamentos' ? (
-        <Card title="Fechamentos do mês">
+        <Card title="Meses fechados pelo empregador">
           {closings.loading && !closings.data ? (
             <Loading />
           ) : closings.data?.length ? (
@@ -112,6 +110,7 @@ export default function Correcoes() {
         </Card>
       ) : null}
       <DecisionDialog
+        simple
         item={deciding}
         tz={tz}
         onClose={() => setDeciding(null)}

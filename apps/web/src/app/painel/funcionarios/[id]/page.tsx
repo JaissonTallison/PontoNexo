@@ -140,6 +140,7 @@ function Detalhe() {
   return (
     <div className="space-y-4">
       <PageHeader
+        back={{ href: '/painel/funcionarios', label: 'Funcionários' }}
         title={e.fullName}
         alert={missing.length ? `Falta configurar: ${missing.join(', ')}` : null}
         actions={

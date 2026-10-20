@@ -2,7 +2,8 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
-const roots = ['apps/api/src', 'apps/api/test', 'apps/web/src', 'packages/shared/src'];
+const base = new URL('..', import.meta.url).pathname;
+const roots = ['apps/api/src', 'apps/api/test', 'apps/web/src', 'packages/shared/src'].map((r) => join(base, r));
 const rules = [
   [/:\s*any\b|\bas any\b|<any>/, 'uso de any'],
   [/@ts-(ignore|nocheck)/, '@ts-ignore / @ts-nocheck'],

@@ -19,8 +19,8 @@ import { Button, Dialog, Empty, Input, Notice, Select, Textarea, Tone } from './
 
 const statusTone = (s: CorrectionView['status']) => (s === 'approved' ? 'ok' : s === 'rejected' ? 'error' : s === 'pending' ? 'warn' : 'muted');
 
-export function describeCorrection(c: CorrectionView, tz: string) {
-  const alvo = c.targetPunch ? `${PUNCH_TYPE_LABEL[c.targetPunch.type]} de ${dataHora(c.targetPunch.serverTime, tz)} (NSR ${c.targetPunch.nsr})` : null;
+export function describeCorrection(c: CorrectionView, tz: string, simple = false) {
+  const alvo = c.targetPunch ? `${PUNCH_TYPE_LABEL[c.targetPunch.type]} de ${dataHora(c.targetPunch.serverTime, tz)}${simple ? '' : ` (NSR ${c.targetPunch.nsr})`}` : null;
   switch (c.kind) {
     case 'include_punch':
       return `Incluir ${c.proposedType ? PUNCH_TYPE_LABEL[c.proposedType].toLowerCase() : 'marcação'} em ${dataHora(c.proposedTime, tz)}`;
@@ -33,7 +33,7 @@ export function describeCorrection(c: CorrectionView, tz: string) {
   }
 }
 
-export function CorrectionList({ items, tz, onDecide, showEmployee }: { items: CorrectionView[]; tz: string; onDecide?: (c: CorrectionView) => void; showEmployee?: boolean }) {
+export function CorrectionList({ items, tz, onDecide, showEmployee, simple = false }: { items: CorrectionView[]; tz: string; onDecide?: (c: CorrectionView) => void; showEmployee?: boolean; simple?: boolean }) {
   if (!items.length) return <Empty title="Nenhuma solicitação" />;
   return (
     <ul className="divide-y divide-borda">
@@ -41,10 +41,10 @@ export function CorrectionList({ items, tz, onDecide, showEmployee }: { items: C
         <li key={c.id} className="py-3">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="min-w-0">
-              <p className="font-semibold">{describeCorrection(c, tz)}</p>
+              <p className="font-semibold">{describeCorrection(c, tz, simple)}</p>
               <p className="text-sm text-texto-3">
                 {showEmployee ? `${c.employeeName} · ` : ''}
-                {c.initiatedBy === 'employee' ? 'Pedido do funcionário' : 'Proposta do empregador'} por {c.requestedByName} em {dataHora(c.requestedAt, tz)}
+                {simple ? (c.initiatedBy === 'employee' ? 'Seu pedido' : 'Pedido do seu empregador') : `${c.initiatedBy === 'employee' ? 'Pedido do funcionário' : 'Proposta do empregador'} por ${c.requestedByName}`} em {dataHora(c.requestedAt, tz)}
               </p>
               <p className="mt-1 text-sm text-texto-2">Motivo: {c.reason}</p>
               {c.decisionReason ? (
@@ -54,11 +54,13 @@ export function CorrectionList({ items, tz, onDecide, showEmployee }: { items: C
               ) : null}
             </div>
             <div className="text-right">
-              <Tone tone={statusTone(c.status)}>{c.status === 'pending' && c.initiatedBy === 'employer' ? 'Aguardando o funcionário' : CORRECTION_STATUS_LABEL[c.status]}</Tone>
+              <Tone tone={statusTone(c.status)}>
+                {c.status === 'pending' && c.initiatedBy === 'employer' ? (simple ? 'Precisa da sua resposta' : 'Aguardando o funcionário') : simple && c.status === 'pending' ? 'Em análise' : CORRECTION_STATUS_LABEL[c.status]}
+              </Tone>
               {c.canDecide && onDecide ? (
                 <div className="mt-2">
                   <Button size="sm" onClick={() => onDecide(c)}>
-                    Analisar
+                    {simple ? 'Responder' : 'Analisar'}
                   </Button>
                 </div>
               ) : null}
@@ -70,7 +72,7 @@ export function CorrectionList({ items, tz, onDecide, showEmployee }: { items: C
   );
 }
 
-export function DecisionDialog({ item, tz, onClose, onDone }: { item: CorrectionView | null; tz: string; onClose: () => void; onDone: () => void }) {
+export function DecisionDialog({ item, tz, onClose, onDone, simple = false }: { item: CorrectionView | null; tz: string; onClose: () => void; onDone: () => void; simple?: boolean }) {
   const [reason, setReason] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<'approve' | 'reject' | null>(null);
@@ -91,27 +93,29 @@ export function DecisionDialog({ item, tz, onClose, onDone }: { item: Correction
   return (
     <Dialog
       open={item !== null}
-      title="Analisar solicitação"
+      title={simple ? 'Seu empregador pediu um ajuste' : 'Analisar solicitação'}
       onClose={onClose}
       footer={
         <>
           <Button variant="danger" busy={busy === 'reject'} disabled={busy !== null} onClick={() => decide('reject')}>
-            Recusar
+            {simple ? 'Não concordo' : 'Recusar'}
           </Button>
           <Button busy={busy === 'approve'} disabled={busy !== null} onClick={() => decide('approve')}>
-            Aprovar
+            {simple ? 'Concordo' : 'Aprovar'}
           </Button>
         </>
       }
     >
       {item ? (
         <div className="space-y-3">
-          <p className="font-semibold">{describeCorrection(item, tz)}</p>
-          <p className="text-sm text-texto-2">Motivo informado: {item.reason}</p>
+          <p className="font-semibold">{describeCorrection(item, tz, simple)}</p>
+          <p className="text-sm text-texto-2">{simple ? 'Explicação do empregador' : 'Motivo informado'}: {item.reason}</p>
           <p className="text-sm text-texto-3">
-            Aprovar cria um tratamento: a marcação original continua guardada e o espelho passa a considerar o ajuste. A decisão fica registrada com seu nome, data e motivo.
+            {simple
+              ? 'Se estiver certo, toque em Concordo. Se não estiver, toque em Não concordo e explique. Seu registro original continua guardado.'
+              : 'Aprovar cria um tratamento: a marcação original continua guardada e o espelho passa a considerar o ajuste. A decisão fica registrada com seu nome, data e motivo.'}
           </p>
-          <Textarea label="Motivo da decisão" value={reason} onChange={(e) => setReason(e.target.value)} />
+          <Textarea label={simple ? 'Seu comentário' : 'Motivo da decisão'} value={reason} onChange={(e) => setReason(e.target.value)} />
           {error ? <Notice tone="error">{error}</Notice> : null}
         </div>
       ) : null}
