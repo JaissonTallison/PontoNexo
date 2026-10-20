@@ -2,15 +2,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import argon2 from 'argon2';
 import { and, desc, eq, gt, isNull, sql } from 'drizzle-orm';
-import {
-  PRIVACY_NOTICE_VERSION,
-  type MeView,
-  type SessionView,
-  type SignupInput,
-} from '@pontonexo/shared';
+import { DEFAULT_JOB_ROLES, type MeView, PRIVACY_NOTICE_VERSION, type SessionView, type SignupInput } from '@pontonexo/shared';
 import type { Env } from '../../config/env.js';
 import type { Database } from '../../db/client.js';
-import { employerCounters, employers, passwordResetTokens, privacyAcknowledgements, retentionPolicies, sessions, userRoles, users } from '../../db/schema.js';
+import { employerCounters, employers, jobRoles, passwordResetTokens, privacyAcknowledgements, retentionPolicies, sessions, userRoles, users } from '../../db/schema.js';
 import { AuditService } from '../../common/audit.service.js';
 import type { ActiveMembership, AuthContext } from '../../common/auth/context.js';
 import { SessionService } from '../../common/auth/session.service.js';
@@ -60,6 +55,7 @@ export class AuthService {
         documentCpf: input.employer.cpf,
       });
       await tx.insert(employerCounters).values({ employerId });
+      await tx.insert(jobRoles).values(DEFAULT_JOB_ROLES.map((name) => ({ employerId, name })));
       await tx.insert(retentionPolicies).values({ employerId, category: 'punch_coordinates', retentionDays: 395 });
       await tx.insert(userRoles).values({ userId: user!.id, employerId, roleCode: 'employer_owner' });
       await this.audit.record(tx, {

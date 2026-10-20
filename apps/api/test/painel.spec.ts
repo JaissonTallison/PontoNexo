@@ -22,6 +22,16 @@ describe('painel do empregador: configuração, fechamento geral e resumo diári
   });
   afterAll(async () => app.close());
 
+  it('conta nova já vem com as funções comuns e não duplica função repetida', async () => {
+    const roles = await s.owner.get('/job-roles');
+    const names = roles.body.map((r: { name: string }) => r.name);
+    expect(names).toContain('Cozinheiro(a)');
+    expect(names).toContain('Cuidador(a) de idosos');
+    const a = await s.owner.post('/job-roles', { name: 'Passadeira' });
+    const b = await s.owner.post('/job-roles', { name: 'passadeira' });
+    expect(b.body.id).toBe(a.body.id);
+  });
+
   it('mostra o que falta configurar para cada funcionário', async () => {
     const d = await s.owner.get('/dashboard');
     expect(d.body.setup.hasLocation).toBe(true);
