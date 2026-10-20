@@ -21,7 +21,7 @@ Ver `.env.example` (comentado). Em produção: `NODE_ENV=production`, `COOKIE_SE
 
 ## Acesso, e-mail e lembretes
 - **Entrar:** só e-mail e senha. O login por SMS e por biometria foi retirado (19/10/2026).
-- **E-mail (SMTP):** em produção, Gmail com senha de app (`SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=465`, `SMTP_SECURE=true`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM` com o mesmo Gmail). Em desenvolvimento, o Mailpit (`localhost:5576`) captura tudo.
+- **E-mail:** o Railway bloqueia SMTP (portas 25/465/587) nos planos Hobby e de teste, então a produção usa a **API do Brevo** por HTTPS: `MAIL_PROVIDER=brevo`, `BREVO_API_KEY` e `MAIL_FROM` com um remetente confirmado no Brevo. Em desenvolvimento, `MAIL_PROVIDER=smtp` com o Mailpit (`localhost:5576`). Qualquer envio tem limite de 15 s: se falhar, a tela mostra "Não foi possível enviar o e-mail agora" (na recuperação de senha a falha fica só no log, para não revelar se o e-mail tem conta).
 - **Lembretes (Web Push):** chaves `VAPID_*` geradas por `pnpm chaves:gerar`; a tarefa roda a cada 5 min e avisa 15 min após o início/fim previsto. Desligar com `REMINDERS_ENABLED=false`.
 - **Avisos ao empregador:** pedido de ajuste do funcionário gera notificação para titular e gestores que ligaram os avisos em Minha conta. O **resumo diário por e-mail** sai a partir das 8h (fuso do empregador), uma vez por dia e só quando há pendência; desliga junto com `JOBS_ENABLED=false`.
 - **Mapa dos locais:** usa tiles de `tile.openstreetmap.org` e busca no Nominatim (liberados no CSP de `next.config.ts`). Para volume alto, troque por um provedor de mapas próprio, conforme a política de uso do OpenStreetMap.

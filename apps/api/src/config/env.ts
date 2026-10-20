@@ -31,6 +31,9 @@ const schema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
   MAIL_FROM: z.string().default('PontoNexo <nao-responda@pontonexo.local>'),
+  /** smtp (desenvolvimento, Mailpit) ou brevo (API por HTTPS; hospedagens como o Railway bloqueiam SMTP) */
+  MAIL_PROVIDER: z.enum(['smtp', 'brevo']).default('smtp'),
+  BREVO_API_KEY: z.string().optional(),
   JOBS_ENABLED: bool.default(true),
   APP_VERSION: z.string().default('0.1.0'),
   SIGNUP_ENABLED: bool.default(true),

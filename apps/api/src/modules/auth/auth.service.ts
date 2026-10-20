@@ -171,11 +171,14 @@ export class AuthService {
       .where(and(eq(passwordResetTokens.userId, user.id), gt(passwordResetTokens.createdAt, new Date(Date.now() - 60_000))));
     if (recent.length) return;
     const token = await this.issueToken(user.id, 'reset');
-    await this.mail.send({
-      to: user.email,
-      subject: 'PontoNexo · redefinição de senha',
-      text: `Olá, ${user.name}.\n\nRecebemos um pedido para redefinir sua senha. O link vale por 1 hora:\n${this.env.WEB_ORIGIN}/redefinir-senha?token=${token}\n\nSe não foi você, ignore esta mensagem; sua senha continua a mesma.`,
-    });
+    // falha de envio fica só no log: a resposta não pode revelar se o e-mail tem conta
+    await this.mail
+      .send({
+        to: user.email,
+        subject: 'PontoNexo · redefinição de senha',
+        text: `Olá, ${user.name}.\n\nRecebemos um pedido para redefinir sua senha. O link vale por 1 hora:\n${this.env.WEB_ORIGIN}/redefinir-senha?token=${token}\n\nSe não foi você, ignore esta mensagem; sua senha continua a mesma.`,
+      })
+      .catch(() => undefined);
     await this.platformAudit('auth.password_reset_requested', 'Pedido de redefinição de senha', meta, user.id);
   }
 
