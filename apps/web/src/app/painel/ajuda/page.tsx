@@ -1,10 +1,8 @@
 'use client';
-import { RotateCcw } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { ListenButton, useGuide } from '@/components/guia';
+import { ListenButton } from '@/components/ouvir';
 import { SECAO, type Secao } from '@/components/secoes';
-import { Button, PageHeader } from '@/components/ui';
+import { PageHeader } from '@/components/ui';
 
 const ROTA: Partial<Record<keyof typeof SECAO, string>> = {
   inicio: '/painel',
@@ -42,29 +40,14 @@ function Item({ s, href }: { s: Secao; href?: string }) {
   );
 }
 
-/** Todas as explicações do painel num lugar só, com leitura em voz alta e a opção de rever as dicas. */
+/** Todas as explicações do painel num lugar só, com leitura em voz alta. */
 export default function Ajuda() {
-  const guide = useGuide();
-  const router = useRouter();
   return (
     <div>
       <PageHeader
         title="Ajuda e explicações"
         description="Como funciona cada tela do painel."
         back={{ href: '/painel', label: 'Início' }}
-        actions={
-          guide ? (
-            <Button
-              variant="secondary"
-              onClick={() => {
-                guide.restart();
-                router.push('/painel');
-              }}
-            >
-              <RotateCcw size={18} aria-hidden /> Rever as dicas desde o começo
-            </Button>
-          ) : null
-        }
       />
       <div className="grid gap-4 xl:grid-cols-2">
         {GRUPOS.map((g) => (

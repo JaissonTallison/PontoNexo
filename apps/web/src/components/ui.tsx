@@ -2,7 +2,6 @@
 import { ArrowLeft, Check, ChevronLeft, ChevronRight, Eye, EyeOff, RotateCcw, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Tip } from './guia';
 import { useCallback, useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type KeyboardEvent, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 
 /* Classes comuns: mudar aqui muda o sistema inteiro. */
@@ -123,7 +122,7 @@ export function Card({ title, actions, children, className = '' }: { title?: str
 }
 
 /** Cabeçalho da página: título e ações. A linha de alerta só aparece quando algo pede ação. */
-export function PageHeader({ title, actions, alert, back, description, help, helpTitle, guideKey }: { title: string; actions?: ReactNode; alert?: string | null; back?: { href: string; label: string }; description?: string; /** explicação de primeiro uso (dica na primeira visita) */ help?: string; helpTitle?: string; guideKey?: string }) {
+export function PageHeader({ title, actions, alert, back, description }: { title: string; actions?: ReactNode; alert?: string | null; back?: { href: string; label: string }; description?: string }) {
   const heading = (
     <div className="min-w-0">
       <h1 className="text-2xl leading-tight font-bold text-marca">{title}</h1>
@@ -139,13 +138,7 @@ export function PageHeader({ title, actions, alert, back, description, help, hel
         </Link>
       ) : null}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        {help && guideKey ? (
-          <Tip id={`painel.tela.${guideKey}`} order={50} title={helpTitle ?? title} text={help} className="min-w-0">
-            {heading}
-          </Tip>
-        ) : (
-          heading
-        )}
+        {heading}
         {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
       </div>
       {alert ? <p className="mt-2 text-sm font-semibold text-perigo">{alert}</p> : null}
