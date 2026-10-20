@@ -917,3 +917,17 @@ export const correctionReads = pgTable(
   },
   (t) => [uniqueIndex('correction_reads_uq').on(t.correctionRequestId, t.userId)],
 );
+
+/** Resumo diário por e-mail já enviado ao empregador (um por dia). */
+export const dailySummariesSent = pgTable(
+  'daily_summaries_sent',
+  {
+    id: id(),
+    employerId: uuid()
+      .notNull()
+      .references(() => employers.id),
+    date: date({ mode: 'string' }).notNull(),
+    sentAt: createdAt(),
+  },
+  (t) => [uniqueIndex('daily_summary_uq').on(t.employerId, t.date)],
+);

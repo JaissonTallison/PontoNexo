@@ -6,11 +6,12 @@ import { GovernanceController } from './governance.controller.js';
 import { GovernanceService } from './governance.service.js';
 import { IntegrationsService } from './integrations.service.js';
 import { RetentionJob } from './retention.job.js';
+import { DailySummaryJob } from './daily-summary.job.js';
 
 @Module({
   imports: [RegistradorModule, TratamentoModule],
   controllers: [GovernanceController],
-  providers: [GovernanceService, IntegrationsService, ExportsService, RetentionJob],
-  exports: [IntegrationsService, RetentionJob],
+  providers: [GovernanceService, IntegrationsService, ExportsService, RetentionJob, DailySummaryJob],
+  exports: [IntegrationsService, RetentionJob, DailySummaryJob],
 })
 export class GovernanceModule {}

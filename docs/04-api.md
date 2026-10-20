@@ -11,5 +11,5 @@ Autenticação: cookie `pn_session` (HttpOnly) + cabeçalho `x-csrf-token` (valo
 | Funcionário | `GET /me/punch-context` · `POST /me/punches` · `GET /me/punches?month` `/me/receipts/:id` `/me/timesheet?month` `/me/corrections` `/me/closings` `/me/data-export` |
 | Cadastros | `/employer` `/users` `/employees` `/job-roles` `/contracts/:id/end` `/locations` `/locations/:id/geofences` `/employee-locations/:id/revoke` `/schedules` `/holidays` |
 | Registro | `GET /punches` `/punches/:id/receipt` `/punches/integrity` `/alerts` · `POST /alerts/:id/review` · público `GET /receipts/verify/:code` |
-| Tratamento | `POST /corrections` `/corrections/:id/decide` `/corrections/:id/cancel` · `GET /timesheets/:employeeId?month` · `/closings` `/closings/:id/reopen` `/closings/:id/snapshot` |
-| Governança | `/dashboard` `/audit` `/audit/verify` `/incidents` `/settings/retention` `/integrations` `/data-requests` `/exports/punches.csv` `/exports/timesheet.csv` `/exports/employer.json` |
+| Tratamento | `POST /corrections` `/corrections/:id/decide` `/corrections/:id/cancel` · `GET /timesheets/:employeeId?month` · `/closings` `/closings/:id/reopen` `/closings/:id/snapshot` · `GET /closings/summary?month` · `POST /closings/batch` |
+| Governança | `/dashboard` `/dashboard/badges` `/audit` `/audit/verify` `/incidents` `/settings/retention` `/integrations` `/data-requests` `/exports/punches.csv` `/exports/timesheet.csv` `/exports/summary.csv?month` `/exports/employer.json` |

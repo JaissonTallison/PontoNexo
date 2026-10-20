@@ -141,7 +141,19 @@ export interface DashboardBadges {
   openIncidents: number;
 }
 
+export interface SetupStatus {
+  hasLocation: boolean;
+  hasSchedule: boolean;
+  employees: number;
+  /** funcionários com tudo pronto para marcar (contrato, local, horário e acesso) */
+  employeesReady: number;
+  pending: Array<{ employeeId: string; fullName: string; missing: Array<'contrato' | 'local' | 'horário' | 'acesso'> }>;
+}
+
 export interface DashboardView {
+  setup: SetupStatus;
+  /** mês anterior com funcionários ainda sem fechamento */
+  unclosed: { month: string; employees: number } | null;
   today: DashboardTodayRow[];
   punchesToday: number;
   working: Array<{ employeeId: string; fullName: string; state: 'working' | 'on_break'; since: string }>;

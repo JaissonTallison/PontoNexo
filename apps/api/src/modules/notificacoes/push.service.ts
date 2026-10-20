@@ -80,6 +80,17 @@ export class PushService {
     return ur?.userId ?? null;
   }
 
+  /** Titular e gestores do empregador (quem decide pedidos de ajuste). */
+  async sendToDeciders(employerId: string, payload: PushPayload) {
+    const rows = await this.db
+      .select({ userId: userRoles.userId })
+      .from(userRoles)
+      .where(and(eq(userRoles.employerId, employerId), eq(userRoles.active, true), inArray(userRoles.roleCode, ['employer_owner', 'employer_manager'])));
+    let n = 0;
+    for (const r of rows) n += await this.sendToUser(r.userId, payload);
+    return n;
+  }
+
   async sendToEmployee(employerId: string, employeeId: string, payload: PushPayload) {
     const userId = await this.employeeUserId(employerId, employeeId);
     return userId ? this.sendToUser(userId, payload) : 0;

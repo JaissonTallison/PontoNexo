@@ -177,6 +177,7 @@ export class CorrectionsService {
       return view!;
     }).then((view) => {
       if (!fromEmployee) this.notify(employerId, employeeId, 'Seu empregador pediu um ajuste', 'Toque para ver e responder se concorda.');
+      else void this.push.sendToDeciders(employerId, { title: 'Novo pedido de ajuste', body: `${view.employeeName} pediu um ajuste no ponto. Toque para decidir.`, url: '/painel/revisar', tag: 'pedidos-empregador' }).catch(() => 0);
       return view;
     });
   }

@@ -2,6 +2,7 @@ import { Body, Controller, Get, HttpCode, Param, Post, Query, Req } from '@nestj
 import { ApiTags } from '@nestjs/swagger';
 import {
   closingAckSchema,
+  closingBatchSchema,
   closingCreateSchema,
   closingReopenSchema,
   correctionCreateSchema,
@@ -105,6 +106,19 @@ export class TratamentoController {
   @Post('closings')
   close(@Auth() auth: AuthContext, @Body({ schema: closingCreateSchema }) body: z.infer<typeof closingCreateSchema>, @Req() req: Request) {
     return this.closings.close(requireEmployer(auth), body.employeeId, body.month, requestMeta(req));
+  }
+
+  @RequirePermission('timesheets.read')
+  @Get('closings/summary')
+  summary(@Auth() auth: AuthContext, @Query({ schema: timesheetQuery }) q: z.infer<typeof timesheetQuery>) {
+    return this.closings.summary(requireEmployer(auth), q.month);
+  }
+
+  @RequirePermission('closings.manage')
+  @Post('closings/batch')
+  @HttpCode(200)
+  closeAll(@Auth() auth: AuthContext, @Body({ schema: closingBatchSchema }) body: z.infer<typeof closingBatchSchema>, @Req() req: Request) {
+    return this.closings.closeAll(requireEmployer(auth), body.month, requestMeta(req));
   }
 
   @RequirePermission('closings.manage')

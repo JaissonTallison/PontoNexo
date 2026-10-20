@@ -51,6 +51,17 @@
   --text-2xl: 28px;
 }
 
+/* "Letra maior" do painel: a escala inteira cresce cerca de 15%, sem quebrar o layout. */
+html.letra-maior {
+  --text-xs: 14px;
+  --text-sm: 16px;
+  --text-base: 17px;
+  --text-md: 19px;
+  --text-lg: 21px;
+  --text-xl: 26px;
+  --text-2xl: 31px;
+}
+
 html {
   font-size: 15px;
   -webkit-text-size-adjust: 100%;
@@ -149,4 +160,15 @@ html.app-sem-barra::-webkit-scrollbar,
   box-shadow:
     0 1px 2px rgb(16 42 67 / 0.06),
     0 8px 20px -6px rgb(16 42 67 / 0.16);
+}
+
+/* Marcador do centro da cerca no mapa (Leaflet). */
+.pn-pino {
+  border: 3px solid #ffffff;
+  border-radius: 9999px;
+  background: var(--color-marca);
+  box-shadow: 0 1px 4px rgb(0 15 75 / 0.45);
+}
+.leaflet-container {
+  font-family: var(--font-sans);
 }

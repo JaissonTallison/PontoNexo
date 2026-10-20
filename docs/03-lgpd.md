@@ -19,6 +19,9 @@
 | Inscrição de notificação | Endereço técnico do aparelho para lembretes | Até desligar ou o navegador invalidar |
 | Fala do "Falar o motivo" | Transcrita pelo serviço de voz do celular; o PontoNexo recebe só o texto | Não guardada |
 
+| Mapa da tela de locais | O navegador do empregador baixa imagens do OpenStreetMap da região exibida; a busca de endereço envia o texto digitado ao Nominatim (OpenStreetMap). Só quando o empregador usa a tela | Não guardado pelo PontoNexo |
+| Resumo diário por e-mail | Pendências do dia (nomes e contagens) para titular e gestores | Registro de envio por data, sem conteúdo |
+
 O provedor de SMS (se contratado) passa a ser operador e deve constar no contrato e no aviso de privacidade.
 
 ## Direitos do titular (art. 18)

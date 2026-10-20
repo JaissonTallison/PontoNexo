@@ -6,7 +6,7 @@ import { MonthNav, TimesheetTable, Totals } from '@/components/espelho';
 import { PrintableTimesheet } from '@/components/espelho-impressao';
 import { EmployeeSelect } from '@/components/filtros';
 import { useSession } from '@/components/session';
-import { Button, Card, Dialog, Empty, ErrorState, Loading, Notice, PageHeader, Textarea, Tone } from '@/components/ui';
+import { Button, Card, Dialog, Empty, ErrorState, Loading, Notice, PageHeader, Textarea, Tone, useConfirm } from '@/components/ui';
 import { api, ApiError, qs } from '@/lib/api';
 import { dataHora, mesAnterior, mesAtual, nomeMes } from '@/lib/formato';
 import { useResource } from '@/lib/hooks';
@@ -17,7 +17,9 @@ function Espelho() {
   const params = useSearchParams();
   const max = mesAtual(tz);
   const [employeeId, setEmployeeId] = useState(params.get('funcionario') ?? '');
-  const [month, setMonth] = useState(mesAnterior(max));
+  const mesParam = params.get('mes');
+  const [month, setMonth] = useState(mesParam && /^\d{4}-\d{2}$/.test(mesParam) && mesParam <= max ? mesParam : mesAnterior(max));
+  const { ask, dialog } = useConfirm();
   const sheet = useResource<TimesheetView>(employeeId ? `/timesheets/${employeeId}?month=${month}` : null);
   const [msg, setMsg] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -29,7 +31,12 @@ function Espelho() {
   const ended = month < max;
 
   async function close() {
-    if (!window.confirm(`Fechar ${nomeMes(month)}? Uma fotografia do espelho será guardada e novos ajustes ficarão bloqueados até reabrir.`)) return;
+    const ok = await ask({
+      title: `Fechar ${nomeMes(month)}`,
+      confirmLabel: 'Fechar o mês',
+      message: 'Uma fotografia do espelho fica guardada e novos ajustes ficam bloqueados até reabrir. O funcionário poderá registrar ciência no app.',
+    });
+    if (!ok) return;
     setBusy(true);
     setMsg(null);
     try {
@@ -48,7 +55,8 @@ function Espelho() {
       {sheet.data && employeeId ? <PrintableTimesheet t={sheet.data} /> : null}
       <div className="print:hidden">
       <PageHeader
-        title="Espelho e fechamento"
+        title="Espelho por funcionário"
+        back={{ href: '/painel/fechamento', label: 'Folha do mês' }}
         actions={
           employeeId && sheet.data ? (
             <>
@@ -126,6 +134,7 @@ function Espelho() {
         </div>
       ) : null}
       </div>
+      {dialog}
       <Dialog
         open={reopen !== null}
         title="Reabrir mês"

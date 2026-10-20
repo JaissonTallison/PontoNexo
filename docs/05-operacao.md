@@ -23,6 +23,8 @@ Ver `.env.example` (comentado). Em produção: `NODE_ENV=production`, `COOKIE_SE
 - **Código por SMS:** `OTP_PROVIDER=console` só em desenvolvimento (o código aparece no log da API). Em produção, `console` desliga o login por celular. `OTP_PROVIDER=twilio` envia SMS pela Twilio (`TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM`); **adaptador implementado pela documentação pública e não testado com conta real**.
 - **Biometria (passkey):** `WEBAUTHN_RP_ID` precisa ser o domínio do site (sem protocolo nem porta) e `WEB_ORIGIN` o endereço exato. Trocar o domínio invalida as biometrias já cadastradas.
 - **Lembretes (Web Push):** chaves `VAPID_*` geradas por `pnpm chaves:gerar`; a tarefa roda a cada 5 min e avisa 15 min após o início/fim previsto. Desligar com `REMINDERS_ENABLED=false`.
+- **Avisos ao empregador:** pedido de ajuste do funcionário gera notificação para titular e gestores que ligaram os avisos em Minha conta. O **resumo diário por e-mail** sai a partir das 8h (fuso do empregador), uma vez por dia e só quando há pendência; desliga junto com `JOBS_ENABLED=false`.
+- **Mapa dos locais:** usa tiles de `tile.openstreetmap.org` e busca no Nominatim (liberados no CSP de `next.config.ts`). Para volume alto, troque por um provedor de mapas próprio, conforme a política de uso do OpenStreetMap.
 - Em celulares, tudo isso exige **HTTPS** (ver `docs/07-teste-em-celular.md`).
 
 ## Banco

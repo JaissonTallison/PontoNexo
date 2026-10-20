@@ -35,7 +35,7 @@ export class NotificationsController {
   @Post('test')
   @HttpCode(200)
   async test(@Auth() auth: AuthContext) {
-    const sent = await this.push.sendToUser(auth.userId, { title: 'Lembretes ligados', body: 'Você vai receber avisos do PontoNexo neste celular.', url: '/app', tag: 'teste' });
+    const sent = await this.push.sendToUser(auth.userId, { title: 'Avisos ligados', body: 'Você vai receber avisos do PontoNexo neste aparelho.', url: auth.membership?.role === 'employee' ? '/app' : '/painel', tag: 'teste' });
     return { sent };
   }
 }

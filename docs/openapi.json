@@ -57,6 +57,346 @@
         ]
       }
     },
+    "/api/me/push/public-key": {
+      "get": {
+        "operationId": "NotificationsController_key",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Notificações"
+        ]
+      }
+    },
+    "/api/me/push/subscribe": {
+      "post": {
+        "operationId": "NotificationsController_subscribe",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "endpoint": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "format": "uri"
+                  },
+                  "keys": {
+                    "type": "object",
+                    "properties": {
+                      "p256dh": {
+                        "type": "string",
+                        "minLength": 20,
+                        "maxLength": 200
+                      },
+                      "auth": {
+                        "type": "string",
+                        "minLength": 10,
+                        "maxLength": 100
+                      }
+                    },
+                    "required": [
+                      "p256dh",
+                      "auth"
+                    ]
+                  }
+                },
+                "required": [
+                  "endpoint",
+                  "keys"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Notificações"
+        ]
+      }
+    },
+    "/api/me/push/unsubscribe": {
+      "post": {
+        "operationId": "NotificationsController_unsubscribe",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "endpoint": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "format": "uri"
+                  }
+                },
+                "required": [
+                  "endpoint"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Notificações"
+        ]
+      }
+    },
+    "/api/me/push/test": {
+      "post": {
+        "operationId": "NotificationsController_test",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Notificações"
+        ]
+      }
+    },
+    "/api/auth/phone/start": {
+      "post": {
+        "operationId": "AuthController_phoneStart",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "phone": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "phone"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Autenticação"
+        ]
+      }
+    },
+    "/api/auth/phone/verify": {
+      "post": {
+        "operationId": "AuthController_phoneVerify",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "phone": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  }
+                },
+                "required": [
+                  "phone",
+                  "code"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Autenticação"
+        ]
+      }
+    },
+    "/api/auth/passkeys": {
+      "get": {
+        "operationId": "AuthController_passkeyList",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Autenticação"
+        ]
+      }
+    },
+    "/api/auth/passkeys/register/options": {
+      "post": {
+        "operationId": "AuthController_passkeyRegisterOptions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Autenticação"
+        ]
+      }
+    },
+    "/api/auth/passkeys/register": {
+      "post": {
+        "operationId": "AuthController_passkeyRegister",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "challengeId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  "response": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  },
+                  "deviceLabel": {
+                    "nullable": true,
+                    "type": "string",
+                    "maxLength": 80
+                  }
+                },
+                "required": [
+                  "challengeId",
+                  "response"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Autenticação"
+        ]
+      }
+    },
+    "/api/auth/passkeys/{id}/remove": {
+      "post": {
+        "operationId": "AuthController_passkeyRemove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "minLength": 10,
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Autenticação"
+        ]
+      }
+    },
+    "/api/auth/passkeys/login/options": {
+      "post": {
+        "operationId": "AuthController_passkeyLoginOptions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Autenticação"
+        ]
+      }
+    },
+    "/api/auth/passkeys/login": {
+      "post": {
+        "operationId": "AuthController_passkeyLogin",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "challengeId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  "response": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  },
+                  "deviceLabel": {
+                    "nullable": true,
+                    "type": "string",
+                    "maxLength": 80
+                  }
+                },
+                "required": [
+                  "challengeId",
+                  "response"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Autenticação"
+        ]
+      }
+    },
     "/api/auth/signup": {
       "post": {
         "operationId": "AuthController_signup",
@@ -1823,6 +2163,31 @@
         ]
       }
     },
+    "/api/me/receipts/{punchId}/pdf": {
+      "get": {
+        "operationId": "RegistradorController_myReceiptPdf",
+        "parameters": [
+          {
+            "name": "punchId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Registro de ponto"
+        ]
+      }
+    },
     "/api/punches": {
       "get": {
         "operationId": "RegistradorController_list",
@@ -1906,6 +2271,31 @@
     "/api/punches/{id}/receipt": {
       "get": {
         "operationId": "RegistradorController_receipt",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Registro de ponto"
+        ]
+      }
+    },
+    "/api/punches/{id}/receipt.pdf": {
+      "get": {
+        "operationId": "RegistradorController_receiptPdf",
         "parameters": [
           {
             "name": "id",
@@ -2125,6 +2515,20 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Tratamento, espelho e fechamento"
+        ]
+      }
+    },
+    "/api/me/corrections/seen": {
+      "post": {
+        "operationId": "TratamentoController_seen",
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -2480,6 +2884,63 @@
         ]
       }
     },
+    "/api/closings/summary": {
+      "get": {
+        "operationId": "TratamentoController_summary",
+        "parameters": [
+          {
+            "name": "month",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Tratamento, espelho e fechamento"
+        ]
+      }
+    },
+    "/api/closings/batch": {
+      "post": {
+        "operationId": "TratamentoController_closeAll",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "month": {
+                    "type": "string",
+                    "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+                  }
+                },
+                "required": [
+                  "month"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Tratamento, espelho e fechamento"
+        ]
+      }
+    },
     "/api/closings/{id}/reopen": {
       "post": {
         "operationId": "TratamentoController_reopen",
@@ -2615,6 +3076,20 @@
     "/api/dashboard": {
       "get": {
         "operationId": "GovernanceController_dashboard",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Governança: auditoria, incidentes, LGPD, integrações e exportações"
+        ]
+      }
+    },
+    "/api/dashboard/badges": {
+      "get": {
+        "operationId": "GovernanceController_badges",
         "parameters": [],
         "responses": {
           "200": {
@@ -3298,6 +3773,30 @@
               "type": "string",
               "format": "uuid",
               "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Governança: auditoria, incidentes, LGPD, integrações e exportações"
+        ]
+      }
+    },
+    "/api/exports/summary.csv": {
+      "get": {
+        "operationId": "GovernanceController_summaryCsv",
+        "parameters": [
+          {
+            "name": "month",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
             }
           }
         ],

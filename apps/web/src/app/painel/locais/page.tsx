@@ -1,11 +1,14 @@
 'use client';
 import { DEFAULT_GEOFENCE_RADIUS_M, formatDateBR, LOCATION_KIND_LABEL, LOCATION_KINDS, type LocationKind } from '@pontonexo/shared';
+import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { useSession } from '@/components/session';
 import { Button, Card, DataTable, Dialog, Empty, ErrorState, Input, Loading, Notice, PageHeader, Select, Tone } from '@/components/ui';
 import { api, ApiError } from '@/lib/api';
 import { hojeLocal } from '@/lib/formato';
 import { useResource } from '@/lib/hooks';
+
+const FenceMap = dynamic(() => import('@/components/mapa-cerca').then((m) => m.FenceMap), { ssr: false, loading: () => <div className="h-72 rounded-[8px] border border-borda bg-realce" /> });
 
 interface Loc {
   id: string;
@@ -21,6 +24,7 @@ function FenceFields({ v, onChange, fields }: { v: { lat: string; lng: string; r
   const [msg, setMsg] = useState<string | null>(null);
   return (
     <div className="space-y-3">
+      <FenceMap value={v} onChange={onChange} />
       <div className="grid gap-3 sm:grid-cols-3">
         <Input label="Latitude" inputMode="decimal" value={v.lat} onChange={(e) => onChange({ ...v, lat: e.target.value })} error={fields['geofence.lat'] ?? fields.lat} />
         <Input label="Longitude" inputMode="decimal" value={v.lng} onChange={(e) => onChange({ ...v, lng: e.target.value })} error={fields['geofence.lng'] ?? fields.lng} />
@@ -83,7 +87,7 @@ export default function Locais() {
   return (
     <div>
       <PageHeader
-        title="Locais de trabalho"
+        title="Casa e locais"
         actions={
           can('locations.write') ? (
             <Button

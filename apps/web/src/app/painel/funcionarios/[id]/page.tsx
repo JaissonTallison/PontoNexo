@@ -18,6 +18,7 @@ import { Button, Card, Checkbox, DescList, Dialog, ErrorState, Input, Loading, N
 import { api, ApiError } from '@/lib/api';
 import { dataHora, hojeLocal } from '@/lib/formato';
 import { useResource } from '@/lib/hooks';
+import { mascaraTelefone } from '@/lib/mascara';
 
 interface Detail {
   id: string;
@@ -151,7 +152,7 @@ function Detalhe() {
             {write && !edit ? (
               <Button
                 onClick={() => {
-                  setForm({ fullName: e.fullName, email: e.email ?? '', phone: e.phone ?? '', jobRoleId: e.jobRoleId ?? '', status: e.status });
+                  setForm({ fullName: e.fullName, email: e.email ?? '', phone: mascaraTelefone(e.phone ?? ''), jobRoleId: e.jobRoleId ?? '', status: e.status });
                   setEdit(true);
                 }}
               >
@@ -171,7 +172,7 @@ function Detalhe() {
               <Input label="Nome completo" value={form.fullName} onChange={(x) => setForm({ ...form, fullName: x.target.value })} error={a.fields.fullName} />
             </div>
             <Input label="E-mail" type="email" value={form.email} onChange={(x) => setForm({ ...form, email: x.target.value })} error={a.fields.email} />
-            <Input label="Telefone" value={form.phone} onChange={(x) => setForm({ ...form, phone: x.target.value })} />
+            <Input label="Celular" type="tel" inputMode="tel" value={form.phone} onChange={(x) => setForm({ ...form, phone: mascaraTelefone(x.target.value) })} />
             <Select label="Função" value={form.jobRoleId} onChange={(x) => setForm({ ...form, jobRoleId: x.target.value })}>
               <option value="">Sem função definida</option>
               {(roles.data ?? []).map((r) => (

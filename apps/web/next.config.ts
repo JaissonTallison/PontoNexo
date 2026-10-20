@@ -10,9 +10,11 @@ const securityHeaders = [
       // o Next injeta scripts inline de hidratação; eval só no modo dev (o React usa para depuração), nunca em produção
       `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'production' ? '' : " 'unsafe-eval'"}`,
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob:",
+      // mapas do OpenStreetMap na tela de locais
+      "img-src 'self' data: blob: https://tile.openstreetmap.org",
       "font-src 'self'",
-      "connect-src 'self'",
+      // busca de endereço (Nominatim), só quando o empregador pesquisa
+      "connect-src 'self' https://nominatim.openstreetmap.org",
       "worker-src 'self'",
       "manifest-src 'self'",
       "frame-ancestors 'none'",

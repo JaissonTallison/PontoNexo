@@ -126,3 +126,34 @@ export const closingAckSchema = z.object({
   agree: z.boolean(),
   note: z.string().trim().max(1000).nullable().optional(),
 });
+
+export interface MonthSummaryRow {
+  employeeId: string;
+  fullName: string;
+  workedSeconds: number;
+  expectedSeconds: number;
+  overtimeSeconds: number;
+  restOrHolidaySeconds: number;
+  deficitSeconds: number;
+  absences: number;
+  nightSeconds: number;
+  paidOvertimeSeconds: number;
+  bankSeconds: number;
+  daysWithIssues: number;
+  pendingCorrections: number;
+  closing: { id: string; status: 'closed' | 'reopened'; acknowledged: boolean } | null;
+}
+
+export interface MonthSummaryView {
+  month: string;
+  /** mês já terminou (pode ser fechado) */
+  ended: boolean;
+  rows: MonthSummaryRow[];
+}
+
+export const closingBatchSchema = z.object({ month });
+
+export interface ClosingBatchResult {
+  closed: number;
+  skipped: Array<{ employeeId: string; fullName: string; reason: string }>;
+}

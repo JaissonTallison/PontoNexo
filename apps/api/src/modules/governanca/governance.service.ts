@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { and, count, desc, eq, gte, inArray, lt, ne } from 'drizzle-orm';
+import { and, count, desc, eq, gte, inArray, isNull, lt, lte, ne, or } from 'drizzle-orm';
 import {
   calculatePeriod,
   DEFAULT_RULES,
@@ -8,6 +8,8 @@ import {
   resolveExpectedDay,
   type DashboardBadges,
   type DashboardTodayRow,
+  type SetupStatus,
+  monthDays,
   addDays,
   localToInstant,
   PRIVACY_NOTICE,
@@ -30,6 +32,13 @@ import {
   dataSubjectRequests,
   employees,
   employers,
+  employeeSchedules,
+  employeeWorkLocations,
+  employmentContracts,
+  monthlyClosings,
+  userRoles,
+  workLocations,
+  workSchedules,
   incidents,
   incidentUpdates,
   punchRecords,
@@ -293,8 +302,11 @@ export class GovernanceService {
   // ───── Painel ─────
 
   /** Números do sino da barra superior (consulta leve, chamada a cada troca de tela). */
-  async badges(scope: EmployerScope): Promise<DashboardBadges> {
-    const { employerId } = scope.membership;
+  badges(scope: EmployerScope): Promise<DashboardBadges> {
+    return this.badgesFor(scope.membership.employerId);
+  }
+
+  badgesFor(employerId: string): Promise<DashboardBadges> {
     return this.tenant.run(employerId, async (tx) => {
       const one = async (q: Promise<Array<{ n: number }>>) => (await q)[0]?.n ?? 0;
       return {
@@ -304,6 +316,42 @@ export class GovernanceService {
         openIncidents: await one(tx.select({ n: count() }).from(incidents).where(and(eq(incidents.employerId, employerId), ne(incidents.status, 'resolved')))),
       };
     });
+  }
+
+  /** O que falta configurar para cada funcionário conseguir marcar o ponto. */
+  private async setup(tx: Tx, employerId: string, today: string): Promise<SetupStatus> {
+    const [loc] = await tx.select({ n: count() }).from(workLocations).where(and(eq(workLocations.employerId, employerId), eq(workLocations.active, true)));
+    const [sch] = await tx.select({ n: count() }).from(workSchedules).where(and(eq(workSchedules.employerId, employerId), eq(workSchedules.active, true)));
+    const emps = await tx.select({ id: employees.id, fullName: employees.fullName }).from(employees).where(and(eq(employees.employerId, employerId), eq(employees.status, 'active'))).orderBy(employees.fullName);
+    const access = await this.tenant.db.select({ employeeId: userRoles.employeeId }).from(userRoles).where(and(eq(userRoles.employerId, employerId), eq(userRoles.active, true)));
+    const pending: SetupStatus['pending'] = [];
+    for (const e of emps) {
+      const missing: SetupStatus['pending'][number]['missing'] = [];
+      const [c] = await tx.select({ id: employmentContracts.id }).from(employmentContracts).where(and(eq(employmentContracts.employeeId, e.id), lte(employmentContracts.startDate, today), or(isNull(employmentContracts.endDate), gte(employmentContracts.endDate, today)))).limit(1);
+      if (!c) missing.push('contrato');
+      const [l] = await tx.select({ id: employeeWorkLocations.id }).from(employeeWorkLocations).where(and(eq(employeeWorkLocations.employeeId, e.id), isNull(employeeWorkLocations.revokedAt), lte(employeeWorkLocations.validFrom, today), or(isNull(employeeWorkLocations.validTo), gte(employeeWorkLocations.validTo, today)))).limit(1);
+      if (!l) missing.push('local');
+      const [h] = await tx.select({ id: employeeSchedules.id }).from(employeeSchedules).where(and(eq(employeeSchedules.employeeId, e.id), lte(employeeSchedules.validFrom, today), or(isNull(employeeSchedules.validTo), gte(employeeSchedules.validTo, today)))).limit(1);
+      if (!h) missing.push('horário');
+      if (!access.some((a) => a.employeeId === e.id)) missing.push('acesso');
+      if (missing.length) pending.push({ employeeId: e.id, fullName: e.fullName, missing });
+    }
+    return { hasLocation: (loc?.n ?? 0) > 0, hasSchedule: (sch?.n ?? 0) > 0, employees: emps.length, employeesReady: emps.length - pending.length, pending };
+  }
+
+  /** Mês anterior com funcionário (com contrato no mês) ainda sem fechamento. */
+  private async unclosed(tx: Tx, employerId: string, today: string): Promise<DashboardView['unclosed']> {
+    const [y, m] = today.slice(0, 7).split('-').map(Number) as [number, number];
+    const month = m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, '0')}`;
+    const days = monthDays(month);
+    const withContract = await tx
+      .selectDistinct({ id: employmentContracts.employeeId })
+      .from(employmentContracts)
+      .where(and(eq(employmentContracts.employerId, employerId), lte(employmentContracts.startDate, days[days.length - 1]!), or(isNull(employmentContracts.endDate), gte(employmentContracts.endDate, days[0]!))));
+    if (!withContract.length) return null;
+    const closed = await tx.select({ id: monthlyClosings.employeeId }).from(monthlyClosings).where(and(eq(monthlyClosings.employerId, employerId), eq(monthlyClosings.month, month), eq(monthlyClosings.status, 'closed')));
+    const open = withContract.filter((w) => !closed.some((c) => c.id === w.id)).length;
+    return open ? { month, employees: open } : null;
   }
 
   /** Situação de hoje de cada funcionário ativo: estado, entrada, horas até agora e ocorrências. */
@@ -351,8 +399,11 @@ export class GovernanceService {
     return { rows, punchesToday };
   }
 
-  async dashboard(scope: EmployerScope): Promise<DashboardView> {
-    const { employerId } = scope.membership;
+  dashboard(scope: EmployerScope): Promise<DashboardView> {
+    return this.dashboardFor(scope.membership.employerId);
+  }
+
+  async dashboardFor(employerId: string): Promise<DashboardView> {
     const data = await this.tenant.run(employerId, async (tx) => {
       const working = await tx
         .select({ employeeId: workSessions.employeeId, fullName: employees.fullName, state: workSessions.state, since: workSessions.startedAt })
@@ -362,7 +413,11 @@ export class GovernanceService {
         .orderBy(employees.fullName);
       const one = async (q: Promise<Array<{ n: number }>>) => (await q)[0]?.n ?? 0;
       const { rows, punchesToday } = await this.todayRows(tx, employerId);
+      const [emp] = await tx.select({ tz: employers.timezone }).from(employers).where(eq(employers.id, employerId));
+      const today = localDate(new Date(), emp!.tz);
       return {
+        setup: await this.setup(tx, employerId, today),
+        unclosed: await this.unclosed(tx, employerId, today),
         today: rows,
         punchesToday,
         working: working.map((w) => ({ employeeId: w.employeeId, fullName: w.fullName, state: w.state as 'working' | 'on_break', since: w.since.toISOString() })),

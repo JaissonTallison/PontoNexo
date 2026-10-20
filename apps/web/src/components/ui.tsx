@@ -2,7 +2,7 @@
 import { ArrowLeft, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useId, useRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
+import { useCallback, useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 
 /* Classes comuns: mudar aqui muda o sistema inteiro. */
 export const cls = {
@@ -365,4 +365,44 @@ export function BackBar({ title, fallback }: { title: string; fallback: string }
       <h1 className="truncate text-xl font-bold text-marca">{title}</h1>
     </div>
   );
+}
+
+interface ConfirmOptions {
+  title: string;
+  message: ReactNode;
+  confirmLabel: string;
+  danger?: boolean;
+}
+
+/**
+ * Janela de confirmação no padrão do sistema (substitui o window.confirm, que é pequeno e sem contexto).
+ * Uso: const { ask, dialog } = useConfirm(); ... if (!(await ask({...}))) return; ... e renderizar {dialog}.
+ */
+export function useConfirm() {
+  const [state, setState] = useState<(ConfirmOptions & { resolve: (v: boolean) => void }) | null>(null);
+  const ask = useCallback((o: ConfirmOptions) => new Promise<boolean>((resolve) => setState({ ...o, resolve })), []);
+  const finish = (v: boolean) => {
+    state?.resolve(v);
+    setState(null);
+  };
+  const dialog = (
+    <Dialog
+      open={state !== null}
+      title={state?.title ?? ''}
+      onClose={() => finish(false)}
+      footer={
+        <>
+          <Button variant="secondary" onClick={() => finish(false)}>
+            Cancelar
+          </Button>
+          <Button variant={state?.danger ? 'danger' : 'primary'} onClick={() => finish(true)}>
+            {state?.confirmLabel}
+          </Button>
+        </>
+      }
+    >
+      <div className="text-texto-2">{state?.message}</div>
+    </Dialog>
+  );
+  return { ask, dialog };
 }

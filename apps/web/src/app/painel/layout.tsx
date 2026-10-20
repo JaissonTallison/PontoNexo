@@ -2,7 +2,6 @@
 import type { Permission } from '@pontonexo/shared';
 import { ROLE_LABEL } from '@pontonexo/shared';
 import {
-  AlertTriangle,
   CalendarDays,
   ClipboardCheck,
   FileClock,
@@ -15,6 +14,9 @@ import {
   PanelLeftOpen,
   Settings,
   ShieldCheck,
+  FileText,
+  ChevronRight,
+  ALargeSmall,
   Siren,
   Bell,
   ChevronDown,
@@ -34,30 +36,91 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { SessionProvider, useSession } from '@/components/session';
 import { Empty } from '@/components/ui';
 
-const NAV: Array<{ href: string; label: string; icon: typeof Gauge; perm: Permission }> = [
-  { href: '/painel', label: 'Visão geral', icon: Gauge, perm: 'employer.read' },
-  { href: '/painel/funcionarios', label: 'Funcionários', icon: Users, perm: 'employees.read' },
-  { href: '/painel/marcacoes', label: 'Marcações', icon: FileClock, perm: 'punches.read' },
-  { href: '/painel/ocorrencias', label: 'Ocorrências', icon: AlertTriangle, perm: 'punches.read' },
-  { href: '/painel/correcoes', label: 'Correções', icon: ListChecks, perm: 'corrections.read' },
-  { href: '/painel/espelho', label: 'Espelho e fechamento', icon: ClipboardCheck, perm: 'timesheets.read' },
-  { href: '/painel/locais', label: 'Locais', icon: MapPin, perm: 'employees.read' },
-  { href: '/painel/escalas', label: 'Escalas e feriados', icon: CalendarDays, perm: 'employees.read' },
-  { href: '/painel/auditoria', label: 'Auditoria', icon: FileSearch, perm: 'audit.read' },
-  { href: '/painel/incidentes', label: 'Incidentes', icon: Siren, perm: 'incidents.manage' },
-  { href: '/painel/privacidade', label: 'Privacidade (LGPD)', icon: ShieldCheck, perm: 'privacy.manage' },
-  { href: '/painel/configuracoes', label: 'Configurações', icon: Settings, perm: 'settings.manage' },
+interface NavItem {
+  href: string;
+  label: string;
+  icon: typeof Gauge;
+  perm: Permission;
+  /** número de pendências mostrado ao lado do item */
+  badge?: (b: DashboardBadges) => number;
+}
+
+/** Menu em linguagem do dia a dia, na ordem em que o empregador usa. "Mais opções" fica recolhido. */
+const GROUPS: Array<{ title: string; items: NavItem[]; advanced?: boolean }> = [
+  {
+    title: 'Dia a dia',
+    items: [
+      { href: '/painel', label: 'Início', icon: Gauge, perm: 'employer.read' },
+      { href: '/painel/funcionarios', label: 'Funcionários', icon: Users, perm: 'employees.read' },
+      { href: '/painel/marcacoes', label: 'Marcações', icon: FileClock, perm: 'punches.read' },
+      { href: '/painel/revisar', label: 'Para revisar', icon: ListChecks, perm: 'punches.read', badge: (b) => b.pendingCorrections + b.openAlerts },
+    ],
+  },
+  {
+    title: 'Fim do mês',
+    items: [
+      { href: '/painel/fechamento', label: 'Folha do mês', icon: ClipboardCheck, perm: 'timesheets.read' },
+      { href: '/painel/espelho', label: 'Espelho por funcionário', icon: FileText, perm: 'timesheets.read' },
+    ],
+  },
+  {
+    title: 'Configurar',
+    items: [
+      { href: '/painel/locais', label: 'Casa e locais', icon: MapPin, perm: 'employees.read' },
+      { href: '/painel/escalas', label: 'Horários e feriados', icon: CalendarDays, perm: 'employees.read' },
+      { href: '/painel/configuracoes', label: 'Usuários e dados', icon: Settings, perm: 'settings.manage' },
+    ],
+  },
+  {
+    title: 'Mais opções',
+    advanced: true,
+    items: [
+      { href: '/painel/auditoria', label: 'Auditoria', icon: FileSearch, perm: 'audit.read' },
+      { href: '/painel/incidentes', label: 'Incidentes', icon: Siren, perm: 'incidents.manage', badge: (b) => b.openIncidents },
+      { href: '/painel/privacidade', label: 'Privacidade (LGPD)', icon: ShieldCheck, perm: 'privacy.manage', badge: (b) => b.overdueDataRequests },
+    ],
+  },
 ];
 
+const FONT_KEY = 'pn_letra_maior';
+
+/** Letra maior para quem enxerga pouco: aumenta toda a escala tipográfica do painel e fica guardada no aparelho. */
+function useBigText() {
+  const [big, setBig] = useState(false);
+  useEffect(() => {
+    let on = false;
+    try {
+      on = localStorage.getItem(FONT_KEY) === '1';
+    } catch {
+      on = false;
+    }
+    setBig(on);
+  }, []);
+  useEffect(() => {
+    document.documentElement.classList.toggle('letra-maior', big);
+    return () => document.documentElement.classList.remove('letra-maior');
+  }, [big]);
+  const toggle = () =>
+    setBig((v) => {
+      try {
+        localStorage.setItem(FONT_KEY, v ? '0' : '1');
+      } catch {
+        // sem armazenamento: vale só nesta visita
+      }
+      return !v;
+    });
+  return { big, toggle };
+}
+
 /** Barra superior: empregador, data e hora oficial, sino de pendências e menu do usuário. */
-function TopBar({ onMenu, collapsed }: { onMenu: () => void; collapsed: boolean }) {
+function TopBar({ onMenu, collapsed, badges }: { onMenu: () => void; collapsed: boolean; badges: DashboardBadges | null }) {
   const { me } = useSession();
   const router = useRouter();
   const path = usePathname();
   const tz = me.timezone;
   const time = useResource<TimeView>('/time');
   const { now } = useServerClock(time.data?.serverTime ?? null);
-  const badges = useResource<DashboardBadges>(`/dashboard/badges?_=${encodeURIComponent(path)}`);
+  const text = useBigText();
   const [bellOpen, setBellOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -76,11 +139,11 @@ function TopBar({ onMenu, collapsed }: { onMenu: () => void; collapsed: boolean 
     return () => document.removeEventListener('mousedown', close);
   }, []);
 
-  const b = badges.data;
+  const b = badges;
   const items = b
     ? [
-        { n: b.pendingCorrections, text: b.pendingCorrections === 1 ? 'pedido de correção para decidir' : 'pedidos de correção para decidir', href: '/painel/correcoes' },
-        { n: b.openAlerts, text: b.openAlerts === 1 ? 'ocorrência para revisar' : 'ocorrências para revisar', href: '/painel/ocorrencias' },
+        { n: b.pendingCorrections, text: b.pendingCorrections === 1 ? 'pedido de ajuste para decidir' : 'pedidos de ajuste para decidir', href: '/painel/revisar?aba=ajustes' },
+        { n: b.openAlerts, text: b.openAlerts === 1 ? 'ocorrência para revisar' : 'ocorrências para revisar', href: '/painel/revisar?aba=ocorrencias' },
         { n: b.overdueDataRequests, text: b.overdueDataRequests === 1 ? 'pedido LGPD vencido' : 'pedidos LGPD vencidos', href: '/painel/privacidade' },
         { n: b.openIncidents, text: b.openIncidents === 1 ? 'incidente em aberto' : 'incidentes em aberto', href: '/painel/incidentes' },
       ].filter((i) => i.n > 0)
@@ -110,6 +173,16 @@ function TopBar({ onMenu, collapsed }: { onMenu: () => void; collapsed: boolean 
           <p className="text-lg leading-none font-bold text-marca tabular">{hora(now.toISOString(), tz, true)}</p>
           <p className={`mt-0.5 text-xs ${clock === 'synced' ? 'text-texto-3' : 'text-atencao'}`}>{clock === 'synced' ? 'Hora oficial sincronizada' : clock === 'drift' ? 'Relógio com defasagem' : 'Relógio em verificação'}</p>
         </div>
+
+        <button
+          onClick={text.toggle}
+          aria-pressed={text.big}
+          title={text.big ? 'Voltar ao tamanho normal da letra' : 'Aumentar a letra'}
+          className={`flex h-10 items-center gap-1.5 rounded-[8px] px-2.5 font-bold ${text.big ? 'bg-marca text-white hover:bg-marca-2' : 'text-marca hover:bg-realce'}`}
+        >
+          <ALargeSmall size={22} aria-hidden />
+          <span className="hidden text-sm xl:inline">{text.big ? 'Letra normal' : 'Letra maior'}</span>
+        </button>
 
         <div className="relative">
           <button
@@ -197,6 +270,12 @@ function Shell({ children }: { children: ReactNode }) {
   const path = usePathname();
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const badges = useResource<DashboardBadges>(`/dashboard/badges?_=${encodeURIComponent(path)}`);
+  const inAdvanced = GROUPS.some((g) => g.advanced && g.items.some((i) => path.startsWith(i.href)));
+  const [moreOpen, setMoreOpen] = useState(inAdvanced);
+  useEffect(() => {
+    if (inAdvanced) setMoreOpen(true);
+  }, [inAdvanced]);
   // etiqueta do item no menu recolhido (posição fixa: o menu tem rolagem própria e cortaria a etiqueta)
   const [tip, setTip] = useState<{ label: string; top: number; left: number } | null>(null);
   const showTip = (label: string, el: HTMLElement) => {
@@ -239,11 +318,39 @@ function Shell({ children }: { children: ReactNode }) {
       />
     );
   }
-  const items = NAV.filter((n) => can(n.perm));
+  const groups = GROUPS.map((g) => ({ ...g, items: g.items.filter((n) => can(n.perm)) })).filter((g) => g.items.length);
+  const link = ({ href, label, icon: Icon, badge }: NavItem, mini: boolean) => {
+    const active = href === '/painel' ? path === '/painel' : path.startsWith(href);
+    const n = badge && badges.data ? badge(badges.data) : 0;
+    const tipText = n ? `${label} · ${n}` : label;
+    return (
+      <li key={href}>
+        <Link
+          href={href}
+          onClick={() => setOpen(false)}
+          aria-current={active ? 'page' : undefined}
+          onMouseEnter={mini ? (e) => showTip(tipText, e.currentTarget) : undefined}
+          onMouseLeave={mini ? () => setTip(null) : undefined}
+          onFocus={mini ? (e) => showTip(tipText, e.currentTarget) : undefined}
+          onBlur={mini ? () => setTip(null) : undefined}
+          className={`relative flex items-center rounded-[8px] text-sm font-semibold ${mini ? 'h-11 justify-center' : 'gap-3 px-3 py-2.5'} ${active ? 'bg-marca-3 text-white' : 'text-white/80 hover:bg-marca-2 hover:text-white'}`}
+        >
+          <Icon size={mini ? 21 : 19} className="shrink-0 text-marcador" aria-hidden />
+          <span className={mini ? 'sr-only' : 'flex-1'}>{label}</span>
+          {n ? (
+            <span className={`rounded-[6px] bg-marcador font-bold text-marca tabular ${mini ? 'absolute top-0.5 right-0.5 px-1 text-[11px]' : 'px-1.5 text-xs'}`}>
+              <span className="sr-only">, pendências: </span>
+              {n > 99 ? '99+' : n}
+            </span>
+          ) : null}
+        </Link>
+      </li>
+    );
+  };
   const nav = (mini: boolean) => (
     <nav aria-label="Menu principal" className="flex h-full flex-col">
       <div className={`flex items-center ${mini ? 'justify-center px-2 py-5' : 'px-5 py-6'}`}>
-        <Link href="/painel" aria-label="PontoNexo · Visão geral">
+        <Link href="/painel" aria-label="PontoNexo · Início">
           {mini ? (
             <img src="/brand/pontonexo-simbolo-fundo-escuro.svg" alt="PontoNexo" className="h-11 w-auto" />
           ) : (
@@ -251,28 +358,30 @@ function Shell({ children }: { children: ReactNode }) {
           )}
         </Link>
       </div>
-      <ul className={`flex-1 space-y-1 ${mini ? 'px-2' : 'px-3'}`}>
-        {items.map(({ href, label, icon: Icon }) => {
-          const active = href === '/painel' ? path === '/painel' : path.startsWith(href);
+      <div className={`flex-1 space-y-4 ${mini ? 'px-2' : 'px-3'}`}>
+        {groups.map((g) => {
+          const shown = !g.advanced || mini || moreOpen;
           return (
-            <li key={href}>
-              <Link
-                href={href}
-                onClick={() => setOpen(false)}
-                aria-current={active ? 'page' : undefined}
-                onMouseEnter={mini ? (e) => showTip(label, e.currentTarget) : undefined}
-                onMouseLeave={mini ? () => setTip(null) : undefined}
-                onFocus={mini ? (e) => showTip(label, e.currentTarget) : undefined}
-                onBlur={mini ? () => setTip(null) : undefined}
-                className={`flex items-center rounded-[8px] text-sm font-semibold ${mini ? 'h-11 justify-center' : 'gap-3 px-3 py-2.5'} ${active ? 'bg-marca-3 text-white' : 'text-white/80 hover:bg-marca-2 hover:text-white'}`}
-              >
-                <Icon size={mini ? 21 : 19} className="shrink-0 text-marcador" aria-hidden />
-                <span className={mini ? 'sr-only' : ''}>{label}</span>
-              </Link>
-            </li>
+            <div key={g.title}>
+              {mini ? (
+                <div className="mx-2 mb-2 border-t border-white/15" aria-hidden />
+              ) : g.advanced ? (
+                <button
+                  onClick={() => setMoreOpen(!moreOpen)}
+                  aria-expanded={moreOpen}
+                  className="flex w-full items-center justify-between rounded-[8px] px-3 py-1.5 text-xs font-bold tracking-wide text-white/60 uppercase hover:text-white"
+                >
+                  {g.title}
+                  <ChevronRight size={16} className={`transition-transform ${moreOpen ? 'rotate-90' : ''}`} aria-hidden />
+                </button>
+              ) : (
+                <p className="px-3 pb-1.5 text-xs font-bold tracking-wide text-white/60 uppercase">{g.title}</p>
+              )}
+              {shown ? <ul className="space-y-1">{g.items.map((i) => link(i, mini))}</ul> : null}
+            </div>
           );
         })}
-      </ul>
+      </div>
       {mini ? null : <p className="px-5 py-4 text-xs text-white/60">Registro conforme LC 150/2015, art. 12. Sem certificação REP-P.</p>}
     </nav>
   );
@@ -299,7 +408,7 @@ function Shell({ children }: { children: ReactNode }) {
         </div>
       ) : null}
       <div className="min-w-0">
-        <TopBar onMenu={toggle} collapsed={collapsed} />
+        <TopBar onMenu={toggle} collapsed={collapsed} badges={badges.data} />
         <main className="px-4 py-5 lg:px-6 print:p-0">{children}</main>
       </div>
     </div>

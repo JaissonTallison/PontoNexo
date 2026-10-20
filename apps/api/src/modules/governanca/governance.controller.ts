@@ -186,6 +186,15 @@ export class GovernanceController {
     res.send(csv);
   }
 
+  @RequirePermission('exports.run')
+  @Get('exports/summary.csv')
+  async summaryCsv(@Auth() auth: AuthContext, @Query({ schema: z.object({ month }) }) q: { month: string }, @Req() req: Request, @Res() res: Response) {
+    const csv = await this.exportsService.summaryCsv(requireEmployer(auth), q.month, requestMeta(req));
+    res.setHeader('content-type', 'text/csv; charset=utf-8');
+    res.setHeader('content-disposition', `attachment; filename="resumo-${q.month}.csv"`);
+    res.send(csv);
+  }
+
   @RequirePermission('settings.manage')
   @Get('exports/employer.json')
   @Header('content-disposition', 'attachment; filename="pontonexo-empregador.json"')

@@ -30,6 +30,7 @@ import { notFound } from '../../common/errors.js';
 import type { RequestMeta } from '../../common/http.js';
 import { TenantDb } from '../../common/tenant.js';
 import { TimesheetService } from '../tratamento/timesheet.service.js';
+import { ClosingsService } from '../tratamento/closings.service.js';
 
 const cell = (v: unknown) => {
   const s = v === null || v === undefined ? '' : String(v);
@@ -50,7 +51,35 @@ export class ExportsService {
     private readonly tenant: TenantDb,
     private readonly audit: AuditService,
     private readonly timesheets: TimesheetService,
+    private readonly closings: ClosingsService,
   ) {}
+
+  /** Resumo do mês de todos os funcionários, uma linha por pessoa (para o contador). */
+  async summaryCsv(scope: EmployerScope, month: string, meta: RequestMeta) {
+    const s = await this.closings.summary(scope, month);
+    const d = (x: number) => formatDuration(x);
+    const csv = toCsv([
+      ['Resumo do mês', month, 'Cálculo de referência: conferir antes da folha'],
+      ['Funcionário', 'Previsto', 'Trabalhado', 'Excedente', 'Extras a pagar', 'Banco de horas', 'Domingos/feriados', 'Noturno', 'Faltas/atrasos', 'Faltas (dias)', 'Dias com ocorrência', 'Pedidos pendentes', 'Situação do mês'],
+      ...s.rows.map((r) => [
+        r.fullName,
+        d(r.expectedSeconds),
+        d(r.workedSeconds),
+        d(r.overtimeSeconds),
+        d(r.paidOvertimeSeconds),
+        d(r.bankSeconds),
+        d(r.restOrHolidaySeconds),
+        d(r.nightSeconds),
+        d(r.deficitSeconds),
+        r.absences,
+        r.daysWithIssues,
+        r.pendingCorrections,
+        r.closing?.status === 'closed' ? (r.closing.acknowledged ? 'Fechado, com ciência' : 'Fechado') : 'Aberto',
+      ]),
+    ]);
+    await this.log(scope.membership.employerId, scope.userId, `resumo do mês ${month}`, meta, { month });
+    return csv;
+  }
 
   private log(employerId: string, actor: string, what: string, meta: RequestMeta, metadata: Record<string, unknown>) {
     return this.tenant.run(employerId, (tx) => this.audit.record(tx, { employerId, category: 'privileged', action: 'export.generated', actorUserId: actor, summary: `Exportação: ${what}`, ip: meta.ip, metadata }));

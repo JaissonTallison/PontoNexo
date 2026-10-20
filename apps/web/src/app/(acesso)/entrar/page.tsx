@@ -7,6 +7,7 @@ import { Suspense, useEffect, useState, type FormEvent } from 'react';
 import { Button, Input, Notice, Segmented } from '@/components/ui';
 import { api, ApiError } from '@/lib/api';
 import { loginWithPasskey, passkeySupported } from '@/lib/dispositivo';
+import { mascaraTelefone } from '@/lib/mascara';
 
 function Entrar() {
   const router = useRouter();
@@ -100,7 +101,7 @@ function Entrar() {
 
       {mode === 'celular' ? (
         <form onSubmit={submitPhone} className="mt-4 space-y-4" noValidate>
-          <Input label="Seu celular com DDD" type="tel" inputMode="tel" autoComplete="tel" placeholder="(11) 98765-4321" value={phone} onChange={(e) => { setPhone(e.target.value); setCodeSent(false); }} className="h-12 text-md" />
+          <Input label="Seu celular com DDD" type="tel" inputMode="tel" autoComplete="tel" placeholder="(11) 98765-4321" value={phone} onChange={(e) => { setPhone(mascaraTelefone(e.target.value)); setCodeSent(false); }} className="h-12 text-md" />
           {codeSent ? (
             <>
               {info ? <p className="text-sm text-texto-2">{info}</p> : null}

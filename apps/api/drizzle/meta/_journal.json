@@ -50,6 +50,20 @@
       "when": 1792456595382,
       "tag": "0006_acesso_celular_seguranca",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792459352127,
+      "tag": "0007_resumo_diario",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792459352952,
+      "tag": "0008_resumo_diario_seguranca",
+      "breakpoints": true
     }
   ]
 }

@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { and, count, desc, eq } from 'drizzle-orm';
-import { localDate } from '@pontonexo/shared';
-import { closingAcknowledgements, correctionRequests, monthlyClosings } from '../../db/schema.js';
+import { localDate, monthDays, type ClosingBatchResult, type MonthSummaryRow, type MonthSummaryView } from '@pontonexo/shared';
+import { closingAcknowledgements, correctionRequests, employees, employmentContracts, monthlyClosings } from '../../db/schema.js';
+import { gte, isNull, lte, or } from 'drizzle-orm';
+import { AppError } from '../../common/errors.js';
 import { AuditService } from '../../common/audit.service.js';
 import type { EmployeeScope, EmployerScope } from '../../common/auth/decorators.js';
 import { canonicalJson, sha256 } from '../../common/crypto.js';
@@ -30,6 +32,70 @@ export class ClosingsService {
       for (const r of rows) out.push(await closingView(tx, r));
       return out;
     });
+  }
+
+  /** Funcionários com contrato em algum dia do mês. */
+  private async employeesInMonth(tx: Parameters<Parameters<TenantDb['run']>[1]>[0], employerId: string, month: string) {
+    const days = monthDays(month);
+    const first = days[0]!;
+    const last = days[days.length - 1]!;
+    const rows = await tx
+      .selectDistinct({ id: employees.id, fullName: employees.fullName })
+      .from(employees)
+      .innerJoin(employmentContracts, eq(employmentContracts.employeeId, employees.id))
+      .where(and(eq(employees.employerId, employerId), lte(employmentContracts.startDate, last), or(isNull(employmentContracts.endDate), gte(employmentContracts.endDate, first))));
+    return rows.sort((a, b) => a.fullName.localeCompare(b.fullName));
+  }
+
+  /** Resumo do mês de todos os funcionários (para o fechamento e o contador). */
+  async summary(scope: EmployerScope, month: string): Promise<MonthSummaryView> {
+    const { employerId, timezone } = scope.membership;
+    return this.tenant.run(employerId, async (tx) => {
+      const rows: MonthSummaryRow[] = [];
+      for (const e of await this.employeesInMonth(tx, employerId, month)) {
+        const t = await this.timesheets.compute(tx, employerId, e.id, month);
+        const [pending] = await tx.select({ n: count() }).from(correctionRequests).where(and(eq(correctionRequests.employeeId, e.id), eq(correctionRequests.status, 'pending')));
+        rows.push({
+          employeeId: e.id,
+          fullName: e.fullName,
+          workedSeconds: t.totals.workedSeconds,
+          expectedSeconds: t.totals.expectedSeconds,
+          overtimeSeconds: t.totals.overtimeSeconds,
+          restOrHolidaySeconds: t.totals.restOrHolidaySeconds,
+          deficitSeconds: t.totals.deficitSeconds,
+          absences: t.totals.absences,
+          nightSeconds: t.totals.nightSeconds,
+          paidOvertimeSeconds: t.compensation.paidOvertimeSeconds,
+          bankSeconds: t.compensation.bankSeconds,
+          daysWithIssues: t.totals.daysWithIssues,
+          pendingCorrections: pending?.n ?? 0,
+          closing: t.closing ? { id: t.closing.id, status: t.closing.status, acknowledged: Boolean(t.closing.acknowledgedAt) } : null,
+        });
+      }
+      return { month, ended: month < localDate(new Date(), timezone).slice(0, 7), rows };
+    });
+  }
+
+  /** Fecha o mês de todos os funcionários prontos; informa quem ficou de fora e por quê. */
+  async closeAll(scope: EmployerScope, month: string, meta: RequestMeta): Promise<ClosingBatchResult> {
+    const s = await this.summary(scope, month);
+    if (!s.ended) throw new AppError(409, 'MONTH_NOT_ENDED', 'Só é possível fechar meses já encerrados.');
+    let closed = 0;
+    const skipped: ClosingBatchResult['skipped'] = [];
+    for (const r of s.rows) {
+      if (r.closing?.status === 'closed') continue;
+      if (r.pendingCorrections) {
+        skipped.push({ employeeId: r.employeeId, fullName: r.fullName, reason: r.pendingCorrections === 1 ? 'Há 1 pedido de ajuste para decidir' : `Há ${r.pendingCorrections} pedidos de ajuste para decidir` });
+        continue;
+      }
+      try {
+        await this.close(scope, r.employeeId, month, meta);
+        closed++;
+      } catch (e) {
+        skipped.push({ employeeId: r.employeeId, fullName: r.fullName, reason: e instanceof Error ? e.message : 'Não foi possível fechar' });
+      }
+    }
+    return { closed, skipped };
   }
 
   /** Fotografia do espelho com hash. Só para meses encerrados e sem correções pendentes. */
