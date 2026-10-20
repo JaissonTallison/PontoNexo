@@ -1,4 +1,5 @@
 'use client';
+import { UserPlus } from 'lucide-react';
 import { CONTRACT_REGIME_LABEL, type ContractRegime, type Page } from '@pontonexo/shared';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -44,8 +45,8 @@ export default function Funcionarios() {
         title="Funcionários"
         actions={
           can('employees.write') ? (
-            <Link href="/painel/funcionarios/novo" className="inline-flex h-9 items-center rounded-[8px] bg-marca px-4 font-semibold text-white hover:bg-marca-2">
-              Novo funcionário
+            <Link href="/painel/funcionarios/novo" className="inline-flex h-9 items-center gap-2 rounded-[8px] bg-marca px-4 font-semibold text-white hover:bg-marca-2">
+              <UserPlus size={18} aria-hidden /> Novo funcionário
             </Link>
           ) : null
         }

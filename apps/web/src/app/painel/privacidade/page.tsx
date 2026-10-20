@@ -1,4 +1,5 @@
 'use client';
+import { Check, Reply, Send } from 'lucide-react';
 import { DATA_REQUEST_KIND_LABEL, type DataRequestView, type RetentionPolicyView } from '@pontonexo/shared';
 import { useState } from 'react';
 import { useSession } from '@/components/session';
@@ -43,7 +44,7 @@ export default function Privacidade() {
                   </div>
                   <div className="text-right">
                     {r.status === 'open' ? <Tone tone={late ? 'error' : 'warn'}>{late ? `Vencido em ${dataCurta(r.dueAt, tz)}` : `Prazo ${dataCurta(r.dueAt, tz)}`}</Tone> : <Tone tone="muted">{r.status === 'answered' ? 'Respondido' : 'Negado'}</Tone>}
-                    {r.status === 'open' ? <div className="mt-2"><Button size="sm" onClick={() => { setAnswering(r); setAnswer({ status: 'answered', response: '' }); }}>Responder</Button></div> : null}
+                    {r.status === 'open' ? <div className="mt-2"><Button size="sm" onClick={() => { setAnswering(r); setAnswer({ status: 'answered', response: '' }); }}><Reply size={18} aria-hidden /> Responder</Button></div> : null}
                   </div>
                 </li>
               );
@@ -67,7 +68,7 @@ export default function Privacidade() {
                     <Button size="sm" disabled={!days} onClick={async () => {
                       try { await api.put('/settings/retention', { policies: [{ category: 'punch_coordinates', retentionDays: Number(days) }] }); setDays(''); setMsg({ tone: 'ok', text: 'Prazo atualizado.' }); ret.reload(); }
                       catch (e) { setMsg({ tone: 'error', text: e instanceof ApiError ? e.message : 'Erro ao salvar.' }); }
-                    }}>Salvar prazo</Button>
+                    }}><Check size={18} aria-hidden /> Salvar prazo</Button>
                   </div>
                 ) : null}
               </li>
@@ -80,7 +81,7 @@ export default function Privacidade() {
           if (!answering) return;
           try { await api.post(`/data-requests/${answering.id}/respond`, answer); setAnswering(null); setMsg({ tone: 'ok', text: 'Resposta registrada.' }); reqs.reload(); }
           catch (e) { setMsg({ tone: 'error', text: e instanceof ApiError ? (e.fields.response ?? e.message) : 'Erro ao responder.' }); }
-        }}>Enviar resposta</Button>
+        }}><Send size={18} aria-hidden /> Enviar resposta</Button>
       }>
         {answering ? (
           <div className="space-y-3">

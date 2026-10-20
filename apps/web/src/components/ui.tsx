@@ -1,7 +1,8 @@
 'use client';
-import { ArrowLeft, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ArrowLeft, Check, ChevronLeft, ChevronRight, RotateCcw, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Tip } from './guia';
 import { useCallback, useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 
 /* Classes comuns: mudar aqui muda o sistema inteiro. */
@@ -122,7 +123,13 @@ export function Card({ title, actions, children, className = '' }: { title?: str
 }
 
 /** Cabeçalho da página: título e ações. A linha de alerta só aparece quando algo pede ação. */
-export function PageHeader({ title, actions, alert, back, description }: { title: string; actions?: ReactNode; alert?: string | null; back?: { href: string; label: string }; description?: string }) {
+export function PageHeader({ title, actions, alert, back, description, help, helpTitle, guideKey }: { title: string; actions?: ReactNode; alert?: string | null; back?: { href: string; label: string }; description?: string; /** explicação de primeiro uso (dica na primeira visita) */ help?: string; helpTitle?: string; guideKey?: string }) {
+  const heading = (
+    <div className="min-w-0">
+      <h1 className="text-2xl leading-tight font-bold text-marca">{title}</h1>
+      {description ? <p className="mt-0.5 text-texto-2 print:hidden">{description}</p> : null}
+    </div>
+  );
   return (
     <div className="mb-5">
       {back ? (
@@ -132,10 +139,13 @@ export function PageHeader({ title, actions, alert, back, description }: { title
         </Link>
       ) : null}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="text-2xl leading-tight font-bold text-marca">{title}</h1>
-          {description ? <p className="mt-0.5 text-texto-2 print:hidden">{description}</p> : null}
-        </div>
+        {help && guideKey ? (
+          <Tip id={`painel.tela.${guideKey}`} order={50} title={helpTitle ?? title} text={help} className="min-w-0">
+            {heading}
+          </Tip>
+        ) : (
+          heading
+        )}
         {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
       </div>
       {alert ? <p className="mt-2 text-sm font-semibold text-perigo">{alert}</p> : null}
@@ -157,7 +167,7 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry?: ()
       <p className="text-perigo">{message}</p>
       {onRetry ? (
         <Button variant="secondary" size="sm" className="mt-3" onClick={onRetry}>
-          Tentar de novo
+          <RotateCcw size={18} aria-hidden /> Tentar de novo
         </Button>
       ) : null}
     </div>
@@ -199,13 +209,17 @@ export interface Column<T> {
 }
 
 /** Tabela zebrada; no celular vira cartões com rótulo e valor. */
-export function DataTable<T>({ rows: all, columns, rowKey, onRowClick, empty, pageSize }: { rows: T[]; columns: Column<T>[]; rowKey: (r: T) => string; onRowClick?: (r: T) => void; empty?: ReactNode; /** pagina no navegador listas que a API devolve inteiras */ pageSize?: number }) {
+/**
+ * Tabela zebrada que vira cartões quando falta espaço. A troca segue a largura do próprio card
+ * (container query), não a da tela: com o menu lateral aberto o card é mais estreito.
+ */
+export function DataTable<T>({ rows: all, columns, rowKey, onRowClick, empty, pageSize, wide = false }: { rows: T[]; columns: Column<T>[]; rowKey: (r: T) => string; onRowClick?: (r: T) => void; empty?: ReactNode; /** pagina no navegador listas que a API devolve inteiras */ pageSize?: number; /** muitas colunas: só vira tabela a partir de 1024 px de card */ wide?: boolean }) {
   const paged = usePaged(all, pageSize ?? Math.max(all.length, 1));
   const rows = paged.rows;
   if (!rows.length) return <>{empty ?? <Empty title="Nada por aqui ainda" />}</>;
   return (
-    <>
-      <div className="hidden overflow-x-auto md:block">
+    <div className="@container">
+      <div className={`hidden overflow-x-auto ${wide ? '@5xl:block' : '@3xl:block'}`}>
         <table className="w-full border-collapse text-base">
           <thead>
             <tr className="border-b border-borda text-left">
@@ -233,7 +247,7 @@ export function DataTable<T>({ rows: all, columns, rowKey, onRowClick, empty, pa
           </tbody>
         </table>
       </div>
-      <ul className="space-y-2 md:hidden">
+      <ul className={`space-y-2 ${wide ? '@5xl:hidden' : '@3xl:hidden'}`}>
         {rows.map((r) => (
           <li key={rowKey(r)}>
             <div
@@ -256,7 +270,7 @@ export function DataTable<T>({ rows: all, columns, rowKey, onRowClick, empty, pa
         ))}
       </ul>
       {pageSize ? paged.pager : null}
-    </>
+    </div>
   );
 }
 
@@ -399,10 +413,10 @@ export function useConfirm() {
       footer={
         <>
           <Button variant="secondary" onClick={() => finish(false)}>
-            Cancelar
+            <X size={18} aria-hidden /> Cancelar
           </Button>
           <Button variant={state?.danger ? 'danger' : 'primary'} onClick={() => finish(true)}>
-            {state?.confirmLabel}
+            <Check size={18} aria-hidden /> {state?.confirmLabel}
           </Button>
         </>
       }

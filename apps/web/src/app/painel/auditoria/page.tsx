@@ -1,4 +1,5 @@
 'use client';
+import { ShieldCheck } from 'lucide-react';
 import type { AuditEventView, AuditVerification, Page } from '@pontonexo/shared';
 import { useState } from 'react';
 import { useSession } from '@/components/session';
@@ -43,7 +44,7 @@ export default function Auditoria() {
               }
             }}
           >
-            Verificar integridade
+            <ShieldCheck size={18} aria-hidden /> Verificar integridade
           </Button>
         }
       />

@@ -1,4 +1,5 @@
 'use client';
+import { FilePen } from 'lucide-react';
 import type { CorrectionView, Page } from '@pontonexo/shared';
 import { useState } from 'react';
 import { CorrectionForm, CorrectionList, DecisionDialog } from '@/components/correcoes';
@@ -26,7 +27,7 @@ export function RevisarCorrecoes() {
     <div>
       <SectionHeader
         alert={status === 'pending' && toDecide ? `${plural(toDecide, 'pedido aguarda', 'pedidos aguardam')} sua decisão` : null}
-        actions={can('corrections.propose') ? <Button onClick={() => setProposing(true)}>Propor ajuste</Button> : null}
+        actions={can('corrections.propose') ? <Button onClick={() => setProposing(true)}><FilePen size={18} aria-hidden /> Propor ajuste</Button> : null}
       />
       <p className="mb-4 max-w-3xl text-texto-2">
         Quem pede não decide. Pedidos do funcionário são decididos aqui. Ajustes propostos pelo empregador só valem depois que o funcionário aceita. As marcações originais nunca são alteradas.

@@ -1,4 +1,5 @@
 'use client';
+import { Check, LogOut } from 'lucide-react';
 import { ROLE_LABEL, type SessionView } from '@pontonexo/shared';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -62,7 +63,7 @@ export function AccountPanel({ simple = false }: { simple?: boolean }) {
           </div>
         ) : null}
         <Button variant="secondary" className="mt-4" onClick={logout}>
-          Sair
+          <LogOut size={18} aria-hidden /> Sair
         </Button>
       </Card>
       <Card title="Alterar senha">
@@ -70,7 +71,7 @@ export function AccountPanel({ simple = false }: { simple?: boolean }) {
           <Input label="Senha atual" type="password" autoComplete="current-password" value={pw.currentPassword} onChange={(e) => setPw({ ...pw, currentPassword: e.target.value })} error={fields.currentPassword} />
           <Input label="Nova senha" type="password" autoComplete="new-password" value={pw.newPassword} onChange={(e) => setPw({ ...pw, newPassword: e.target.value })} error={fields.newPassword} hint="Mínimo de 10 caracteres, com letras e números." />
           {msg ? <Notice tone={msg.tone}>{msg.text}</Notice> : null}
-          <Button onClick={changePassword}>Salvar nova senha</Button>
+          <Button onClick={changePassword}><Check size={18} aria-hidden /> Salvar nova senha</Button>
         </div>
       </Card>
       {simple ? null : (
@@ -94,7 +95,7 @@ export function AccountPanel({ simple = false }: { simple?: boolean }) {
                     sessions.reload();
                   }}
                 >
-                  Encerrar
+                  <LogOut size={18} aria-hidden /> Encerrar
                 </Button>
               ) : null}
             </li>

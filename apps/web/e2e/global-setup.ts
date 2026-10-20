@@ -1,5 +1,5 @@
 import { request, type FullConfig } from '@playwright/test';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 
 /** Faz login uma vez por usuário e salva a sessão (o login real tem limite de tentativas por minuto). */
 export default async function globalSetup(config: FullConfig) {
@@ -13,7 +13,12 @@ export default async function globalSetup(config: FullConfig) {
     const ctx = await request.newContext({ baseURL, extraHTTPHeaders: { origin: baseURL } });
     const res = await ctx.post('/api/auth/login', { data: { email, password: 'PontoNexo2026' } });
     if (!res.ok()) throw new Error(`login de ${email} falhou: ${res.status()} ${await res.text()}`);
-    await ctx.storageState({ path: `e2e/.auth/${file}.json` });
+    const path = `e2e/.auth/${file}.json`;
+    await ctx.storageState({ path });
     await ctx.dispose();
+    // guia de primeiro uso desligado nos testes gerais (o teste do guia religa)
+    const state = JSON.parse(readFileSync(path, 'utf8')) as { cookies: unknown[]; origins: Array<{ origin: string; localStorage: Array<{ name: string; value: string }> }> };
+    state.origins = [{ origin: new URL(baseURL).origin, localStorage: [{ name: 'pn_guia_off', value: '1' }] }];
+    writeFileSync(path, JSON.stringify(state));
   }
 }

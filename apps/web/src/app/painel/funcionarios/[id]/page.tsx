@@ -1,4 +1,5 @@
 'use client';
+import { Ban, CalendarCheck, Check, FilePlus, FileX, LogOut, Pencil, Send, X } from 'lucide-react';
 import {
   COMPENSATION_LABEL,
   COMPENSATION_REGIMES,
@@ -72,7 +73,7 @@ function ContractDialog({ open, onClose, employeeId, onDone, tz }: { open: boole
       onClose={onClose}
       footer={
         <Button busy={a.busy} onClick={async () => (await a.run(() => api.post(`/employees/${employeeId}/contracts`, { ...c, writtenAgreementRef: c.writtenAgreementRef || null, notes: c.notes || null }), 'Contrato registrado.')) && onClose()}>
-          Salvar contrato
+          <Check size={18} aria-hidden /> Salvar contrato
         </Button>
       }
     >
@@ -157,7 +158,7 @@ function Detalhe() {
                   setEdit(true);
                 }}
               >
-                Editar cadastro
+                <Pencil size={18} aria-hidden /> Editar cadastro
               </Button>
             ) : null}
           </>
@@ -188,10 +189,10 @@ function Detalhe() {
             </Select>
             <div className="flex gap-2 sm:col-span-2">
               <Button busy={a.busy} onClick={async () => (await a.run(() => api.put(`/employees/${e.id}`, { ...form, email: form.email || null, phone: form.phone || null, jobRoleId: form.jobRoleId || null }), 'Cadastro atualizado.')) && setEdit(false)}>
-                Salvar
+                <Check size={18} aria-hidden /> Salvar
               </Button>
               <Button variant="secondary" onClick={() => setEdit(false)}>
-                Cancelar
+                <X size={18} aria-hidden /> Cancelar
               </Button>
             </div>
           </div>
@@ -208,7 +209,7 @@ function Detalhe() {
         )}
       </Card>
 
-      <Card title="Contrato" actions={write ? <Button size="sm" onClick={() => setContractOpen(true)}>Registrar contrato</Button> : null}>
+      <Card title="Contrato" actions={write ? <Button size="sm" onClick={() => setContractOpen(true)}><FilePlus size={18} aria-hidden /> Registrar contrato</Button> : null}>
         {e.contracts.length ? (
           <ul className="divide-y divide-borda">
             {e.contracts.map((c) => (
@@ -234,12 +235,12 @@ function Detalhe() {
                       <Input label="Término" type="date" value={endForm.endDate} onChange={(x) => setEndForm({ ...endForm, endDate: x.target.value })} />
                       <Input label="Motivo" value={endForm.reason} onChange={(x) => setEndForm({ ...endForm, reason: x.target.value })} error={a.fields.reason} />
                       <Button variant="danger" busy={a.busy} onClick={async () => (await a.run(() => api.post(`/contracts/${c.id}/end`, endForm), 'Contrato encerrado.')) && setEnding(null)}>
-                        Encerrar
+                        <LogOut size={18} aria-hidden /> Encerrar
                       </Button>
                     </div>
                   ) : (
                     <Button variant="ghost" size="sm" className="mt-1" onClick={() => setEnding(c.id)}>
-                      Encerrar contrato
+                      <FileX size={18} aria-hidden /> Encerrar contrato
                     </Button>
                   )
                 ) : null}
@@ -266,7 +267,7 @@ function Detalhe() {
                 </div>
                 {l.current && can('locations.write') ? (
                   <Button variant="ghost" size="sm" onClick={() => a.run(() => api.post(`/employee-locations/${l.id}/revoke`), 'Autorização revogada.')}>
-                    Revogar
+                    <Ban size={18} aria-hidden /> Revogar
                   </Button>
                 ) : !l.current ? (
                   <Tone tone="muted">Fora de vigência</Tone>
@@ -290,7 +291,7 @@ function Detalhe() {
               <Input label="Até (opcional)" type="date" value={newLoc.validTo} onChange={(x) => setNewLoc({ ...newLoc, validTo: x.target.value })} hint="Para trabalho externo temporário." />
               <div>
                 <Button size="sm" disabled={!newLoc.locationId} busy={a.busy} onClick={() => a.run(() => api.post(`/employees/${e.id}/locations`, { ...newLoc, validTo: newLoc.validTo || null }), 'Local autorizado.')}>
-                  Autorizar
+                  <Check size={18} aria-hidden /> Autorizar
                 </Button>
               </div>
             </div>
@@ -324,7 +325,7 @@ function Detalhe() {
               <Input label="Vigente a partir de" type="date" value={newSched.validFrom} onChange={(x) => setNewSched({ ...newSched, validFrom: x.target.value })} hint="A escala anterior termina no dia anterior." />
               <div>
                 <Button size="sm" disabled={!newSched.scheduleId} busy={a.busy} onClick={() => a.run(() => api.post(`/employees/${e.id}/schedules`, newSched), 'Escala atribuída.')}>
-                  Atribuir
+                  <CalendarCheck size={18} aria-hidden /> Atribuir
                 </Button>
               </div>
             </div>
@@ -339,7 +340,7 @@ function Detalhe() {
         </p>
         {write && e.status === 'active' ? (
           <Button size="sm" className="mt-3" busy={a.busy} onClick={() => a.run(() => api.post(`/employees/${e.id}/access`), 'Acesso enviado por e-mail.')}>
-            {e.access.status === 'none' ? 'Enviar acesso por e-mail' : 'Reenviar acesso'}
+            <Send size={18} aria-hidden /> {e.access.status === 'none' ? 'Enviar acesso por e-mail' : 'Reenviar acesso'}
           </Button>
         ) : null}
       </Card>

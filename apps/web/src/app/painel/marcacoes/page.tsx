@@ -1,4 +1,5 @@
 'use client';
+import { FileText } from 'lucide-react';
 import { ALERT_LABEL, GEO_STATUS_LABEL, PUNCH_TYPE_LABEL, type Page, type PunchView, type ReceiptView } from '@pontonexo/shared';
 import { useState } from 'react';
 import { ReceiptDocument } from '@/components/comprovante';
@@ -49,6 +50,7 @@ export default function Marcacoes() {
         ) : (
           <>
             <DataTable
+              wide
               rows={data?.items ?? []}
               rowKey={(r) => r.id}
               empty={<Empty title="Nenhuma marcação no filtro" />}
@@ -88,7 +90,7 @@ export default function Marcacoes() {
                   header: '',
                   cell: (r) => (
                     <Button size="sm" variant="ghost" onClick={async () => setReceipt(await api.get<ReceiptView>(`/punches/${r.id}/receipt`))}>
-                      Comprovante
+                      <FileText size={18} aria-hidden /> Comprovante
                     </Button>
                   ),
                 },

@@ -1,4 +1,5 @@
 'use client';
+import { Archive, CalendarPlus, Check, ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react';
 import { formatDateBR, formatDuration, weekdayShort } from '@pontonexo/shared';
 import { useState } from 'react';
 import { useSession } from '@/components/session';
@@ -64,7 +65,7 @@ export default function Escalas() {
 
   return (
     <div>
-      <PageHeader {...SECAO.escalas} title="Horários e feriados" back={{ href: '/painel', label: 'Início' }} actions={can('schedules.write') && tab === 'escalas' ? <Button onClick={() => setOpen(true)}>Nova escala</Button> : null} />
+      <PageHeader {...SECAO.escalas} title="Horários e feriados" back={{ href: '/painel', label: 'Início' }} actions={can('schedules.write') && tab === 'escalas' ? <Button onClick={() => setOpen(true)}><CalendarPlus size={18} aria-hidden /> Nova escala</Button> : null} />
       <div className="mb-4">
         <Segmented label="Seção" value={tab} onChange={setTab} options={[{ value: 'escalas', label: 'Escalas' }, { value: 'feriados', label: 'Feriados' }]} />
       </div>
@@ -81,7 +82,7 @@ export default function Escalas() {
                 actions={
                   can('schedules.write') ? (
                     <Button size="sm" variant="ghost" onClick={() => run(() => api.post(`/schedules/${x.id}/${x.active ? 'archive' : 'activate'}`), x.active ? 'Escala arquivada.' : 'Escala reativada.', s.reload)}>
-                      {x.active ? 'Arquivar' : 'Reativar'}
+                      <Archive size={18} aria-hidden /> {x.active ? 'Arquivar' : 'Reativar'}
                     </Button>
                   ) : null
                 }
@@ -121,10 +122,10 @@ export default function Escalas() {
           actions={
             <span className="flex gap-1">
               <Button size="sm" variant="secondary" onClick={() => setYear(year - 1)}>
-                {year - 1}
+                <ChevronLeft size={18} aria-hidden /> {year - 1}
               </Button>
               <Button size="sm" variant="secondary" onClick={() => setYear(year + 1)}>
-                {year + 1}
+                {year + 1} <ChevronRight size={18} aria-hidden />
               </Button>
             </span>
           }
@@ -139,7 +140,7 @@ export default function Escalas() {
                   {x.scope === 'national' ? 'Nacional (lei federal)' : x.scope === 'state' ? 'Estadual' : x.scope === 'municipal' ? 'Municipal' : 'Outro'}
                   {x.removable && x.id && can('schedules.write') ? (
                     <Button size="sm" variant="ghost" onClick={() => run(() => api.del(`/holidays/${x.id}`), 'Feriado removido.', h.reload)}>
-                      Remover
+                      <Trash2 size={18} aria-hidden /> Remover
                     </Button>
                   ) : null}
                 </span>
@@ -157,7 +158,7 @@ export default function Escalas() {
                 <option value="other">Outro</option>
               </Select>
               <Button busy={busy} onClick={() => run(() => api.post('/holidays', hol), 'Feriado cadastrado.', () => { setHol({ date: '', name: '', scope: 'municipal' }); h.reload(); })}>
-                Adicionar
+                <Plus size={18} aria-hidden /> Adicionar
               </Button>
             </div>
           ) : null}
@@ -192,7 +193,7 @@ export default function Escalas() {
               )
             }
           >
-            Salvar escala
+            <Check size={18} aria-hidden /> Salvar escala
           </Button>
         }
       >

@@ -1,6 +1,8 @@
 'use client';
 import { CalendarDays, CircleHelp, Clock, FileCheck2, MapPin, WifiOff, type LucideIcon } from 'lucide-react';
-import { BackBar } from '@/components/ui';
+import { useRouter } from 'next/navigation';
+import { ListenButton, useGuide } from '@/components/guia';
+import { BackBar, Button } from '@/components/ui';
 
 const STEPS: Array<{ icon: LucideIcon; title: string; text: string }> = [
   { icon: Clock, title: 'Marcar o ponto', text: 'Na tela Ponto, toque no bloco colorido que diz “Toque para registrar”. Confira a hora e toque em “Sim, registrar”. Pronto.' },
@@ -12,9 +14,24 @@ const STEPS: Array<{ icon: LucideIcon; title: string; text: string }> = [
 ];
 
 export default function Ajuda() {
+  const guide = useGuide();
+  const router = useRouter();
   return (
     <div>
       <BackBar title="Como usar o app" fallback="/app/conta" />
+      {guide ? (
+        <Button
+          variant="secondary"
+          size="lg"
+          className="mb-3 w-full"
+          onClick={() => {
+            guide.restart();
+            router.push('/app');
+          }}
+        >
+          Ver as explicações de novo
+        </Button>
+      ) : null}
       <ol className="space-y-3">
         {STEPS.map(({ icon: Icon, title, text }, i) => (
           <li key={title} className="flex gap-3 rounded-[8px] bg-card p-4 shadow-card">
@@ -24,6 +41,7 @@ export default function Ajuda() {
                 {i + 1}. {title}
               </span>
               <span className="mt-0.5 block text-texto-2">{text}</span>
+              <ListenButton text={`${title}. ${text}`} className="mt-2" />
             </span>
           </li>
         ))}

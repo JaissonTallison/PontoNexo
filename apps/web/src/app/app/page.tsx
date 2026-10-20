@@ -16,6 +16,7 @@ import {
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DayTimeline, PunchGrid } from '@/components/grade-ponto';
+import { Tip } from '@/components/guia';
 import { InstallCard } from '@/components/instalar';
 import { QuickReasons } from '@/components/motivos';
 import { Button, Dialog, ErrorState, Loading, Notice, Select } from '@/components/ui';
@@ -233,6 +234,7 @@ export default function Ponto() {
         const st = statusParts(ctx, view.state, tz);
         const hhmmss = hora(now.toISOString(), tz, true);
         return (
+          <Tip id="app.relogio" order={1} title="Hora certa" text="Esta é a hora oficial, a mesma que vai no seu registro. Ao lado aparece o que você está fazendo agora: trabalhando, em pausa ou fora do horário.">
           <section className="cartao-3d rounded-[8px] bg-card px-4 py-3" aria-live="polite">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
@@ -251,6 +253,7 @@ export default function Ponto() {
             </div>
             {ctx?.staleSession ? <p className="mt-2 border-t border-borda pt-2 text-sm text-atencao">A última jornada ficou sem saída. Registre a entrada e depois toque em “Esqueci de marcar”.</p> : null}
           </section>
+          </Tip>
         );
       })()}
 
@@ -284,6 +287,7 @@ export default function Ponto() {
         </Select>
       ) : null}
 
+      <Tip id="app.grade" order={2} title="Marcar o ponto" text="Os quatro blocos são: 1 Entrada, 2 Pausa, 3 Retorno da pausa e 4 Saída. Toque no bloco que está aceso, confira a hora e toque em Sim, registrar. Pronto.">
       <PunchGrid
         allowed={view.allowedNext}
         today={ctx?.today ?? []}
@@ -292,6 +296,7 @@ export default function Ponto() {
         disabled={step !== 'idle' || (ctx ? !ctx.hasActiveContract : false)}
         onPick={start}
       />
+      </Tip>
 
       {(() => {
         const waiting = pending.filter((a) => !a.lastError);
@@ -351,10 +356,12 @@ export default function Ponto() {
 
       <InstallCard />
 
+      <Tip id="app.hoje" order={3} title="Seu dia" text="Aqui ficam as marcações de hoje, na ordem. Cada uma tem um comprovante: toque nela para ver.">
       <section aria-label="Hoje">
         <h2 className="mb-2 text-md font-bold text-marca">Hoje</h2>
         <DayTimeline today={ctx?.today ?? []} tz={tz} />
       </section>
+      </Tip>
 
       <Dialog
         open={step === 'confirm' || step === 'sending'}

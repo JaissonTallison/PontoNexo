@@ -22,6 +22,7 @@ import {
   ChevronDown,
   LogOut,
   User,
+  CircleHelp,
   Users,
   X,
 } from 'lucide-react';
@@ -33,6 +34,7 @@ import { useResource, useServerClock } from '@/lib/hooks';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { GuideProvider, Tip } from '@/components/guia';
 import { SessionProvider, useSession } from '@/components/session';
 import { Empty } from '@/components/ui';
 
@@ -83,6 +85,15 @@ const GROUPS: Array<{ title: string; items: NavItem[]; advanced?: boolean }> = [
 ];
 
 const FONT_KEY = 'pn_letra_maior';
+
+const PAINEL_WELCOME = {
+  title: 'Bem-vindo ao PontoNexo',
+  paragraphs: [
+    'Aqui você acompanha o ponto dos seus funcionários, decide os pedidos de ajuste e fecha o mês para o contador.',
+    'Na primeira vez em cada tela, uma dica rápida explica para que ela serve. Toque em "Entendi" para seguir.',
+    'Para rever as explicações quando quiser, toque no seu nome, no alto da tela, e escolha "Ajuda e explicações".',
+  ],
+};
 
 /** Letra maior para quem enxerga pouco: aumenta toda a escala tipográfica do painel e fica guardada no aparelho. */
 function useBigText() {
@@ -156,12 +167,14 @@ function TopBar({ onMenu, collapsed, badges }: { onMenu: () => void; collapsed: 
   return (
     <header ref={ref} className="sticky top-0 z-20 flex items-center justify-between gap-3 bg-card px-4 py-2 shadow-barra print:hidden">
       <div className="flex min-w-0 items-center gap-3">
+        <Tip id="painel.botaoMenu" order={2} title="Mostrar ou esconder o menu" text="Toque aqui para esconder o menu e ganhar espaço na tela, ou para abri-lo de novo. No celular, é por aqui que o menu abre." className="shrink-0">
         <button className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] text-marca hover:bg-realce" onClick={onMenu} aria-label={collapsed ? 'Expandir menu' : 'Recolher ou abrir menu'} title={collapsed ? 'Expandir menu' : 'Recolher menu'}>
           <span className="lg:hidden">
             <Menu size={22} aria-hidden />
           </span>
           <span className="hidden lg:block">{collapsed ? <PanelLeftOpen size={22} aria-hidden /> : <PanelLeftClose size={22} aria-hidden />}</span>
         </button>
+        </Tip>
         <div className="min-w-0">
           <p className="truncate font-bold text-marca">{me.active?.employerName}</p>
           <p className="truncate text-xs text-texto-3 first-letter:uppercase">{longDate}</p>
@@ -174,6 +187,7 @@ function TopBar({ onMenu, collapsed, badges }: { onMenu: () => void; collapsed: 
           <p className={`mt-0.5 text-xs ${clock === 'synced' ? 'text-texto-3' : 'text-atencao'}`}>{clock === 'synced' ? 'Hora oficial sincronizada' : clock === 'drift' ? 'Relógio com defasagem' : 'Relógio em verificação'}</p>
         </div>
 
+        <Tip id="painel.letra" order={3} title="Letra maior" text="Deixa todas as letras do painel maiores. Toque de novo para voltar ao tamanho normal. A escolha fica guardada neste aparelho.">
         <button
           onClick={text.toggle}
           aria-pressed={text.big}
@@ -183,7 +197,9 @@ function TopBar({ onMenu, collapsed, badges }: { onMenu: () => void; collapsed: 
           <ALargeSmall size={22} aria-hidden />
           <span className="hidden text-sm xl:inline">{text.big ? 'Letra normal' : 'Letra maior'}</span>
         </button>
+        </Tip>
 
+        <Tip id="painel.sino" order={4} title="Pendências" text="O sino mostra quantas coisas esperam a sua decisão, como pedidos de ajuste e ocorrências. Toque para ver a lista e ir direto a cada uma.">
         <div className="relative">
           <button
             onClick={() => {
@@ -222,6 +238,9 @@ function TopBar({ onMenu, collapsed, badges }: { onMenu: () => void; collapsed: 
           ) : null}
         </div>
 
+        </Tip>
+
+        <Tip id="painel.usuario" order={5} title="Sua conta e a Ajuda" text="Toque no seu nome para trocar a senha, ligar os avisos, abrir a Ajuda com a explicação de cada tela ou sair do sistema.">
         <div className="relative">
           <button
             onClick={() => {
@@ -246,6 +265,9 @@ function TopBar({ onMenu, collapsed, badges }: { onMenu: () => void; collapsed: 
               <Link href="/painel/conta" className="flex items-center gap-2 rounded-[8px] px-3 py-2.5 text-sm hover:bg-realce">
                 <User size={18} className="text-marca" aria-hidden /> Minha conta e senha
               </Link>
+              <Link href="/painel/ajuda" className="flex items-center gap-2 rounded-[8px] px-3 py-2.5 text-sm hover:bg-realce">
+                <CircleHelp size={18} className="text-marca" aria-hidden /> Ajuda e explicações
+              </Link>
               <button
                 onClick={async () => {
                   await api.post('/auth/logout').catch(() => undefined);
@@ -258,6 +280,7 @@ function TopBar({ onMenu, collapsed, badges }: { onMenu: () => void; collapsed: 
             </div>
           ) : null}
         </div>
+        </Tip>
       </div>
     </header>
   );
@@ -352,7 +375,7 @@ function Shell({ children }: { children: ReactNode }) {
       </li>
     );
   };
-  const nav = (mini: boolean) => (
+  const nav = (mini: boolean, withTip = false) => (
     <nav aria-label="Menu principal" className="flex h-full flex-col">
       <div className={`flex shrink-0 items-center ${mini ? 'justify-center px-2 py-5' : 'px-5 py-6'}`}>
         <Link href="/painel" aria-label="PontoNexo · Início">
@@ -367,8 +390,8 @@ function Shell({ children }: { children: ReactNode }) {
       <div className={`menu-rolagem min-h-0 flex-1 space-y-4 overflow-y-auto pb-3 ${mini ? 'px-2' : 'px-3'}`} onScroll={() => setTip(null)}>
         {groups.map((g) => {
           const shown = !g.advanced || mini || moreOpen;
-          return (
-            <div key={g.title}>
+          const group = (
+            <>
               {mini ? (
                 <div className="mx-2 mb-2 border-t border-white/15" aria-hidden />
               ) : g.advanced ? (
@@ -384,7 +407,14 @@ function Shell({ children }: { children: ReactNode }) {
                 <p className="px-3 pb-1.5 text-xs font-bold tracking-wide text-white/60 uppercase">{g.title}</p>
               )}
               {shown ? <ul className="space-y-1">{g.items.map((i) => link(i, mini))}</ul> : null}
-            </div>
+            </>
+          );
+          return withTip && !mini && g === groups[0] ? (
+            <Tip key={g.title} id="painel.menu" order={1} title="O menu" text="Dia a dia: o que você usa sempre. Fim do mês: a folha e o espelho para o contador. Configurar: casa, horários e usuários. O número laranja mostra quantas coisas esperam por você.">
+              {group}
+            </Tip>
+          ) : (
+            <div key={g.title}>{group}</div>
           );
         })}
       </div>
@@ -392,9 +422,10 @@ function Shell({ children }: { children: ReactNode }) {
     </nav>
   );
   return (
+    <GuideProvider scope="painel" welcome={PAINEL_WELCOME}>
     <div className={`h-dvh overflow-hidden print:block print:h-auto print:overflow-visible ${collapsed ? 'lg:grid lg:grid-cols-[76px_1fr]' : 'lg:grid lg:grid-cols-[264px_1fr]'}`}>
       <aside className="sticky top-0 hidden h-screen overflow-hidden bg-marca lg:block print:hidden">
-        {nav(collapsed)}
+        {nav(collapsed, true)}
       </aside>
       {collapsed && tip ? (
         <div role="tooltip" className="pointer-events-none fixed z-50 hidden -translate-y-1/2 lg:block" style={{ top: tip.top, left: tip.left }}>
@@ -421,6 +452,7 @@ function Shell({ children }: { children: ReactNode }) {
         </main>
       </div>
     </div>
+    </GuideProvider>
   );
 }
 

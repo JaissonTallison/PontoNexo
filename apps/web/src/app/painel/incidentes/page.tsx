@@ -1,4 +1,5 @@
 'use client';
+import { Check, MessageSquarePlus, Siren } from 'lucide-react';
 import { INCIDENT_KIND_LABEL, INCIDENT_KINDS, INCIDENT_SEVERITY, INCIDENT_SEVERITY_LABEL, INCIDENT_STATUS_LABEL, type IncidentKind, type IncidentSeverity, type IncidentStatus, type IncidentView, type Page } from '@pontonexo/shared';
 import { useState } from 'react';
 import { useSession } from '@/components/session';
@@ -34,7 +35,7 @@ export default function Incidentes() {
 
   return (
     <div>
-      <PageHeader {...SECAO.incidentes} title="Incidentes" back={{ href: '/painel', label: 'Início' }} actions={<Button onClick={() => setOpen(true)}>Registrar incidente</Button>} />
+      <PageHeader {...SECAO.incidentes} title="Incidentes" back={{ href: '/painel', label: 'Início' }} actions={<Button onClick={() => setOpen(true)}><Siren size={18} aria-hidden /> Registrar incidente</Button>} />
       <p className="mb-4 max-w-3xl text-texto-2">
         Registre falhas, acessos indevidos, perda de aparelho ou vazamento. Incidentes com dados pessoais podem exigir comunicação à ANPD e aos titulares (LGPD, art. 48): veja o procedimento em docs/03-lgpd.md.
       </p>
@@ -69,7 +70,7 @@ export default function Incidentes() {
                       {i.status !== 'resolved' ? (
                         <div className="mt-2">
                           <Button size="sm" onClick={() => setUpd({ item: i, status: i.status === 'open' ? 'investigating' : 'resolved', note: '' })}>
-                            Atualizar
+                            <MessageSquarePlus size={18} aria-hidden /> Atualizar
                           </Button>
                         </div>
                       ) : null}
@@ -82,7 +83,7 @@ export default function Incidentes() {
           </>
         )}
       </Card>
-      <Dialog open={open} title="Registrar incidente" onClose={() => setOpen(false)} footer={<Button onClick={() => run(() => api.post('/incidents', f), () => setOpen(false))}>Registrar</Button>}>
+      <Dialog open={open} title="Registrar incidente" onClose={() => setOpen(false)} footer={<Button onClick={() => run(() => api.post('/incidents', f), () => setOpen(false))}><Check size={18} aria-hidden /> Registrar</Button>}>
         <div className="space-y-3">
           <Select label="Tipo" value={f.kind} onChange={(e) => setF({ ...f, kind: e.target.value as IncidentKind })}>
             {INCIDENT_KINDS.map((k) => <option key={k} value={k}>{INCIDENT_KIND_LABEL[k]}</option>)}
@@ -96,7 +97,7 @@ export default function Incidentes() {
           {err && !Object.keys(fields).length ? <Notice tone="error">{err}</Notice> : null}
         </div>
       </Dialog>
-      <Dialog open={upd !== null} title="Atualizar incidente" onClose={() => setUpd(null)} footer={<Button onClick={() => upd && run(() => api.post(`/incidents/${upd.item.id}/updates`, { status: upd.status, note: upd.note }), () => setUpd(null))}>Salvar</Button>}>
+      <Dialog open={upd !== null} title="Atualizar incidente" onClose={() => setUpd(null)} footer={<Button onClick={() => upd && run(() => api.post(`/incidents/${upd.item.id}/updates`, { status: upd.status, note: upd.note }), () => setUpd(null))}><Check size={18} aria-hidden /> Salvar</Button>}>
         {upd ? (
           <div className="space-y-3">
             <Select label="Situação" value={upd.status} onChange={(e) => setUpd({ ...upd, status: e.target.value as IncidentStatus })}>

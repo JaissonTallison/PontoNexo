@@ -1,4 +1,5 @@
 'use client';
+import { Bell } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { ApiError } from '@/lib/api';
 import { currentPushSubscription, disablePush, enablePush, pushSupported } from '@/lib/dispositivo';
@@ -50,7 +51,7 @@ export function EmployerNotices() {
           </div>
           {supported ? (
             <Button variant={on ? 'secondary' : 'primary'} busy={busy} onClick={toggle}>
-              {on ? 'Desligar avisos' : 'Ligar avisos'}
+              <Bell size={18} aria-hidden /> {on ? 'Desligar avisos' : 'Ligar avisos'}
             </Button>
           ) : (
             <p className="text-sm text-texto-3">Este navegador não recebe notificações.</p>

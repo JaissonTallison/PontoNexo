@@ -1,4 +1,5 @@
 'use client';
+import { Check, ClipboardCheck, Send, X } from 'lucide-react';
 import {
   CORRECTION_KIND_LABEL,
   CORRECTION_STATUS_LABEL,
@@ -60,7 +61,7 @@ export function CorrectionList({ items, tz, onDecide, showEmployee, simple = fal
               {c.canDecide && onDecide ? (
                 <div className="mt-2">
                   <Button size="sm" onClick={() => onDecide(c)}>
-                    {simple ? 'Responder' : 'Analisar'}
+                    <ClipboardCheck size={18} aria-hidden /> {simple ? 'Responder' : 'Analisar'}
                   </Button>
                 </div>
               ) : null}
@@ -98,10 +99,10 @@ export function DecisionDialog({ item, tz, onClose, onDone, simple = false }: { 
       footer={
         <>
           <Button variant="danger" busy={busy === 'reject'} disabled={busy !== null} onClick={() => decide('reject')}>
-            {simple ? 'Não concordo' : 'Recusar'}
+            <X size={18} aria-hidden /> {simple ? 'Não concordo' : 'Recusar'}
           </Button>
           <Button busy={busy === 'approve'} disabled={busy !== null} onClick={() => decide('approve')}>
-            {simple ? 'Concordo' : 'Aprovar'}
+            <Check size={18} aria-hidden /> {simple ? 'Concordo' : 'Aprovar'}
           </Button>
         </>
       }
@@ -216,7 +217,7 @@ export function CorrectionForm({ tz, employeeId, onDone }: { tz: string; employe
       <Textarea label="Motivo" hint="Explique o que aconteceu. Fica no histórico junto com a decisão." value={reason} onChange={(e) => setReason(e.target.value)} error={fields.reason} />
       {error && !Object.keys(fields).length ? <Notice tone="error">{error}</Notice> : null}
       <Button onClick={submit} busy={busy}>
-        {employeeId ? 'Enviar proposta ao funcionário' : 'Enviar pedido'}
+        <Send size={18} aria-hidden /> {employeeId ? 'Enviar proposta ao funcionário' : 'Enviar pedido'}
       </Button>
     </div>
   );

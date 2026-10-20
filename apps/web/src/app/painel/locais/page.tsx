@@ -1,4 +1,5 @@
 'use client';
+import { Check, LocateFixed, MapPinPlus, Power, Target } from 'lucide-react';
 import { DEFAULT_GEOFENCE_RADIUS_M, formatDateBR, LOCATION_KIND_LABEL, LOCATION_KINDS, type LocationKind } from '@pontonexo/shared';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
@@ -45,7 +46,7 @@ function FenceFields({ v, onChange, fields }: { v: { lat: string; lng: string; r
           )
         }
       >
-        Usar a posição deste aparelho
+        <LocateFixed size={18} aria-hidden /> Usar a posição deste aparelho
       </Button>
       {msg ? <p className="text-sm text-texto-2">{msg}</p> : null}
       <p className="text-xs text-texto-3">Comece com 100 m e ajuste conforme o sinal no local. Raio pequeno demais gera ocorrências por imprecisão do GPS, não por ausência.</p>
@@ -99,7 +100,7 @@ export default function Locais() {
                 setCreating(true);
               }}
             >
-              Novo local
+              <MapPinPlus size={18} aria-hidden /> Novo local
             </Button>
           ) : null
         }
@@ -142,11 +143,11 @@ export default function Locais() {
                             setFenceFor(r);
                           }}
                         >
-                          Redefinir cerca
+                          <Target size={18} aria-hidden /> Redefinir cerca
                         </Button>
                       ) : null}
                       <Button size="sm" variant="ghost" onClick={() => run(() => api.put(`/locations/${r.id}`, { name: r.name, addressLine: r.addressLine, active: !r.active }), r.active ? 'Local desativado.' : 'Local reativado.')}>
-                        {r.active ? 'Desativar' : 'Reativar'}
+                        <Power size={18} aria-hidden /> {r.active ? 'Desativar' : 'Reativar'}
                       </Button>
                     </span>
                   ) : null,
@@ -156,7 +157,7 @@ export default function Locais() {
         )}
       </Card>
 
-      <Dialog open={creating} title="Novo local" onClose={() => setCreating(false)} footer={<Button busy={busy} onClick={() => run(() => api.post('/locations', { ...f, addressLine: f.addressLine || null, geofence: f.kind === 'travel' ? null : fencePayload() }), 'Local cadastrado.')}>Salvar local</Button>}>
+      <Dialog open={creating} title="Novo local" onClose={() => setCreating(false)} footer={<Button busy={busy} onClick={() => run(() => api.post('/locations', { ...f, addressLine: f.addressLine || null, geofence: f.kind === 'travel' ? null : fencePayload() }), 'Local cadastrado.')}><Check size={18} aria-hidden /> Salvar local</Button>}>
         <div className="space-y-3">
           <Input label="Nome" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} error={fields.name} />
           <Select label="Tipo" value={f.kind} onChange={(e) => setF({ ...f, kind: e.target.value as LocationKind })}>
@@ -172,7 +173,7 @@ export default function Locais() {
         </div>
       </Dialog>
 
-      <Dialog open={fenceFor !== null} title={`Cerca de ${fenceFor?.name ?? ''}`} onClose={() => setFenceFor(null)} footer={<Button busy={busy} onClick={() => fenceFor && run(() => api.post(`/locations/${fenceFor.id}/geofences`, { ...fencePayload(), validFrom }), 'Cerca redefinida. Marcações antigas mantêm a cerca que estava valendo.')}>Salvar nova cerca</Button>}>
+      <Dialog open={fenceFor !== null} title={`Cerca de ${fenceFor?.name ?? ''}`} onClose={() => setFenceFor(null)} footer={<Button busy={busy} onClick={() => fenceFor && run(() => api.post(`/locations/${fenceFor.id}/geofences`, { ...fencePayload(), validFrom }), 'Cerca redefinida. Marcações antigas mantêm a cerca que estava valendo.')}><Check size={18} aria-hidden /> Salvar nova cerca</Button>}>
         <div className="space-y-3">
           <FenceFields v={fence} onChange={setFence} fields={fields} />
           <Input label="Vale a partir de" type="date" value={validFrom} onChange={(e) => setValidFrom(e.target.value)} />

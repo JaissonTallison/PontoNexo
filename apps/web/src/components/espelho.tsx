@@ -68,69 +68,117 @@ export function Totals({ t }: { t: TimesheetView }) {
 }
 
 /** Espelho dia a dia. Previsto, marcações (originais e incluídas), desconsideradas e ocorrências separados. */
+function DayIssues({ d }: { d: TimesheetView['days'][number] }) {
+  const issues = d.issues.filter((i) => !INFO_ISSUES.has(i.code));
+  const info = d.issues.filter((i) => INFO_ISSUES.has(i.code));
+  return (
+    <>
+      {issues.map((i) => (
+        <div key={i.code} className="text-atencao">
+          {DAY_ISSUE_LABEL[i.code]}
+          {i.detail ? ` (${i.detail})` : ''}
+        </div>
+      ))}
+      {info.map((i) => (
+        <div key={i.code} className="text-texto-3">
+          {DAY_ISSUE_LABEL[i.code]}
+        </div>
+      ))}
+    </>
+  );
+}
+
+function DayPunches({ d, tz }: { d: TimesheetView['days'][number]; tz: string }) {
+  return (
+    <>
+      <span className="font-mono tabular">
+        {d.punches.map((p) => (
+          <span key={p.ref} title={PUNCH_TYPE_LABEL[p.type]} className={`mr-2 ${p.source === 'inclusion' ? 'text-acao' : ''}`}>
+            {hora(p.at, tz)}
+            {p.source === 'inclusion' ? '*' : ''}
+          </span>
+        ))}
+      </span>
+      {d.disregarded.map((x) => (
+        <span key={x.id} className="mr-2 font-mono text-texto-3 line-through" title="Desconsiderada por tratamento">
+          {hora(x.at, tz)}
+        </span>
+      ))}
+      {d.justified ? <Tone tone="ok">Abonado</Tone> : null}
+    </>
+  );
+}
+
+/** Dia a dia do espelho: tabela quando o card tem espaço, um cartão por dia quando não tem (celular e tablet). */
 export function TimesheetTable({ t }: { t: TimesheetView }) {
   const tz = t.timezone;
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[760px] border-collapse text-sm">
-        <thead>
-          <tr className="border-b border-borda text-left text-texto-2">
-            <th className="px-3 py-2">Dia</th>
-            <th className="px-3 py-2">Previsto</th>
-            <th className="px-3 py-2">Marcações</th>
-            <th className="px-3 py-2 text-right">Trabalhado</th>
-            <th className="px-3 py-2 text-right">Excedente</th>
-            <th className="px-3 py-2 text-right">Falta</th>
-            <th className="px-3 py-2">Ocorrências</th>
-          </tr>
-        </thead>
-        <tbody>
-          {t.days.map((d) => {
-            const issues = d.issues.filter((i) => !INFO_ISSUES.has(i.code));
-            const info = d.issues.filter((i) => INFO_ISSUES.has(i.code));
-            return (
+    <div className="@container">
+      <div className="hidden @3xl:block">
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr className="border-b border-borda text-left text-texto-2">
+              <th className="px-3 py-2">Dia</th>
+              <th className="px-3 py-2">Previsto</th>
+              <th className="px-3 py-2">Marcações</th>
+              <th className="px-3 py-2 text-right">Trabalhado</th>
+              <th className="px-3 py-2 text-right">Excedente</th>
+              <th className="px-3 py-2 text-right">Falta</th>
+              <th className="px-3 py-2">Ocorrências</th>
+            </tr>
+          </thead>
+          <tbody>
+            {t.days.map((d) => (
               <tr key={d.date} className="border-b border-borda align-top even:bg-zebra hover:bg-realce">
                 <td className="px-3 py-2 whitespace-nowrap tabular">
                   {formatDateBR(d.date).slice(0, 5)} <span className="text-texto-3">{weekdayShort(d.date)}</span>
                 </td>
                 <td className="px-3 py-2 text-texto-2">{expectedText(d)}</td>
                 <td className="px-3 py-2">
-                  <span className="font-mono tabular">
-                    {d.punches.map((p) => (
-                      <span key={p.ref} title={PUNCH_TYPE_LABEL[p.type]} className={`mr-2 ${p.source === 'inclusion' ? 'text-acao' : ''}`}>
-                        {hora(p.at, tz)}
-                        {p.source === 'inclusion' ? '*' : ''}
-                      </span>
-                    ))}
-                  </span>
-                  {d.disregarded.map((x) => (
-                    <span key={x.id} className="mr-2 font-mono text-texto-3 line-through" title="Desconsiderada por tratamento">
-                      {hora(x.at, tz)}
-                    </span>
-                  ))}
-                  {d.justified ? <Tone tone="ok">Abonado</Tone> : null}
+                  <DayPunches d={d} tz={tz} />
                 </td>
                 <td className="px-3 py-2 text-right tabular">{d.workedSeconds ? duracao(d.workedSeconds) : '—'}</td>
                 <td className="px-3 py-2 text-right tabular">{d.overtimeSeconds ? duracao(d.overtimeSeconds) : d.restOrHolidaySeconds ? duracao(d.restOrHolidaySeconds) : '—'}</td>
                 <td className="px-3 py-2 text-right tabular">{d.deficitSeconds ? <Tone tone="error">{duracao(d.deficitSeconds)}</Tone> : '—'}</td>
                 <td className="px-3 py-2">
-                  {issues.map((i) => (
-                    <div key={i.code} className="text-atencao">
-                      {DAY_ISSUE_LABEL[i.code]}
-                      {i.detail ? ` (${i.detail})` : ''}
-                    </div>
-                  ))}
-                  {info.map((i) => (
-                    <div key={i.code} className="text-texto-3">
-                      {DAY_ISSUE_LABEL[i.code]}
-                    </div>
-                  ))}
+                  <DayIssues d={d} />
                 </td>
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <ul className="space-y-2 @3xl:hidden">
+        {t.days.map((d) => {
+          const extra = d.overtimeSeconds || d.restOrHolidaySeconds;
+          return (
+            <li key={d.date} className="rounded-[8px] border border-borda px-3 py-2.5 text-sm">
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="font-semibold tabular">
+                  {formatDateBR(d.date).slice(0, 5)} <span className="font-normal text-texto-3">{weekdayShort(d.date)}</span>
+                </span>
+                <span className="font-semibold tabular">{d.workedSeconds ? duracao(d.workedSeconds) : '—'}</span>
+              </div>
+              <p className="mt-0.5 text-texto-3">Previsto: {expectedText(d)}</p>
+              {d.punches.length || d.disregarded.length || d.justified ? (
+                <p className="mt-1">
+                  <DayPunches d={d} tz={tz} />
+                </p>
+              ) : null}
+              {extra || d.deficitSeconds ? (
+                <p className="mt-1 tabular">
+                  {extra ? <span className="text-acao">Excedente {duracao(extra)}</span> : null}
+                  {extra && d.deficitSeconds ? ' · ' : null}
+                  {d.deficitSeconds ? <span className="text-perigo">Falta {duracao(d.deficitSeconds)}</span> : null}
+                </p>
+              ) : null}
+              <div className="mt-1">
+                <DayIssues d={d} />
+              </div>
+            </li>
+          );
+        })}
+      </ul>
       <p className="mt-2 text-xs text-texto-3">* incluída por correção aprovada · riscado: desconsiderada por correção (o registro original continua guardado)</p>
     </div>
   );

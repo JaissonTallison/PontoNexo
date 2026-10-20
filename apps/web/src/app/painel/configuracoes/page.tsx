@@ -1,4 +1,5 @@
 'use client';
+import { Check, Plus, Power, Send, UserPlus } from 'lucide-react';
 import { ROLE_LABEL, type IntegrationView } from '@pontonexo/shared';
 import { useEffect, useState } from 'react';
 import { useSession } from '@/components/session';
@@ -57,34 +58,34 @@ export default function Configuracoes() {
             </div>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Button onClick={() => run(() => api.put('/employer', { displayName: f.displayName, legalName: f.legalName, timezone: f.timezone, addressLine: f.addressLine || null, city: f.city || null, state: f.state || null }), 'Dados salvos.', () => { emp.reload(); reloadMe(); })}>Salvar</Button>
+            <Button onClick={() => run(() => api.put('/employer', { displayName: f.displayName, legalName: f.legalName, timezone: f.timezone, addressLine: f.addressLine || null, city: f.city || null, state: f.state || null }), 'Dados salvos.', () => { emp.reload(); reloadMe(); })}><Check size={18} aria-hidden /> Salvar</Button>
             <a href="/api/exports/employer.json" className="inline-flex h-9 items-center rounded-[8px] border border-borda-forte px-4 font-semibold text-marca hover:bg-realce">Exportar todos os dados (JSON)</a>
           </div>
         </Card>
       ) : null}
 
       {tab === 'usuarios' ? (
-        <Card title="Quem acessa o painel" actions={<Button size="sm" onClick={() => setInvite({ ...invite, open: true })}>Convidar</Button>}>
+        <Card title="Quem acessa o painel" actions={<Button size="sm" onClick={() => setInvite({ ...invite, open: true })}><UserPlus size={18} aria-hidden /> Convidar</Button>}>
           <DataTable pageSize={10} rows={(users.data ?? []).filter((u) => u.role !== 'employee')} rowKey={(u) => u.id} columns={[
             { key: 'n', header: 'Nome', cell: (u) => <span className="font-semibold">{u.name}{u.isSelf ? ' (você)' : ''}</span> },
             { key: 'e', header: 'E-mail', cell: (u) => u.email },
             { key: 'p', header: 'Papel', cell: (u) => ROLE_LABEL[u.role] },
             { key: 's', header: 'Situação', cell: (u) => (!u.active ? <Tone tone="muted">Desativado</Tone> : u.invitePending ? <Tone tone="warn">Convite pendente</Tone> : 'Ativo') },
             { key: 'l', header: 'Último acesso', cell: (u) => (u.lastLoginAt ? dataHora(u.lastLoginAt, tz) : '—'), hideOnMobile: true },
-            { key: 'a', header: '', cell: (u) => (!u.isSelf && u.role !== 'employer_owner' ? <Button size="sm" variant="ghost" onClick={() => run(() => api.post(`/users/${u.id}/${u.active ? 'deactivate' : 'reactivate'}`), u.active ? 'Acesso desativado.' : 'Acesso reativado.', users.reload)}>{u.active ? 'Desativar' : 'Reativar'}</Button> : null) },
+            { key: 'a', header: '', cell: (u) => (!u.isSelf && u.role !== 'employer_owner' ? <Button size="sm" variant="ghost" onClick={() => run(() => api.post(`/users/${u.id}/${u.active ? 'deactivate' : 'reactivate'}`), u.active ? 'Acesso desativado.' : 'Acesso reativado.', users.reload)}><Power size={18} aria-hidden /> {u.active ? 'Desativar' : 'Reativar'}</Button> : null) },
           ]} />
         </Card>
       ) : null}
 
       {tab === 'integracoes' ? (
-        <Card title="Webhooks" actions={<Button size="sm" onClick={() => setHook({ ...hook, open: true })}>Novo webhook</Button>}>
+        <Card title="Webhooks" actions={<Button size="sm" onClick={() => setHook({ ...hook, open: true })}><Plus size={18} aria-hidden /> Novo webhook</Button>}>
           <p className="mb-3 text-sm text-texto-2">Eventos assinados com HMAC-SHA256 (cabeçalho x-pontonexo-signature). Não há integração pronta com REP-P certificado.</p>
           <DataTable pageSize={10} rows={ints.data ?? []} rowKey={(i) => i.id} columns={[
             { key: 'n', header: 'Nome', cell: (i) => <span className="font-semibold">{i.name}</span> },
             { key: 'u', header: 'Endereço', cell: (i) => <span className="break-all font-mono text-xs">{i.url}</span> },
             { key: 'e', header: 'Eventos', cell: (i) => i.events.join(', ') },
             { key: 's', header: 'Entregas', cell: (i) => <span className="text-sm">{i.lastStatus ?? 'Nenhuma ainda'}{i.pendingDeliveries ? ` · ${i.pendingDeliveries} na fila` : ''}{i.failedDeliveries ? <Tone tone="error"> · {i.failedDeliveries} falharam</Tone> : null}</span> },
-            { key: 'a', header: '', cell: (i) => <Button size="sm" variant="ghost" onClick={() => run(() => api.put(`/integrations/${i.id}`, { active: !i.active }), 'Integração atualizada.', ints.reload)}>{i.active ? 'Desativar' : 'Ativar'}</Button> },
+            { key: 'a', header: '', cell: (i) => <Button size="sm" variant="ghost" onClick={() => run(() => api.put(`/integrations/${i.id}`, { active: !i.active }), 'Integração atualizada.', ints.reload)}><Power size={18} aria-hidden /> {i.active ? 'Desativar' : 'Ativar'}</Button> },
           ]} />
         </Card>
       ) : null}
@@ -99,7 +100,7 @@ export default function Configuracoes() {
         </Card>
       ) : null}
 
-      <Dialog open={invite.open} title="Convidar usuário" onClose={() => setInvite({ ...invite, open: false })} footer={<Button onClick={() => run(() => api.post('/users/invite', { name: invite.name, email: invite.email, role: invite.role }), 'Convite enviado.', () => { setInvite({ open: false, name: '', email: '', role: 'employer_manager' }); users.reload(); })}>Enviar convite</Button>}>
+      <Dialog open={invite.open} title="Convidar usuário" onClose={() => setInvite({ ...invite, open: false })} footer={<Button onClick={() => run(() => api.post('/users/invite', { name: invite.name, email: invite.email, role: invite.role }), 'Convite enviado.', () => { setInvite({ open: false, name: '', email: '', role: 'employer_manager' }); users.reload(); })}><Send size={18} aria-hidden /> Enviar convite</Button>}>
         <div className="space-y-3">
           <Input label="Nome" value={invite.name} onChange={(e) => setInvite({ ...invite, name: e.target.value })} error={fields.name} />
           <Input label="E-mail" type="email" value={invite.email} onChange={(e) => setInvite({ ...invite, email: e.target.value })} error={fields.email} />
@@ -109,7 +110,7 @@ export default function Configuracoes() {
           </Select>
         </div>
       </Dialog>
-      <Dialog open={hook.open} title="Novo webhook" onClose={() => setHook({ ...hook, open: false })} footer={<Button onClick={() => run(() => api.post('/integrations', { name: hook.name, kind: 'webhook', url: hook.url, secret: hook.secret, events: hook.events }), 'Webhook cadastrado.', () => { setHook({ open: false, name: '', url: '', secret: '', events: ['punch.accepted'] }); ints.reload(); })}>Salvar</Button>}>
+      <Dialog open={hook.open} title="Novo webhook" onClose={() => setHook({ ...hook, open: false })} footer={<Button onClick={() => run(() => api.post('/integrations', { name: hook.name, kind: 'webhook', url: hook.url, secret: hook.secret, events: hook.events }), 'Webhook cadastrado.', () => { setHook({ open: false, name: '', url: '', secret: '', events: ['punch.accepted'] }); ints.reload(); })}><Check size={18} aria-hidden /> Salvar</Button>}>
         <div className="space-y-3">
           <Input label="Nome" value={hook.name} onChange={(e) => setHook({ ...hook, name: e.target.value })} error={fields.name} />
           <Input label="Endereço (HTTPS)" value={hook.url} onChange={(e) => setHook({ ...hook, url: e.target.value })} error={fields.url} />

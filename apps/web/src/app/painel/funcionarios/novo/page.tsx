@@ -1,6 +1,6 @@
 'use client';
 import { CONTRACT_REGIME_LABEL, LOCATION_KIND_LABEL, type ContractRegime, type LocationKind } from '@pontonexo/shared';
-import { Check } from 'lucide-react';
+import { ArrowRight, Check, SkipForward, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
@@ -109,7 +109,7 @@ export default function NovoFuncionario() {
 
   const skipButton = (what: string) => (
     <Button variant="secondary" onClick={() => skip(what)} disabled={st.busy}>
-      Pular por agora
+      <SkipForward size={18} aria-hidden /> Pular por agora
     </Button>
   );
 
@@ -135,10 +135,10 @@ export default function NovoFuncionario() {
                   })
                 }
               >
-                Salvar e continuar
+                Salvar e continuar <ArrowRight size={18} aria-hidden />
               </Button>
               <Button variant="secondary" onClick={() => router.back()}>
-                Cancelar
+                <X size={18} aria-hidden /> Cancelar
               </Button>
             </>
           }
@@ -173,7 +173,7 @@ export default function NovoFuncionario() {
                 await api.post(`/employees/${employeeId}/contracts`, { ...c, breakReductionAgreement: false, compensation: 'none', travelAgreement: false, writtenAgreementRef: null, notes: null });
                 next();
               })}>
-                Salvar e continuar
+                Salvar e continuar <ArrowRight size={18} aria-hidden />
               </Button>
               {skipButton('contrato')}
             </>
@@ -222,7 +222,7 @@ export default function NovoFuncionario() {
                   })
                 }
               >
-                Salvar e continuar
+                Salvar e continuar <ArrowRight size={18} aria-hidden />
               </Button>
               {skipButton('horário')}
             </>
@@ -281,7 +281,7 @@ export default function NovoFuncionario() {
                   })
                 }
               >
-                Salvar e continuar
+                Salvar e continuar <ArrowRight size={18} aria-hidden />
               </Button>
               {skipButton('local')}
             </>
@@ -335,7 +335,7 @@ export default function NovoFuncionario() {
                   })
                 }
               >
-                Concluir cadastro
+                <Check size={18} aria-hidden /> Concluir cadastro
               </Button>
             </>
           }

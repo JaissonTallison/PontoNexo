@@ -1,4 +1,5 @@
 'use client';
+import { Check, ClipboardCheck } from 'lucide-react';
 import { PUNCH_TYPE_LABEL, type Page } from '@pontonexo/shared';
 import { useState } from 'react';
 import { useSession } from '@/components/session';
@@ -62,7 +63,7 @@ export function RevisarOcorrencias() {
                     {a.status === 'open' && can('alerts.review') ? (
                       <div className="mt-2">
                         <Button size="sm" onClick={() => { setReviewing(a); setNote(''); setErr(null); }}>
-                          Registrar revisão
+                          <ClipboardCheck size={18} aria-hidden /> Registrar revisão
                         </Button>
                       </div>
                     ) : null}
@@ -91,7 +92,7 @@ export function RevisarOcorrencias() {
               }
             }}
           >
-            Salvar revisão
+            <Check size={18} aria-hidden /> Salvar revisão
           </Button>
         }
       >

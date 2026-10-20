@@ -1,4 +1,5 @@
 'use client';
+import { Download, Lock, LockOpen, Printer } from 'lucide-react';
 import type { ClosingView, TimesheetView } from '@pontonexo/shared';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
@@ -61,20 +62,20 @@ function Espelho() {
         actions={
           employeeId && sheet.data ? (
             <>
-              <a className="inline-flex h-9 items-center rounded-[8px] bg-marca px-4 font-semibold text-white hover:bg-marca-2" href={`/api/exports/timesheet.csv${qs({ month, employeeId })}`}>
-                Exportar CSV
+              <a className="inline-flex h-9 items-center gap-2 rounded-[8px] bg-marca px-4 font-semibold text-white hover:bg-marca-2" href={`/api/exports/timesheet.csv${qs({ month, employeeId })}`}>
+                <Download size={18} aria-hidden /> Exportar CSV
               </a>
               <Button onClick={() => window.print()}>
-                Imprimir
+                <Printer size={18} aria-hidden /> Imprimir
               </Button>
               {can('closings.manage') && ended && !isClosed ? (
                 <Button onClick={close} busy={busy}>
-                  Fechar mês
+                  <Lock size={18} aria-hidden /> Fechar mês
                 </Button>
               ) : null}
               {can('closings.manage') && isClosed ? (
                 <Button variant="danger" onClick={() => { setReopen(closing); setReason(''); }}>
-                  Reabrir
+                  <LockOpen size={18} aria-hidden /> Reabrir
                 </Button>
               ) : null}
             </>
@@ -155,7 +156,7 @@ function Espelho() {
               }
             }}
           >
-            Reabrir
+            <LockOpen size={18} aria-hidden /> Reabrir
           </Button>
         }
       >

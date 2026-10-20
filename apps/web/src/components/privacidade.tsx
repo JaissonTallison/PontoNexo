@@ -1,4 +1,5 @@
 'use client';
+import { Check } from 'lucide-react';
 import { PRIVACY_NOTICE, PRIVACY_NOTICE_VERSION } from '@pontonexo/shared';
 import { useState } from 'react';
 import { api, errorMessage } from '@/lib/api';
@@ -44,7 +45,7 @@ export function PrivacyGate({ onDone }: { onDone: () => void }) {
           }
         }}
       >
-        Li e estou ciente
+        <Check size={18} aria-hidden /> Li e estou ciente
       </Button>
     </main>
   );
