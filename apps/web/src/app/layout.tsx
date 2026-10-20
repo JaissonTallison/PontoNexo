@@ -21,6 +21,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   // ocupa a tela toda no celular (inclusive atrás do entalhe), como aplicativo
   viewportFit: 'cover',
+  // só tema claro: impede o "modo escuro forçado" do Samsung Internet e do navegador da Xiaomi de trocar as cores
+  colorScheme: 'light',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

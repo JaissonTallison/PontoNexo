@@ -62,7 +62,21 @@ html.letra-maior {
   --text-2xl: 31px;
 }
 
+/*
+ * Tela fixa como aplicativo: a página nunca rola nem "estica" (o iPhone estica até página que não rola).
+ * Cada área (login, app, painel) tem a altura da tela e rola só por dentro do conteúdo.
+ */
+@media screen {
+  html,
+  body {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+  }
+}
+
 html {
+  color-scheme: light only;
   /* tela presa como em aplicativo: sem o "puxar" que mostra faixa branca acima/abaixo */
   overscroll-behavior: none;
   /* se o navegador ainda esticar a tela, aparece o azul da marca (barra superior) e não branco */
@@ -131,12 +145,10 @@ button {
   }
 }
 
-/* App do funcionário: rolagem sem barra visível, como em aplicativo (rolagem por toque, roda e teclado continua) */
-html.app-sem-barra,
+/* Área que rola sem barra visível, como em aplicativo (toque, roda e teclado continuam funcionando) */
 .sem-barra {
   scrollbar-width: none;
 }
-html.app-sem-barra::-webkit-scrollbar,
 .sem-barra::-webkit-scrollbar {
   display: none;
 }
@@ -206,4 +218,30 @@ html.app-sem-barra::-webkit-scrollbar,
 .conteudo-rolagem::-webkit-scrollbar-thumb {
   border-radius: 8px;
   background: var(--color-borda-forte);
+}
+
+/*
+ * Campos de data e hora no iPhone: o Safari dá a eles uma largura mínima própria, maior que a tela,
+ * e a página "quebra" para a direita. Aqui eles respeitam a largura do formulário.
+ */
+input[type='date'],
+input[type='time'],
+input[type='month'] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+}
+input::-webkit-date-and-time-value {
+  text-align: left;
+}
+
+/* No celular, campo com letra menor que 16 px faz o iPhone dar zoom sozinho ao tocar (e a tela parece quebrar). */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
 }
