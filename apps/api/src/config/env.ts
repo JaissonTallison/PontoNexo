@@ -50,7 +50,9 @@ const schema = z.object({
 export type Env = z.infer<typeof schema>;
 
 export function loadEnv(overrides: Partial<Record<keyof Env, string>> = {}): Env {
-  const parsed = schema.safeParse({ ...process.env, ...overrides });
+  // hospedagens como o Railway informam a porta em PORT
+  const fromHost = process.env.API_PORT ?? process.env.PORT;
+  const parsed = schema.safeParse({ ...process.env, ...(fromHost ? { API_PORT: fromHost } : {}), ...overrides });
   if (!parsed.success) {
     const msg = parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ');
     throw new Error(`Configuração inválida: ${msg}`);

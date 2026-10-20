@@ -13,7 +13,8 @@
     "db:migrate": "tsx src/db/migrate.ts",
     "db:reset": "tsx src/db/reset.ts",
     "db:seed": "nest build && node dist/db/seed.js",
-    "openapi": "nest build && node dist/openapi-export.js"
+    "openapi": "nest build && node dist/openapi-export.js",
+    "start:prod": "node dist/db/migrate.js && node dist/main.js"
   },
   "dependencies": {
     "@nestjs/common": "^12.2.0",
