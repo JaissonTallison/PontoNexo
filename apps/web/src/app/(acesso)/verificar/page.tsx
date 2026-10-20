@@ -29,7 +29,7 @@ function Verificar() {
   }, [params]);
 
   return (
-    <div className={`${cls.card} p-6`}>
+    <div className={`${cls.card} p-5 sm:p-6`}>
       <h1 className="text-xl font-bold text-marca">Verificar comprovante</h1>
       <p className="mt-1 text-texto-2">Confere se o comprovante corresponde ao registro original e se não foi alterado.</p>
       <form

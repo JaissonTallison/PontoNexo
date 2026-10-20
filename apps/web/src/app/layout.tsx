@@ -19,6 +19,8 @@ export const viewport: Viewport = {
   themeColor: '#000f4b',
   width: 'device-width',
   initialScale: 1,
+  // ocupa a tela toda no celular (inclusive atrás do entalhe), como aplicativo
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

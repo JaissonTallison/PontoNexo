@@ -32,11 +32,11 @@ function Entrar() {
   }
 
   return (
-    <div className="cartao-3d rounded-[8px] bg-card p-6 sm:p-8">
-      <h1 className="text-2xl font-bold text-marca">Entrar no PontoNexo</h1>
+    <div className="cartao-3d rounded-[8px] bg-card p-5 sm:p-8">
+      <h1 className="text-xl font-bold text-marca sm:text-2xl">Entrar no PontoNexo</h1>
       <p className="mt-1 text-texto-2">Funcionário ou empregador, use o mesmo acesso.</p>
 
-      <form onSubmit={submit} className="mt-6 space-y-4" noValidate>
+      <form onSubmit={submit} className="mt-5 space-y-4" noValidate>
         <Input label="E-mail" type="email" inputMode="email" autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck={false} value={email} onChange={(e) => setEmail(e.target.value)} className="h-12 text-md" />
         <PasswordInput label="Senha" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className="h-12 text-md" />
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
@@ -52,7 +52,7 @@ function Entrar() {
         </Button>
       </form>
 
-      <p className="mt-6 border-t border-borda pt-4 text-center text-sm text-texto-3">
+      <p className="mt-5 border-t border-borda pt-4 text-center text-sm text-texto-3">
         É empregador?{' '}
         <Link href="/cadastro" className="font-semibold text-marca hover:underline">
           Cadastre sua residência

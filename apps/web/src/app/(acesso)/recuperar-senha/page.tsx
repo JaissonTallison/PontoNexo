@@ -25,7 +25,7 @@ export default function Recuperar() {
   }
 
   return (
-    <div className={`${cls.card} p-6`}>
+    <div className={`${cls.card} p-5 sm:p-6`}>
       <h1 className="text-xl font-bold text-marca">Recuperar senha</h1>
       {done ? (
         <p className="mt-4 text-texto-2">{done} O link vale por 1 hora.</p>

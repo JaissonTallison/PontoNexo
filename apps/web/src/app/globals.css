@@ -63,11 +63,17 @@ html.letra-maior {
 }
 
 html {
+  /* tela presa como em aplicativo: sem o "puxar" que mostra faixa branca acima/abaixo */
+  overscroll-behavior: none;
+  /* se o navegador ainda esticar a tela, aparece o azul da marca (barra superior) e não branco */
+  background: var(--color-marca);
   font-size: 15px;
   -webkit-text-size-adjust: 100%;
 }
 
 body {
+  overscroll-behavior: none;
+  min-height: 100dvh;
   background: var(--color-fundo);
   color: var(--color-texto);
   font-family: var(--font-sans);

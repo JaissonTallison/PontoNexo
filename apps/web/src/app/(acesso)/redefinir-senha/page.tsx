@@ -32,7 +32,7 @@ function Redefinir() {
 
   if (!token) return <p className="text-perigo">Link incompleto. Abra o link do e-mail novamente.</p>;
   return (
-    <div className={`${cls.card} p-6`}>
+    <div className={`${cls.card} p-5 sm:p-6`}>
       <h1 className="text-xl font-bold text-marca">{convite ? 'Definir sua senha' : 'Nova senha'}</h1>
       {done ? (
         <div className="mt-4 space-y-4">
