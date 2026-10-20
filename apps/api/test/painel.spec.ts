@@ -1,7 +1,7 @@
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { DailySummaryJob } from '../src/modules/governanca/daily-summary.job.js';
-import { CPFS, MailService, punchBody, scenario, setClock, bootApp, type Scenario } from './helpers.js';
+import { bootApp, Client, CPFS, MailService, PASSWORD, punchBody, scenario, setClock, type Scenario } from './helpers.js';
 
 describe('painel do empregador: configuração, fechamento geral e resumo diário', () => {
   let app: NestExpressApplication;
@@ -22,7 +22,19 @@ describe('painel do empregador: configuração, fechamento geral e resumo diári
   });
   afterAll(async () => app.close());
 
-  it('conta nova já vem com as funções comuns e não duplica função repetida', async () => {
+  it('"manter conectado" guarda o acesso por 30 dias; sem marcar, o cookie some ao fechar o navegador', async () => {
+    const cookie = (res: { headers: Record<string, unknown> }) => ((res.headers['set-cookie'] as string[]) ?? []).find((c) => c.startsWith('pn_session=')) ?? '';
+    const lembrar = await new Client(app).post('/auth/login', { email: s.ownerEmail, password: PASSWORD, remember: true });
+    expect(lembrar.status).toBe(200);
+    const expira = /Expires=([^;]+)/.exec(cookie(lembrar))?.[1];
+    expect(expira).toBeTruthy();
+    expect(new Date(expira!).getTime() - Date.now()).toBeGreaterThan(29 * 86_400_000);
+    const semLembrar = await new Client(app).post('/auth/login', { email: s.ownerEmail, password: PASSWORD });
+    expect(semLembrar.status).toBe(200);
+    expect(cookie(semLembrar)).not.toMatch(/Expires=/);
+  });
+
+    it('conta nova já vem com as funções comuns e não duplica função repetida', async () => {
     const roles = await s.owner.get('/job-roles');
     const names = roles.body.map((r: { name: string }) => r.name);
     expect(names).toContain('Cozinheiro(a)');
@@ -74,6 +86,7 @@ describe('painel do empregador: configuração, fechamento geral e resumo diári
     expect(n).toBeGreaterThan(0);
     expect(await job.run(new Date('2027-01-11T09:00:00-03:00'))).toBe(0);
     const msg = mail.sent.slice(before).find((m) => m.to === s.ownerEmail);
-    expect(msg?.text).toContain('pedido(s) de ajuste');
+    expect(msg?.text).toContain('pedido de ajuste para decidir');
+    expect(msg?.html).toContain('Abrir o painel');
   });
 });

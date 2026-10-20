@@ -1,9 +1,9 @@
 'use client';
-import { ArrowLeft, Check, ChevronLeft, ChevronRight, RotateCcw, X } from 'lucide-react';
+import { ArrowLeft, Check, ChevronLeft, ChevronRight, Eye, EyeOff, RotateCcw, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Tip } from './guia';
-import { useCallback, useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
+import { useCallback, useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type KeyboardEvent, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 
 /* Classes comuns: mudar aqui muda o sistema inteiro. */
 export const cls = {
@@ -438,4 +438,59 @@ export function usePaged<T>(rows: T[], pageSize = 10) {
     rows: rows.slice((current - 1) * pageSize, current * pageSize),
     pager: <Pagination page={current} pageSize={pageSize} total={rows.length} onPage={setPage} />,
   };
+}
+
+/**
+ * Campo de senha com o olho para mostrar o que foi digitado e aviso de Caps Lock ligado.
+ * Usado no login, no cadastro e em todas as trocas de senha.
+ */
+export function PasswordInput({ label, hint, error, className = '', ...rest }: Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & { label: string; hint?: string; error?: string }) {
+  const id = useId();
+  const fieldId = rest.id ?? id;
+  const [show, setShow] = useState(false);
+  const [caps, setCaps] = useState(false);
+  const checkCaps = (e: KeyboardEvent<HTMLInputElement>) => setCaps(e.getModifierState('CapsLock'));
+  return (
+    <Field label={label} hint={caps ? undefined : hint} error={error} htmlFor={fieldId}>
+      <div className="relative">
+        <input
+          id={fieldId}
+          aria-invalid={Boolean(error) || undefined}
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          {...rest}
+          type={show ? 'text' : 'password'}
+          onKeyUp={(e) => {
+            checkCaps(e);
+            rest.onKeyUp?.(e);
+          }}
+          onKeyDown={(e) => {
+            checkCaps(e);
+            rest.onKeyDown?.(e);
+          }}
+          onBlur={(e) => {
+            setCaps(false);
+            rest.onBlur?.(e);
+          }}
+          className={`${cls.campo} pr-12 ${error ? 'border-perigo' : ''} ${className}`}
+        />
+        <button
+          type="button"
+          onClick={() => setShow((v) => !v)}
+          aria-label={show ? 'Esconder a senha' : 'Mostrar a senha'}
+          aria-pressed={show}
+          aria-controls={fieldId}
+          className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-[8px] text-texto-3 hover:text-marca"
+        >
+          {show ? <EyeOff size={20} aria-hidden /> : <Eye size={20} aria-hidden />}
+        </button>
+      </div>
+      {caps && !error ? (
+        <p className="mt-1 text-xs font-semibold text-atencao" role="status">
+          Caps Lock está ligado: as letras estão saindo em MAIÚSCULAS.
+        </p>
+      ) : null}
+    </Field>
+  );
 }

@@ -32,8 +32,9 @@ export class AuthController {
     @Inject(ENV) private readonly env: Env,
   ) {}
 
-  private setCookies(res: Response, s: { token: string; csrfToken: string; expiresAt: Date }) {
-    const base = { secure: this.env.COOKIE_SECURE, sameSite: 'strict' as const, path: '/', expires: s.expiresAt };
+  /** Sem "manter conectado" o cookie é de sessão: some ao fechar o navegador (o servidor também expira em SESSION_TTL_HOURS). */
+  private setCookies(res: Response, s: { token: string; csrfToken: string; expiresAt: Date; remember: boolean }) {
+    const base = { secure: this.env.COOKIE_SECURE, sameSite: 'strict' as const, path: '/', ...(s.remember ? { expires: s.expiresAt } : {}) };
     res.cookie(SESSION_COOKIE, s.token, { ...base, httpOnly: true });
     res.cookie(CSRF_COOKIE, s.csrfToken, { ...base, httpOnly: false });
   }
@@ -51,7 +52,7 @@ export class AuthController {
   @Post('login')
   @HttpCode(200)
   async login(@Body({ schema: loginSchema }) body: z.infer<typeof loginSchema>, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    this.setCookies(res, await this.auth.login(body.email, body.password, requestMeta(req)));
+    this.setCookies(res, await this.auth.login(body.email, body.password, requestMeta(req), body.remember));
     return { ok: true };
   }
 

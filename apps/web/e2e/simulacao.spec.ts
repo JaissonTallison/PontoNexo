@@ -91,7 +91,7 @@ async function definirSenhaEEntrar(page: Page, link: string, email: string) {
   await expect(page.getByText('Senha salva.')).toBeVisible();
   await page.goto('/entrar');
   await page.getByLabel('E-mail').fill(email);
-  await page.getByLabel('Senha').fill(SENHA);
+  await page.getByLabel('Senha', { exact: true }).fill(SENHA);
   await comLimite(page, () => page.getByRole('button', { name: 'Entrar', exact: true }).click());
 }
 
@@ -151,7 +151,7 @@ test.describe('simulação do dia a dia com vários usuários', () => {
       await admin.goto('/cadastro');
       await admin.getByLabel('Seu nome completo').fill(dona.nome);
       await admin.getByLabel('E-mail').fill(dona.email);
-      await admin.getByLabel('Senha').fill(SENHA);
+      await admin.getByLabel('Senha', { exact: true }).fill(SENHA);
       await admin.getByLabel('Como identificar a residência').fill(dona.casa);
       await admin.getByLabel('CPF do empregador').fill(cpf());
       await admin.getByLabel('Li e concordo com os termos de uso e o aviso de privacidade').check();

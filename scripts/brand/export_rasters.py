@@ -120,6 +120,9 @@ def main() -> None:
     shutil.copy(PNG / "icone-app" / "pontonexo-icone-app-192.png", pub / "icon-192.png")
     shutil.copy(PNG / "icone-app" / "pontonexo-icone-app-512.png", pub / "icon-512.png")
     shutil.copy(PNG / "icone-app" / "pontonexo-icone-app-maskable-512.png", pub / "icon-maskable-512.png")
+    # logo dos e-mails (PNG: Gmail e Outlook não mostram SVG)
+    (pub / "brand" / "email").mkdir(parents=True, exist_ok=True)
+    shutil.copy(PNG / "logo-horizontal" / "pontonexo-logo-horizontal-fundo-escuro-512.png", pub / "brand" / "email" / "pontonexo-logo-email.png")
     print("  ✓ apps/web sincronizado")
 
 

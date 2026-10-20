@@ -16,7 +16,11 @@ test.beforeEach(({}, info) => test.skip(info.project.name !== 'celular'));
 test('login é só por e-mail e senha', async ({ page }) => {
   await page.goto('/entrar');
   await expect(page.getByLabel('E-mail')).toBeVisible();
-  await expect(page.getByLabel('Senha')).toBeVisible();
+  await expect(page.getByLabel('Senha', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Manter conectado neste aparelho')).toBeChecked();
+  await page.getByLabel('Senha', { exact: true }).fill('abc');
+  await page.getByRole('button', { name: 'Mostrar a senha' }).click();
+  await expect(page.getByLabel('Senha', { exact: true })).toHaveAttribute('type', 'text');
   await expect(page.getByText(/Receber código|código por SMS|digital ou rosto/i)).toHaveCount(0);
   await expect(page.getByRole('tab')).toHaveCount(0);
 });

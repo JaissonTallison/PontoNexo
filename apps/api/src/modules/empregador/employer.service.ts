@@ -1,3 +1,4 @@
+import { firstName, renderEmail } from '../../common/email-template.js';
 import { Inject, Injectable } from '@nestjs/common';
 import { and, eq, sql } from 'drizzle-orm';
 import { maskCpf, ROLE_LABEL, type RoleCode } from '@pontonexo/shared';
@@ -119,17 +120,32 @@ export class EmployerService {
   async sendAccessEmail(userId: string, email: string, name: string, needsPassword: boolean, employerName: string, roleLabel: string) {
     if (needsPassword) {
       const token = await this.authService.issueToken(userId, 'invite');
-      await this.mail.send({
-        to: email,
-        subject: `PontoNexo · acesso a ${employerName}`,
-        text: `Olá, ${name}.\n\nVocê recebeu acesso ao PontoNexo de ${employerName} como ${roleLabel}.\nDefina sua senha pelo link (vale por 72 horas):\n${this.env.WEB_ORIGIN}/redefinir-senha?token=${token}&convite=1`,
-      });
+      const body = renderEmail(
+        {
+          preheader: `${employerName} liberou seu acesso. Crie sua senha para começar.`,
+          title: 'Seu acesso está pronto',
+          greeting: `Olá, ${firstName(name)}.`,
+          paragraphs: [`${employerName} liberou seu acesso ao PontoNexo como ${roleLabel}.`, 'Para começar, crie sua senha no botão abaixo. Depois é só entrar com este e-mail e a senha que você escolher.'],
+          button: { label: 'Criar minha senha', url: `${this.env.WEB_ORIGIN}/redefinir-senha?token=${token}&convite=1` },
+          note: 'O link vale por 72 horas.',
+          reason: `Você recebeu este e-mail porque ${employerName} cadastrou seu acesso. Se não esperava por ele, pode ignorar.`,
+        },
+        this.env.WEB_ORIGIN,
+      );
+      await this.mail.send({ to: email, subject: `Seu acesso ao PontoNexo · ${employerName}`, ...body });
     } else {
-      await this.mail.send({
-        to: email,
-        subject: `PontoNexo · acesso a ${employerName}`,
-        text: `Olá, ${name}.\n\nVocê recebeu acesso ao PontoNexo de ${employerName} como ${roleLabel}. Entre com sua senha atual em ${this.env.WEB_ORIGIN}/entrar.`,
-      });
+      const body = renderEmail(
+        {
+          preheader: `${employerName} liberou um novo acesso para você.`,
+          title: 'Novo acesso liberado',
+          greeting: `Olá, ${firstName(name)}.`,
+          paragraphs: [`${employerName} liberou seu acesso ao PontoNexo como ${roleLabel}.`, 'Entre com o e-mail e a senha que você já usa.'],
+          button: { label: 'Entrar no PontoNexo', url: `${this.env.WEB_ORIGIN}/entrar` },
+          reason: `Você recebeu este e-mail porque ${employerName} cadastrou seu acesso.`,
+        },
+        this.env.WEB_ORIGIN,
+      );
+      await this.mail.send({ to: email, subject: `Novo acesso no PontoNexo · ${employerName}`, ...body });
     }
   }
 

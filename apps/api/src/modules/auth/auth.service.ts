@@ -1,3 +1,4 @@
+import { firstName, renderEmail } from '../../common/email-template.js';
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import argon2 from 'argon2';
@@ -73,7 +74,7 @@ export class AuthService {
     return this.openSession(userId, meta, null);
   }
 
-  async login(email: string, password: string, meta: RequestMeta) {
+  async login(email: string, password: string, meta: RequestMeta, remember = false) {
     const [user] = await this.db.select().from(users).where(sql`lower(${users.email}) = ${email}`).limit(1);
     const generic = new AppError(401, 'INVALID_CREDENTIALS', 'E-mail ou senha incorretos. Após 5 tentativas a conta fica bloqueada por 15 minutos.');
 
@@ -102,18 +103,18 @@ export class AuthService {
       throw generic;
     }
     await this.db.update(users).set({ failedLogins: 0, lockedUntil: null }).where(eq(users.id, user.id));
-    return this.openSession(user.id, meta, 'auth.login');
+    return this.openSession(user.id, meta, 'auth.login', remember);
   }
 
   /** Abre sessão para o usuário já autenticado (senha). */
-  async openSession(userId: string, meta: RequestMeta, auditAction: string | null) {
+  async openSession(userId: string, meta: RequestMeta, auditAction: string | null, remember = false) {
     const memberships = await this.sessions.memberships(userId);
     // empregador ativo: o primeiro vínculo do lado do empregador, senão o de funcionário
     const active = memberships.find((m) => m.role !== 'employee') ?? memberships[0] ?? null;
-    const session = await this.sessions.create(userId, active, meta);
+    const session = await this.sessions.create(userId, active, meta, remember);
     await this.db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, userId));
     if (auditAction) await this.platformAudit(auditAction, 'Acesso realizado', meta, userId);
-    return session;
+    return { ...session, remember };
   }
 
   private platformAudit(action: string, summary: string, meta: RequestMeta, actorUserId: string | null) {
@@ -175,8 +176,19 @@ export class AuthService {
     await this.mail
       .send({
         to: user.email,
-        subject: 'PontoNexo · redefinição de senha',
-        text: `Olá, ${user.name}.\n\nRecebemos um pedido para redefinir sua senha. O link vale por 1 hora:\n${this.env.WEB_ORIGIN}/redefinir-senha?token=${token}\n\nSe não foi você, ignore esta mensagem; sua senha continua a mesma.`,
+        subject: 'Redefinir sua senha do PontoNexo',
+        ...renderEmail(
+          {
+            preheader: 'Recebemos um pedido para redefinir sua senha.',
+            title: 'Redefinir sua senha',
+            greeting: `Olá, ${firstName(user.name)}.`,
+            paragraphs: ['Recebemos um pedido para redefinir a senha da sua conta. Para criar uma nova, use o botão abaixo.'],
+            button: { label: 'Criar nova senha', url: `${this.env.WEB_ORIGIN}/redefinir-senha?token=${token}` },
+            note: 'O link vale por 1 hora.',
+            reason: 'Se não foi você que pediu, ignore este e-mail: sua senha continua a mesma.',
+          },
+          this.env.WEB_ORIGIN,
+        ),
       })
       .catch(() => undefined);
     await this.platformAudit('auth.password_reset_requested', 'Pedido de redefinição de senha', meta, user.id);

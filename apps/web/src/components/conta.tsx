@@ -7,7 +7,7 @@ import { api, ApiError } from '@/lib/api';
 import { dataHora } from '@/lib/formato';
 import { useResource } from '@/lib/hooks';
 import { useSession } from './session';
-import { Button, Card, Input, Notice } from './ui';
+import { Button, Card, Input, Notice, PasswordInput } from './ui';
 
 /** Conta: troca de senha, sessões abertas, troca de empregador e saída. Usado no app e no painel. */
 export function AccountPanel({ simple = false }: { simple?: boolean }) {
@@ -68,8 +68,8 @@ export function AccountPanel({ simple = false }: { simple?: boolean }) {
       </Card>
       <Card title="Alterar senha">
         <div className="space-y-3">
-          <Input label="Senha atual" type="password" autoComplete="current-password" value={pw.currentPassword} onChange={(e) => setPw({ ...pw, currentPassword: e.target.value })} error={fields.currentPassword} />
-          <Input label="Nova senha" type="password" autoComplete="new-password" value={pw.newPassword} onChange={(e) => setPw({ ...pw, newPassword: e.target.value })} error={fields.newPassword} hint="Mínimo de 10 caracteres, com letras e números." />
+          <PasswordInput label="Senha atual" autoComplete="current-password" value={pw.currentPassword} onChange={(e) => setPw({ ...pw, currentPassword: e.target.value })} error={fields.currentPassword} />
+          <PasswordInput label="Nova senha" autoComplete="new-password" value={pw.newPassword} onChange={(e) => setPw({ ...pw, newPassword: e.target.value })} error={fields.newPassword} hint="Mínimo de 10 caracteres, com letras e números." />
           {msg ? <Notice tone={msg.tone}>{msg.text}</Notice> : null}
           <Button onClick={changePassword}><Check size={18} aria-hidden /> Salvar nova senha</Button>
         </div>

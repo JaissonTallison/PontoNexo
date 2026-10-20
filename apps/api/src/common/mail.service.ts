@@ -8,6 +8,8 @@ export interface MailMessage {
   to: string;
   subject: string;
   text: string;
+  /** versão formatada (modelo em email-template.ts); o texto puro vai sempre junto */
+  html?: string;
 }
 
 /** Tempo máximo para o provedor responder: nenhuma tela fica presa esperando e-mail. */
@@ -62,7 +64,7 @@ export class MailService {
     const res = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: { 'api-key': this.env.BREVO_API_KEY, 'content-type': 'application/json', accept: 'application/json' },
-      body: JSON.stringify({ sender: parseFrom(this.env.MAIL_FROM), to: [{ email: message.to }], subject: message.subject, textContent: message.text }),
+      body: JSON.stringify({ sender: parseFrom(this.env.MAIL_FROM), to: [{ email: message.to }], subject: message.subject, textContent: message.text, ...(message.html ? { htmlContent: message.html } : {}) }),
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
     if (!res.ok) throw new Error(`Brevo respondeu ${res.status}: ${(await res.text()).slice(0, 200)}`);
