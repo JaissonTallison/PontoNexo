@@ -115,13 +115,14 @@ export function PunchGrid({
 export function DayTimeline({ today, tz }: { today: PunchView[]; tz: string }) {
   if (!today.length) return <p className="text-texto-3">Nada registrado ainda.</p>;
   return (
-    <ol className="sem-barra -mx-1 flex gap-2.5 overflow-x-auto px-1 pt-1 pb-4" aria-label="Marcações de hoje">
+    // grade de 2 colunas: as 4 marcações do dia aparecem juntas, sem arrastar para o lado
+    <ol className="grid grid-cols-2 gap-2.5 pb-2" aria-label="Marcações de hoje">
       {today.map((p) => (
-        <li key={p.id} className="shrink-0">
+        <li key={p.id} className="min-w-0">
           <Link
             href={`/app/comprovante/${p.id}`}
             aria-label={`${SIMPLE_NAME[p.type]} às ${hora(p.serverTime, tz)}${p.alerts.length ? ', com observação' : ''}. Abrir comprovante`}
-            className="cartao-3d block min-w-[112px] rounded-[8px] bg-card px-3 py-2.5 active:bg-realce"
+            className="cartao-3d block rounded-[8px] bg-card px-3 py-2.5 active:bg-realce"
           >
             {(() => {
               const { icon: TypeIcon, color } = TYPE_ICON[p.type];

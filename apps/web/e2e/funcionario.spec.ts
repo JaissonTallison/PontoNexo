@@ -44,6 +44,23 @@ test('“Esqueci de marcar” envia o pedido em 3 passos', async ({ page }) => {
   await expect(page.getByText('Pedido enviado')).toBeVisible();
 });
 
+test('Novo pedido reúne os tipos e envia "Marquei sem querer"', async ({ page }) => {
+  await abrirApp(page);
+  // a marcação de hoje vem do teste do ponto, que roda antes neste mesmo celular
+
+  await page.getByRole('link', { name: 'Pedidos' }).click();
+  await page.getByRole('link', { name: 'Novo pedido' }).click();
+  await expect(page.getByRole('link', { name: /Pedido sobre meus dados/ })).toBeVisible();
+  await page.getByRole('link', { name: /Marquei sem querer/ }).click();
+  await expect(page.getByText('Qual marcação foi feita sem querer?')).toBeVisible();
+  await page.locator('button[aria-pressed]').filter({ hasText: /\d{2}:\d{2}/ }).last().click();
+  await page.getByRole('button', { name: 'Continuar' }).click();
+  await expect(page.getByText(/Desconsiderar .* dia/)).toBeVisible();
+  await page.getByRole('button', { name: 'Toquei duas vezes sem querer' }).click();
+  await page.getByRole('button', { name: 'Enviar pedido' }).click();
+  await expect(page.getByText('Pedido enviado')).toBeVisible();
+});
+
 test('Perfil leva a Este celular e valida a troca de senha', async ({ page }) => {
   await abrirApp(page);
   await page.getByRole('link', { name: 'Perfil' }).click();

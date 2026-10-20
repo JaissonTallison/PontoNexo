@@ -131,7 +131,7 @@ export class ExportsService {
       ['Data', 'Previsto', 'Marcações', 'Trabalhado', 'Intervalos', 'Noturno', 'Acréscimo noturno', 'Excedente', 'Falta/atraso', 'Domingo/feriado', 'Abono', 'Ocorrências'],
       ...t.days.map((d) => [
         formatDateBR(d.date),
-        d.expected.kind === 'workday' ? `${d.expected.start}–${d.expected.end}` : d.expected.kind === 'holiday' ? `Feriado: ${d.expected.holidayName}` : d.expected.kind === 'rest' ? 'Descanso' : 'Sem escala',
+        d.expected.kind === 'workday' ? `${d.expected.start}–${d.expected.end}` : d.expected.kind === 'holiday' ? `Feriado: ${d.expected.holidayName}` : d.expected.kind === 'rest' ? 'Descanso' : d.expected.kind === 'not_started' ? 'Antes do início do ponto' : 'Sem escala',
         d.punches.map((p) => `${time(p.at)}${p.source === 'inclusion' ? ' (incluída)' : ''}`).join(' '),
         formatDuration(d.workedSeconds),
         formatDuration(d.breakSeconds),

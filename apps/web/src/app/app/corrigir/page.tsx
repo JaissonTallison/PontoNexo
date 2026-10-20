@@ -1,9 +1,10 @@
 'use client';
-import { formatDateBR, localDate, localToInstant, type CorrectionKind, type PunchType, type PunchView } from '@pontonexo/shared';
-import { ArrowLeft, CalendarX, Clock3, PencilLine } from 'lucide-react';
+import { formatDateBR, localDate, localToInstant, type PunchType, type PunchView } from '@pontonexo/shared';
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useState, type ReactNode } from 'react';
+import { CASOS, isCaso, type Caso } from '@/components/casos-pedido';
 import { QuickReasons } from '@/components/motivos';
 import { useSession } from '@/components/session';
 import { Button, Input, Notice } from '@/components/ui';
@@ -11,17 +12,11 @@ import { api, ApiError } from '@/lib/api';
 import { hojeLocal, hora } from '@/lib/formato';
 import { useResource } from '@/lib/hooks';
 
-type Caso = 'esqueci' | 'errado' | 'faltei';
-
-const CASOS: Array<{ id: Caso; kind: CorrectionKind; title: string; hint: string; icon: typeof Clock3 }> = [
-  { id: 'esqueci', kind: 'include_punch', title: 'Esqueci de marcar', hint: 'Entrada, pausa, retorno ou saída que ficou sem registro', icon: Clock3 },
-  { id: 'errado', kind: 'replace_time', title: 'Marquei no horário errado', hint: 'Toquei na hora errada ou marquei antes da hora', icon: PencilLine },
-  { id: 'faltei', kind: 'justify_absence', title: 'Faltei e tenho motivo', hint: 'Consulta médica, atestado ou combinado com o empregador', icon: CalendarX },
-];
 
 const MOTIVOS: Record<Caso, string[]> = {
   esqueci: ['Esqueci de marcar na hora', 'O celular estava sem bateria', 'Estava sem internet', 'O aplicativo não funcionou'],
   errado: ['Toquei no botão errado', 'Marquei antes da hora sem querer', 'O celular demorou e marcou atrasado'],
+  semquerer: ['Toquei duas vezes sem querer', 'Marquei por engano', 'O celular marcou duas vezes'],
   faltei: ['Consulta médica, tenho atestado', 'Fiquei doente', 'Combinei a folga com o empregador', 'Problema de família'],
 };
 
@@ -50,8 +45,9 @@ function Assistente() {
   const { me } = useSession();
   const tz = me.timezone;
   const params = useSearchParams();
-  const [step, setStep] = useState(1);
-  const [caso, setCaso] = useState<Caso | null>(null);
+  const inicial = params.get('caso');
+  const [caso, setCaso] = useState<Caso | null>(isCaso(inicial) ? inicial : null);
+  const [step, setStep] = useState(isCaso(inicial) ? 2 : 1);
   const [day, setDay] = useState(params.get('dia') ?? hojeLocal(tz));
   const [type, setType] = useState<PunchType | null>(null);
   const [time, setTime] = useState('');
@@ -61,10 +57,10 @@ function Assistente() {
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
 
-  const punches = useResource<PunchView[]>(caso === 'errado' ? `/me/punches?month=${day.slice(0, 7)}` : null);
+  const punches = useResource<PunchView[]>(caso === 'errado' || caso === 'semquerer' ? `/me/punches?month=${day.slice(0, 7)}` : null);
   const ofDay = (punches.data ?? []).filter((p) => !p.disregarded && localDate(new Date(p.serverTime), tz) === day);
 
-  const step2Ok = caso === 'faltei' ? Boolean(day) : caso === 'esqueci' ? Boolean(day && type && time) : Boolean(target && time);
+  const step2Ok = caso === 'faltei' ? Boolean(day) : caso === 'esqueci' ? Boolean(day && type && time) : caso === 'semquerer' ? Boolean(target) : Boolean(target && time);
 
   async function enviar() {
     if (!caso) return;
@@ -73,9 +69,9 @@ function Assistente() {
     try {
       await api.post('/corrections', {
         kind: CASOS.find((c) => c.id === caso)!.kind,
-        targetPunchId: caso === 'errado' ? target?.id : null,
+        targetPunchId: caso === 'errado' || caso === 'semquerer' ? target?.id : null,
         proposedType: caso === 'esqueci' ? type : null,
-        proposedTime: caso === 'faltei' ? null : localToInstant(day, time, tz).toISOString(),
+        proposedTime: caso === 'faltei' || caso === 'semquerer' ? null : localToInstant(day, time, tz).toISOString(),
         absenceDate: caso === 'faltei' ? day : null,
         reason,
       });
@@ -111,7 +107,9 @@ function Assistente() {
       ? `${type ? NOME[type] : ''} no dia ${formatDateBR(day)} às ${time}`
       : caso === 'errado'
         ? `${target ? NOME[target.type] : ''} de ${target ? hora(target.serverTime, tz) : ''} para ${time}, dia ${formatDateBR(day)}`
-        : `Falta no dia ${formatDateBR(day)}`;
+        : caso === 'semquerer'
+          ? `Desconsiderar ${target ? `${NOME[target.type]} das ${hora(target.serverTime, tz)}` : 'a marcação'}, dia ${formatDateBR(day)}`
+          : `Falta no dia ${formatDateBR(day)}`;
 
   return (
     <div className="space-y-4">
@@ -173,10 +171,10 @@ function Assistente() {
             </>
           ) : null}
 
-          {caso === 'errado' ? (
+          {caso === 'errado' || caso === 'semquerer' ? (
             <>
               <div>
-                <p className="mb-2 text-sm font-semibold text-texto-2">Qual marcação está errada?</p>
+                <p className="mb-2 text-sm font-semibold text-texto-2">{caso === 'semquerer' ? 'Qual marcação foi feita sem querer?' : 'Qual marcação está errada?'}</p>
                 {punches.loading ? (
                   <p className="text-texto-3">Carregando…</p>
                 ) : ofDay.length ? (
@@ -194,7 +192,8 @@ function Assistente() {
                   <p className="text-texto-3">Nenhuma marcação neste dia. Se você não marcou, volte e escolha “Esqueci de marcar”.</p>
                 )}
               </div>
-              {target ? <Input label="Qual era o horário certo?" type="time" value={time} onChange={(e) => setTime(e.target.value)} className="h-12" /> : null}
+              {caso === 'semquerer' && target ? <p className="text-sm text-texto-2">Ela deixa de contar nas suas horas. O registro original continua guardado.</p> : null}
+              {caso === 'errado' && target ? <Input label="Qual era o horário certo?" type="time" value={time} onChange={(e) => setTime(e.target.value)} className="h-12" /> : null}
             </>
           ) : null}
 
