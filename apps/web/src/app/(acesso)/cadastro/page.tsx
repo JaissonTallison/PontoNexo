@@ -37,7 +37,7 @@ export default function Cadastro() {
   }
 
   return (
-    <div className={`${cls.card} p-6`}>
+    <div className={`${cls.card} p-5 sm:p-6`}>
       <h1 className="text-xl font-bold text-marca">Cadastrar empregador</h1>
       <p className="mt-1 text-texto-2">Para quem contrata trabalho doméstico. Funcionários recebem o acesso por e-mail.</p>
       <form onSubmit={submit} className="mt-5 space-y-4" noValidate>

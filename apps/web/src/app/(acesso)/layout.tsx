@@ -11,7 +11,7 @@ const BENEFITS = [
 
 export default function AcessoLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen lg:grid lg:grid-cols-[minmax(420px,5fr)_7fr]">
+    <div className="h-dvh overflow-hidden lg:grid lg:grid-cols-[minmax(420px,5fr)_7fr]">
       {/* painel da marca (computador) */}
       <aside className="relative hidden overflow-hidden bg-marca px-12 py-12 text-white lg:flex lg:flex-col lg:justify-between">
         <img src="/brand/pontonexo-simbolo-mono-branco.svg" alt="" aria-hidden className="pointer-events-none absolute -right-24 -bottom-24 w-[460px] opacity-[0.04]" />
@@ -39,20 +39,20 @@ export default function AcessoLayout({ children }: { children: ReactNode }) {
         <p className="relative text-xs text-white/60">Controle de jornada para trabalho doméstico · LC 150/2015, art. 12</p>
       </aside>
 
-      <div className="flex min-h-screen flex-col">
+      <div className="flex h-dvh flex-col">
         {/* faixa da marca (celular) */}
-        <header className="bg-marca px-5 py-4 lg:hidden">
+        <header className="shrink-0 bg-marca px-5 pt-[max(12px,env(safe-area-inset-top))] pb-3 lg:hidden">
           <Link href="/" aria-label="PontoNexo">
-            <img src="/brand/pontonexo-logo-horizontal-fundo-escuro.svg" alt="PontoNexo" className="h-10 w-auto" />
+            <img src="/brand/pontonexo-logo-horizontal-fundo-escuro.svg" alt="PontoNexo" className="h-9 w-auto" />
           </Link>
         </header>
-        <main className="flex flex-1 items-start justify-center px-4 py-8 sm:items-center lg:px-10">
-          <div className="w-full max-w-[440px]">
+        <main className="sem-barra flex min-h-0 flex-1 justify-center overflow-y-auto overscroll-contain px-4 py-4 sm:py-8 lg:px-10">
+          <div className="my-auto w-full max-w-[440px]">
             <BackToLogin />
             {children}
           </div>
         </main>
-        <footer className="px-4 pb-6 text-center text-xs text-texto-3">
+        <footer className="shrink-0 px-4 pt-2 pb-[max(12px,env(safe-area-inset-bottom))] text-center text-xs text-texto-3">
           Registro eletrônico de jornada (LC 150/2015, art. 12), sem certificação REP-P ·{' '}
           <Link className="underline" href="/verificar">
             Verificar comprovante
