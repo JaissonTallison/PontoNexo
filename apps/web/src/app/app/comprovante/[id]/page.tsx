@@ -13,7 +13,7 @@ export default function Comprovante() {
   return (
     <>
       <BackBar title="Comprovante" fallback="/app/historico" />
-      <ReceiptScreen r={data} />
+      <ReceiptScreen r={data} punchId={id} />
       {/* documento formal completo só no papel/PDF */}
       <div className="hidden print:block">
         <ReceiptDocument r={data} />

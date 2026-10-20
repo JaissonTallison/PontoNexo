@@ -58,3 +58,24 @@ export const signupSchema = z.object({
   acceptTerms: z.literal(true, { error: 'É preciso aceitar os termos para continuar.' }),
 });
 export type SignupInput = z.infer<typeof signupSchema>;
+
+/** Celular com DDD; aceita máscara. */
+export const phoneSchema = z
+  .string()
+  .transform((v) => v.replace(/\D/g, ''))
+  .refine((v) => v.length >= 10 && v.length <= 13, 'Informe o celular com DDD.');
+export const phoneStartSchema = z.object({ phone: phoneSchema });
+export const phoneVerifySchema = z.object({ phone: phoneSchema, code: z.string().regex(/^\d{6}$/, 'O código tem 6 números.') });
+
+export const pushSubscribeSchema = z.object({
+  endpoint: z.url().max(1000),
+  keys: z.object({ p256dh: z.string().min(20).max(200), auth: z.string().min(10).max(100) }),
+});
+export const pushUnsubscribeSchema = z.object({ endpoint: z.url().max(1000) });
+
+export interface PasskeyView {
+  id: string;
+  deviceLabel: string | null;
+  createdAt: string;
+  lastUsedAt: string | null;
+}

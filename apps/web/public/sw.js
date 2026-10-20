@@ -1,10 +1,16 @@
 // PontoNexo · service worker
 // Guarda só a "casca" do app (páginas e arquivos estáticos) para abrir sem internet.
 // Nunca guarda respostas da API: marcação sem conexão fica na fila local (IndexedDB) e é enviada depois.
-const CACHE = 'pontonexo-v2';
+// Registrado com ?dev=1 em desenvolvimento: aí NÃO guarda nada em cache (só notificações).
+const DEV = new URL(self.location.href).searchParams.get('dev') === '1';
+const CACHE = 'pontonexo-v3';
 const SHELL = ['/app', '/entrar', '/offline.html', '/icon.svg', '/manifest.webmanifest'];
 
 self.addEventListener('install', (event) => {
+  if (DEV) {
+    event.waitUntil(self.skipWaiting());
+    return;
+  }
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
 });
 
@@ -15,6 +21,7 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  if (DEV) return;
   const url = new URL(event.request.url);
   if (event.request.method !== 'GET' || url.origin !== self.location.origin) return;
   if (url.pathname.startsWith('/api/')) return; // dados sempre da rede
@@ -43,4 +50,40 @@ self.addEventListener('fetch', (event) => {
       ),
     );
   }
+});
+
+// Notificações (lembretes de marcação e respostas de pedidos)
+self.addEventListener('push', (event) => {
+  let data = { title: 'PontoNexo', body: '', url: '/app', tag: 'pontonexo' };
+  try {
+    data = { ...data, ...event.data.json() };
+  } catch (e) {
+    // sem conteúdo: usa o padrão
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      tag: data.tag,
+      icon: '/icon-192.png',
+      badge: '/icon-192.png',
+      data: { url: data.url },
+      lang: 'pt-BR',
+    }),
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || '/app';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      for (const c of list) {
+        if ('focus' in c) {
+          c.navigate(url);
+          return c.focus();
+        }
+      }
+      return self.clients.openWindow(url);
+    }),
+  );
 });

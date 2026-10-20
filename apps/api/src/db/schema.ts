@@ -812,3 +812,108 @@ export const privacyAcknowledgements = pgTable(
   },
   (t) => [uniqueIndex('privacy_ack_uq').on(t.userId, t.employerId, t.version)],
 );
+
+// ───────────────────────────── Acesso pelo celular, passkeys e notificações ─────────────────────────────
+
+/** Código de 6 dígitos para entrar pelo número de celular. Só o hash é guardado. */
+export const loginCodes = pgTable(
+  'login_codes',
+  {
+    id: id(),
+    userId: uuid()
+      .notNull()
+      .references(() => users.id),
+    phoneDigits: text().notNull(),
+    codeHash: text().notNull(),
+    attempts: integer().notNull().default(0),
+    expiresAt: ts().notNull(),
+    usedAt: ts(),
+    createdAt: createdAt(),
+  },
+  (t) => [index('login_codes_phone_idx').on(t.phoneDigits, t.createdAt)],
+);
+
+/** Passkeys (WebAuthn): a biometria fica no aparelho; aqui só a chave pública. */
+export const webauthnCredentials = pgTable(
+  'webauthn_credentials',
+  {
+    /** id da credencial em base64url */
+    id: text().primaryKey(),
+    userId: uuid()
+      .notNull()
+      .references(() => users.id),
+    publicKey: text().notNull(),
+    counter: bigint({ mode: 'number' }).notNull().default(0),
+    transports: text().array(),
+    deviceLabel: text(),
+    createdAt: createdAt(),
+    lastUsedAt: ts(),
+  },
+  (t) => [index('webauthn_user_idx').on(t.userId)],
+);
+
+export const webauthnChallenges = pgTable('webauthn_challenges', {
+  id: id(),
+  userId: uuid().references(() => users.id),
+  kind: text({ enum: ['register', 'login'] }).notNull(),
+  challenge: text().notNull(),
+  expiresAt: ts().notNull(),
+  usedAt: ts(),
+  createdAt: createdAt(),
+});
+
+/** Inscrições de notificação (Web Push) por aparelho. */
+export const pushSubscriptions = pgTable(
+  'push_subscriptions',
+  {
+    id: id(),
+    userId: uuid()
+      .notNull()
+      .references(() => users.id),
+    endpoint: text().notNull(),
+    p256dh: text().notNull(),
+    auth: text().notNull(),
+    userAgent: text(),
+    createdAt: createdAt(),
+    lastSuccessAt: ts(),
+    failures: integer().notNull().default(0),
+  },
+  (t) => [uniqueIndex('push_endpoint_uq').on(t.endpoint), index('push_user_idx').on(t.userId)],
+);
+
+/** Lembrete já enviado no dia (evita repetir). */
+export const remindersSent = pgTable(
+  'reminders_sent',
+  {
+    id: id(),
+    employerId: uuid()
+      .notNull()
+      .references(() => employers.id),
+    employeeId: uuid()
+      .notNull()
+      .references(() => employees.id),
+    date: date({ mode: 'string' }).notNull(),
+    kind: text({ enum: ['missing_clock_in', 'missing_clock_out'] }).notNull(),
+    sentAt: createdAt(),
+  },
+  (t) => [uniqueIndex('reminders_uq').on(t.employeeId, t.date, t.kind)],
+);
+
+/** O funcionário viu a decisão do pedido (para o sino de avisos). */
+export const correctionReads = pgTable(
+  'correction_reads',
+  {
+    id: id(),
+    employerId: uuid()
+      .notNull()
+      .references(() => employers.id),
+    correctionRequestId: uuid()
+      .notNull()
+      .references(() => correctionRequests.id),
+    userId: uuid()
+      .notNull()
+      .references(() => users.id),
+    readAt: createdAt(),
+  },
+  (t) => [uniqueIndex('correction_reads_uq').on(t.correctionRequestId, t.userId)],
+);

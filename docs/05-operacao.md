@@ -19,6 +19,12 @@ Usuários do seed: `titular@`, `gestor@`, `contador@`, `maria@`, `jose@pontonexo
 ## Variáveis de ambiente
 Ver `.env.example` (comentado). Em produção: `NODE_ENV=production`, `COOKIE_SECURE=true` (obrigatório), `TRUST_PROXY=true` atrás de proxy, `WEB_ORIGIN` com o domínio HTTPS, SMTP real, chaves geradas por `pnpm chaves:gerar` guardadas num cofre.
 
+## Acesso pelo celular, biometria e lembretes
+- **Código por SMS:** `OTP_PROVIDER=console` só em desenvolvimento (o código aparece no log da API). Em produção, `console` desliga o login por celular. `OTP_PROVIDER=twilio` envia SMS pela Twilio (`TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM`); **adaptador implementado pela documentação pública e não testado com conta real**.
+- **Biometria (passkey):** `WEBAUTHN_RP_ID` precisa ser o domínio do site (sem protocolo nem porta) e `WEB_ORIGIN` o endereço exato. Trocar o domínio invalida as biometrias já cadastradas.
+- **Lembretes (Web Push):** chaves `VAPID_*` geradas por `pnpm chaves:gerar`; a tarefa roda a cada 5 min e avisa 15 min após o início/fim previsto. Desligar com `REMINDERS_ENABLED=false`.
+- Em celulares, tudo isso exige **HTTPS** (ver `docs/07-teste-em-celular.md`).
+
 ## Banco
 - Dois papéis: dono (migrações) e `pontonexo_app` (aplicação, sujeito a RLS, sem UPDATE/DELETE em registros). Em produção, crie `pontonexo_app` com LOGIN e senha antes de migrar.
 - Migrações em `apps/api/drizzle/` (0001 = segurança: gatilhos, RLS, funções).
@@ -27,8 +33,8 @@ Ver `.env.example` (comentado). Em produção: `NODE_ENV=production`, `COOKIE_SE
 ```bash
 node scripts/verificar-codigo.mjs
 pnpm typecheck
-pnpm test                       # 23 unitários (shared) + 39 integração (API, banco real recriado)
-pnpm test:e2e                   # requer API e web no ar com seed; PW_CHROMIUM=<binário> se o navegador do Playwright não estiver baixado
+pnpm test                       # 23 unitários (shared) + 44 integração (API, banco real recriado)
+pnpm test:e2e                   # 7 testes; requer API e web no ar com seed; PW_CHROMIUM=<binário> se o navegador do Playwright não estiver baixado
 scripts/testar-restauracao.sh   # backup cifrado → restauração em banco novo → compara contagens e cadeia de hash
 ```
 

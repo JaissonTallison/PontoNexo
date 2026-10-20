@@ -85,6 +85,8 @@ export interface PunchContextView {
   hasActiveContract: boolean;
   pendingCorrections: number;
   pendingAcknowledgements: number;
+  /** pedidos do funcionário já decididos que ele ainda não viu */
+  unseenDecisions: number;
 }
 
 export interface PunchResultView {

@@ -1,10 +1,10 @@
 'use client';
 import { Bell, CalendarDays, CircleHelp, Clock, Inbox, UserRound } from 'lucide-react';
-import type { PunchContextView } from '@pontonexo/shared';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
-import { useOnline, useResource } from '@/lib/hooks';
+import { PunchContextProvider, usePunchContext } from '@/components/ponto-context';
+import { useOnline } from '@/lib/hooks';
 import { offlineQueue } from '@/lib/offline';
 import { PrivacyGate } from '@/components/privacidade';
 import { SessionProvider, useSession } from '@/components/session';
@@ -22,9 +22,9 @@ const TABS = [
 function HeaderStatus({ path }: { path: string }) {
   const online = useOnline();
   const [queued, setQueued] = useState(0);
-  // recarrega o contexto ao trocar de tela para o número do sino ficar atualizado
-  const ctx = useResource<PunchContextView>(`/me/punch-context?_=${encodeURIComponent(path)}`);
-  const avisos = ctx.data?.pendingAcknowledgements ?? 0;
+  const ctx = usePunchContext();
+  // itens para responder + respostas do empregador ainda não vistas
+  const avisos = (ctx.data?.pendingAcknowledgements ?? 0) + (ctx.data?.unseenDecisions ?? 0);
 
   useEffect(() => {
     let alive = true;
@@ -45,7 +45,7 @@ function HeaderStatus({ path }: { path: string }) {
           {queued ? <span className="block">{queued === 1 ? '1 para enviar' : `${queued} para enviar`}</span> : null}
         </span>
       ) : null}
-      <Link href="/app/correcoes" className="relative flex h-11 w-11 items-center justify-center rounded-[8px] text-white active:bg-white/10" aria-label={avisos ? `${avisos} ${avisos === 1 ? 'aviso' : 'avisos'} para responder` : 'Avisos'}>
+      <Link href="/app/correcoes" className="relative flex h-11 w-11 items-center justify-center rounded-[8px] text-white active:bg-white/10" aria-label={avisos ? `${avisos} ${avisos === 1 ? 'aviso novo' : 'avisos novos'}` : 'Avisos'}>
         <Bell size={24} aria-hidden />
         {avisos ? (
           <span className="absolute top-1 right-0.5 flex h-5 min-w-5 items-center justify-center rounded-[6px] bg-marcador px-1 text-[11px] font-bold text-marca tabular" aria-hidden>
@@ -104,6 +104,15 @@ function Shell({ children }: { children: ReactNode }) {
   );
 }
 
+/** O contexto de ponto só existe para quem tem vínculo de funcionário. */
+function EmployeeOnly({ children }: { children: ReactNode }) {
+  const { me } = useSession();
+  if (me.active?.role !== 'employee') {
+    return <Empty title="Este acesso é do painel do empregador" action={<Link href="/painel" className="font-semibold text-acao underline">Ir para o painel</Link>} />;
+  }
+  return <>{children}</>;
+}
+
 export default function AppLayout({ children }: { children: ReactNode }) {
   // barra de rolagem escondida só enquanto o app do funcionário está aberto
   useEffect(() => {
@@ -112,7 +121,11 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   }, []);
   return (
     <SessionProvider>
-      <Shell>{children}</Shell>
+      <EmployeeOnly>
+        <PunchContextProvider>
+          <Shell>{children}</Shell>
+        </PunchContextProvider>
+      </EmployeeOnly>
     </SessionProvider>
   );
 }

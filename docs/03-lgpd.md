@@ -9,6 +9,18 @@
 | Segurança | argon2id, sessão HttpOnly/SameSite=Strict, CSRF, limite por sessão/IP, bloqueio após 5 erros, cabeçalhos de segurança, segredos cifrados (AES-256-GCM), backups cifrados |
 | Logs | Auditoria sem coordenadas, CPF, senhas ou tokens (teste automatizado confere) |
 
+## Dados de acesso pelo celular (outubro/2026)
+
+| Dado | Finalidade | Guarda |
+|---|---|---|
+| Celular do funcionário | Enviar o código de acesso por SMS (opcional) | Enquanto houver vínculo |
+| Códigos de acesso | Só o hash, 10 minutos de validade, uso único | Apagáveis após vencer |
+| Passkey | Chave pública da credencial; a biometria fica no aparelho | Até o funcionário remover |
+| Inscrição de notificação | Endereço técnico do aparelho para lembretes | Até desligar ou o navegador invalidar |
+| Fala do "Falar o motivo" | Transcrita pelo serviço de voz do celular; o PontoNexo recebe só o texto | Não guardada |
+
+O provedor de SMS (se contratado) passa a ser operador e deve constar no contrato e no aviso de privacidade.
+
 ## Direitos do titular (art. 18)
 
 - **Cópia dos dados:** botão "Baixar meus dados" no app (JSON completo), imediato.

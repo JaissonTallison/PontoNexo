@@ -11,6 +11,7 @@ import { EmployeesModule } from './modules/funcionarios/employees.module.js';
 import { GovernanceModule } from './modules/governanca/governance.module.js';
 import { HealthController } from './modules/health/health.controller.js';
 import { LocationsModule } from './modules/locais/locations.module.js';
+import { NotificationsModule } from './modules/notificacoes/notifications.module.js';
 import { RegistradorModule } from './modules/registrador/registrador.module.js';
 import { TimeModule } from './modules/time/time.module.js';
 import { TratamentoModule } from './modules/tratamento/tratamento.module.js';
@@ -26,6 +27,7 @@ import { TratamentoModule } from './modules/tratamento/tratamento.module.js';
         (process.env.NODE_ENV !== 'production' && process.env.PN_SEEDING === 'true'),
     }),
     TimeModule,
+    NotificationsModule,
     AuthModule,
     EmployerModule,
     EmployeesModule,

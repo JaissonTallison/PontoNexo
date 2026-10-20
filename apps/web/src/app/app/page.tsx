@@ -16,11 +16,13 @@ import {
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DayTimeline, PunchGrid } from '@/components/grade-ponto';
+import { InstallCard } from '@/components/instalar';
 import { QuickReasons } from '@/components/motivos';
 import { Button, Dialog, ErrorState, Loading, Notice, Select } from '@/components/ui';
 import { api, ApiError, errorMessage } from '@/lib/api';
 import { hora } from '@/lib/formato';
-import { useOnline, useResource, useServerClock } from '@/lib/hooks';
+import { usePunchContext } from '@/components/ponto-context';
+import { useOnline, useServerClock } from '@/lib/hooks';
 import { offlineQueue, type PendingAttempt } from '@/lib/offline';
 
 const CTX_KEY = 'pn_ctx';
@@ -114,7 +116,7 @@ function statusParts(ctx: PunchContextView | null, state: PunchContextView['stat
 }
 
 export default function Ponto() {
-  const { data: ctx, error, loading, reload } = useResource<PunchContextView>('/me/punch-context');
+  const { data: ctx, error, loading, reload } = usePunchContext();
   const online = useOnline();
   const { now } = useServerClock(ctx?.serverTime ?? null);
   const snapshot = useMemo(() => (ctx ? null : loadSnapshot()), [ctx]);
@@ -291,41 +293,63 @@ export default function Ponto() {
         onPick={start}
       />
 
-      {pending.length ? (
-        <section className="rounded-[8px] border border-marcador bg-atencao-suave p-4">
-          <p className="font-bold text-atencao">{pending.length === 1 ? '1 marcação esperando internet' : `${pending.length} marcações esperando internet`}</p>
-          <ul className="mt-2 space-y-2">
-            {pending.map((a) => (
-              <li key={a.input.clientRequestId}>
-                <p>
-                  {PUNCH_TYPE_LABEL[a.input.type]} tocada às {hora(a.createdAt, tz)}
-                </p>
-                {a.lastError ? (
-                  <>
-                    <p className="text-sm text-perigo">Não foi aceita: {a.lastError}</p>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={async () => {
-                        if (!window.confirm('Apagar do celular? Se a marcação era necessária, use “Esqueci de marcar”.')) return;
-                        await offlineQueue.remove(a.input.clientRequestId);
-                        await refreshPending();
-                      }}
-                    >
-                      Apagar do celular
-                    </Button>
-                  </>
+      {(() => {
+        const waiting = pending.filter((a) => !a.lastError);
+        const refused = pending.filter((a) => a.lastError);
+        return (
+          <>
+            {waiting.length ? (
+              <section className="rounded-[8px] border border-marcador bg-atencao-suave p-4">
+                <p className="font-bold text-atencao">{waiting.length === 1 ? '1 marcação esperando internet' : `${waiting.length} marcações esperando internet`}</p>
+                <ul className="mt-2 space-y-1">
+                  {waiting.map((a) => (
+                    <li key={a.input.clientRequestId}>
+                      {PUNCH_TYPE_LABEL[a.input.type]} tocada às {hora(a.createdAt, tz)}
+                    </li>
+                  ))}
+                </ul>
+                {online ? (
+                  <Button variant="secondary" size="sm" className="mt-2" onClick={() => void syncPending()}>
+                    Enviar agora
+                  </Button>
                 ) : null}
-              </li>
-            ))}
-          </ul>
-          {online ? (
-            <Button variant="secondary" size="sm" className="mt-2" onClick={() => void syncPending()}>
-              Enviar agora
-            </Button>
-          ) : null}
-        </section>
-      ) : null}
+              </section>
+            ) : null}
+            {refused.length ? (
+              <section className="rounded-[8px] border border-perigo bg-perigo-suave p-4">
+                <p className="font-bold text-perigo">{refused.length === 1 ? '1 marcação não foi aceita' : `${refused.length} marcações não foram aceitas`}</p>
+                <ul className="mt-2 space-y-3">
+                  {refused.map((a) => (
+                    <li key={a.input.clientRequestId}>
+                      <p>
+                        {PUNCH_TYPE_LABEL[a.input.type]} tocada às {hora(a.createdAt, tz)}
+                      </p>
+                      <p className="text-sm text-texto-2">{a.lastError}</p>
+                      <div className="mt-1 flex flex-wrap gap-2">
+                        <Link href="/app/corrigir" className="inline-flex h-9 items-center rounded-[8px] bg-marca px-3 text-sm font-semibold text-white">
+                          Pedir ajuste
+                        </Link>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={async () => {
+                            await offlineQueue.remove(a.input.clientRequestId);
+                            await refreshPending();
+                          }}
+                        >
+                          Apagar do celular
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+          </>
+        );
+      })()}
+
+      <InstallCard />
 
       <section aria-label="Hoje">
         <h2 className="mb-2 text-md font-bold text-marca">Hoje</h2>

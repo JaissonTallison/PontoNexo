@@ -1,0 +1,25 @@
+{
+  "cookies": [
+    {
+      "name": "pn_session",
+      "value": "kDwOnRBQuCujE6PsoU9_Zif4dazt-ss7ssQ3ACeKdYg",
+      "domain": "localhost",
+      "path": "/",
+      "expires": 1795049277,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Strict"
+    },
+    {
+      "name": "pn_csrf",
+      "value": "A2xFm46IRuLpBficZThdFVMtlWDHKO9P",
+      "domain": "localhost",
+      "path": "/",
+      "expires": 1795049277,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Strict"
+    }
+  ],
+  "origins": []
+}

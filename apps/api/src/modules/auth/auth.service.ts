@@ -74,7 +74,7 @@ export class AuthService {
       });
       return user!.id;
     });
-    return this.startSession(userId, meta, null);
+    return this.openSession(userId, meta, null);
   }
 
   async login(email: string, password: string, meta: RequestMeta) {
@@ -105,15 +105,17 @@ export class AuthService {
       await this.platformAudit(lock ? 'auth.account_locked' : 'auth.login_failed', lock ? 'Conta bloqueada por tentativas incorretas' : 'Senha incorreta', meta, user.id);
       throw generic;
     }
-    await this.db.update(users).set({ failedLogins: 0, lockedUntil: null, lastLoginAt: new Date() }).where(eq(users.id, user.id));
-    return this.startSession(user.id, meta, 'auth.login');
+    await this.db.update(users).set({ failedLogins: 0, lockedUntil: null }).where(eq(users.id, user.id));
+    return this.openSession(user.id, meta, 'auth.login');
   }
 
-  private async startSession(userId: string, meta: RequestMeta, auditAction: string | null) {
+  /** Abre sessão para o usuário já autenticado (senha, código por celular ou passkey). */
+  async openSession(userId: string, meta: RequestMeta, auditAction: string | null) {
     const memberships = await this.sessions.memberships(userId);
     // empregador ativo: o primeiro vínculo do lado do empregador, senão o de funcionário
     const active = memberships.find((m) => m.role !== 'employee') ?? memberships[0] ?? null;
     const session = await this.sessions.create(userId, active, meta);
+    await this.db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, userId));
     if (auditAction) await this.platformAudit(auditAction, 'Acesso realizado', meta, userId);
     return session;
   }

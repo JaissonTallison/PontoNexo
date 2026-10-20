@@ -1,6 +1,6 @@
 'use client';
 import type { ClosingView, CorrectionView, Page } from '@pontonexo/shared';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import { CorrectionList, DecisionDialog } from '@/components/correcoes';
@@ -63,6 +63,10 @@ export default function Correcoes() {
   const list = useResource<Page<CorrectionView>>(`/me/corrections?status=all&pageSize=10&page=${page}`);
   const closings = useResource<ClosingView[]>('/me/closings');
   const [deciding, setDeciding] = useState<CorrectionView | null>(null);
+  // abrir a lista conta como "vi as respostas" (some do sino)
+  useEffect(() => {
+    if (list.data) void api.post('/me/corrections/seen').catch(() => undefined);
+  }, [list.data]);
   const [done, setDone] = useState<string | null>(null);
 
   const awaiting = list.data?.items.filter((c) => c.canDecide) ?? [];

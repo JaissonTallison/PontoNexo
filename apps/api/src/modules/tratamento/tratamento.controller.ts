@@ -42,6 +42,14 @@ export class TratamentoController {
     return this.corrections.list(scope, q, scope.membership.employeeId);
   }
 
+  @RequirePermission('self.read')
+  @Post('me/corrections/seen')
+  @HttpCode(200)
+  async seen(@Auth() auth: AuthContext) {
+    await this.corrections.markSeen(requireEmployee(auth));
+    return { ok: true };
+  }
+
   @RequirePermission('corrections.read')
   @Get('corrections')
   list(@Auth() auth: AuthContext, @Query({ schema: correctionListQuery }) q: z.infer<typeof correctionListQuery>) {

@@ -111,7 +111,7 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
 }
 
 /** Comprovante na tela, com cara de app. O documento formal completo vai para impressão/PDF. */
-export function ReceiptScreen({ r }: { r: ReceiptView }) {
+export function ReceiptScreen({ r, punchId }: { r: ReceiptView; punchId: string }) {
   const p = r.payload;
   const [date, time] = p.localTime.split(' ');
   const [d, m, y] = (date ?? '').split('/').map(Number) as [number, number, number];
@@ -197,9 +197,9 @@ export function ReceiptScreen({ r }: { r: ReceiptView }) {
       </Group>
 
       <div className="grid grid-cols-2 gap-3">
-        <button type="button" onClick={() => window.print()} className="flex h-12 items-center justify-center gap-2 rounded-[8px] bg-marca font-semibold text-white">
-          <FileDown size={18} aria-hidden /> Salvar PDF
-        </button>
+        <a href={`/api/me/receipts/${punchId}/pdf`} download className="flex h-12 items-center justify-center gap-2 rounded-[8px] bg-marca font-semibold text-white">
+          <FileDown size={18} aria-hidden /> Baixar PDF
+        </a>
         <button
           type="button"
           onClick={async () => {

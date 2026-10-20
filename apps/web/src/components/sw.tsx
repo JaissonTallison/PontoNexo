@@ -2,18 +2,16 @@
 import { useEffect } from 'react';
 
 /**
- * Service worker só em produção (lá os arquivos de /_next/static têm hash no nome e podem ficar em cache).
- * Em desenvolvimento os arquivos mudam com o mesmo nome: remove qualquer service worker e cache antigos.
+ * Produção: service worker completo (casca offline + notificações).
+ * Desenvolvimento: registra com ?dev=1, que só cuida de notificações e não guarda arquivos em cache
+ * (os arquivos do modo dev mudam com o mesmo nome e um cache velho quebraria a página).
  */
 export function RegisterServiceWorker() {
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;
-    if (process.env.NODE_ENV === 'production') {
-      navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => undefined);
-      return;
-    }
-    void navigator.serviceWorker.getRegistrations().then((regs) => Promise.all(regs.map((r) => r.unregister())));
-    if ('caches' in window) void caches.keys().then((keys) => Promise.all(keys.filter((k) => k.startsWith('pontonexo')).map((k) => caches.delete(k))));
+    const dev = process.env.NODE_ENV !== 'production';
+    if (dev && 'caches' in window) void caches.keys().then((keys) => Promise.all(keys.filter((k) => k.startsWith('pontonexo')).map((k) => caches.delete(k))));
+    navigator.serviceWorker.register(dev ? '/sw.js?dev=1' : '/sw.js', { scope: '/' }).catch(() => undefined);
   }, []);
   return null;
 }

@@ -1,5 +1,5 @@
 'use client';
-import { ChevronRight, CircleHelp, KeyRound, LogOut, ShieldCheck, type LucideIcon } from 'lucide-react';
+import { Building2, ChevronRight, CircleHelp, KeyRound, LogOut, ShieldCheck, Smartphone, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -45,10 +45,39 @@ export default function Perfil() {
       </section>
 
       <ul className="divide-y divide-borda overflow-hidden rounded-[8px] bg-card shadow-card">
+        <Option href="/app/conta/celular" icon={Smartphone} title="Este celular" hint="Lembretes, digital ou rosto e instalar o app" />
         <Option href="/app/conta/senha" icon={KeyRound} title="Trocar senha" hint="Crie uma senha nova para entrar" />
         <Option href="/app/privacidade" icon={ShieldCheck} title="Meus dados e privacidade" hint="Baixar meus dados e fazer pedidos" />
         <Option href="/app/ajuda" icon={CircleHelp} title="Como usar o app" hint="Passo a passo simples" />
       </ul>
+
+      {me.memberships.length > 1 ? (
+        <section>
+          <h2 className="mb-1 px-1 text-xs font-bold tracking-wide text-texto-3 uppercase">Onde eu trabalho</h2>
+          <ul className="divide-y divide-borda overflow-hidden rounded-[8px] bg-card shadow-card">
+            {me.memberships.map((m) => {
+              const current = m.employerId === me.active?.employerId;
+              return (
+                <li key={m.id}>
+                  <button
+                    type="button"
+                    disabled={current}
+                    onClick={async () => {
+                      await api.post('/auth/switch-employer', { employerId: m.employerId });
+                      window.location.href = m.role === 'employee' ? '/app' : '/painel';
+                    }}
+                    className="flex min-h-[60px] w-full items-center gap-3 px-4 py-3 text-left active:bg-realce"
+                  >
+                    <Building2 size={22} className="shrink-0 text-marca" aria-hidden />
+                    <span className="flex-1 font-semibold">{m.employerName}</span>
+                    {current ? <span className="text-sm font-semibold text-acao">Atual</span> : <span className="text-sm text-texto-3">Trocar</span>}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
 
       <button
         type="button"

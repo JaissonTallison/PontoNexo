@@ -1,8 +1,9 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Query, Req } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post, Query, Req, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { alertListQuery, alertReviewSchema, idParam, month, punchCreateSchema, punchListQuery, type PunchCreateInput } from '@pontonexo/shared';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
+import { receiptPdf } from './receipt-pdf.js';
 import { z } from 'zod';
 import type { AuthContext } from '../../common/auth/context.js';
 import { Auth, Public, requireEmployee, requireEmployer, RequirePermission } from '../../common/auth/decorators.js';
@@ -50,6 +51,20 @@ export class RegistradorController {
     return this.punches.receiptFor(scope.membership.employerId, punchId, scope.membership.employeeId);
   }
 
+  @RequirePermission('self.read')
+  @Get('me/receipts/:punchId/pdf')
+  async myReceiptPdf(@Auth() auth: AuthContext, @Param('punchId', { schema: idParam }) punchId: string, @Res() res: Response) {
+    const scope = requireEmployee(auth);
+    const r = await this.punches.receiptFor(scope.membership.employerId, punchId, scope.membership.employeeId);
+    this.sendPdf(res, await receiptPdf(r), r.payload.nsr);
+  }
+
+  private sendPdf(res: Response, pdf: Buffer, nsr: number) {
+    res.setHeader('content-type', 'application/pdf');
+    res.setHeader('content-disposition', `attachment; filename="comprovante-ponto-${String(nsr).padStart(9, '0')}.pdf"`);
+    res.send(pdf);
+  }
+
   // ───── Empregador ─────
 
   @RequirePermission('punches.read')
@@ -62,6 +77,13 @@ export class RegistradorController {
   @Get('punches/:id/receipt')
   receipt(@Auth() auth: AuthContext, @Param('id', { schema: idParam }) id: string) {
     return this.punches.receiptFor(requireEmployer(auth).membership.employerId, id, null);
+  }
+
+  @RequirePermission('punches.read')
+  @Get('punches/:id/receipt.pdf')
+  async receiptPdf(@Auth() auth: AuthContext, @Param('id', { schema: idParam }) id: string, @Res() res: Response) {
+    const r = await this.punches.receiptFor(requireEmployer(auth).membership.employerId, id, null);
+    this.sendPdf(res, await receiptPdf(r), r.payload.nsr);
   }
 
   @RequirePermission('audit.read')

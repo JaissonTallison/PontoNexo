@@ -11,7 +11,8 @@ import {
 } from '@pontonexo/shared';
 import type { z } from 'zod';
 import type { Tx } from '../../db/client.js';
-import { correctionRequests, employees, employerCounters, punchRecords, treatments, users } from '../../db/schema.js';
+import { correctionReads, correctionRequests, employees, employerCounters, punchRecords, treatments, users } from '../../db/schema.js';
+import { PushService } from '../notificacoes/push.service.js';
 import { AuditService } from '../../common/audit.service.js';
 import type { AuthContext } from '../../common/auth/context.js';
 import type { EmployerScope } from '../../common/auth/decorators.js';
@@ -45,7 +46,26 @@ export class CorrectionsService {
   constructor(
     private readonly tenant: TenantDb,
     private readonly audit: AuditService,
+    private readonly push: PushService,
   ) {}
+
+  /** Funcionário abriu "Meus pedidos": as decisões passam a contar como vistas (sino). */
+  async markSeen(scope: EmployerScope) {
+    const { employerId, employeeId } = scope.membership;
+    if (!employeeId) return;
+    await this.tenant.run(employerId, async (tx) => {
+      const decided = await tx
+        .select({ id: correctionRequests.id })
+        .from(correctionRequests)
+        .where(and(eq(correctionRequests.employeeId, employeeId), eq(correctionRequests.initiatedBy, 'employee'), inArray(correctionRequests.status, ['approved', 'rejected'])));
+      if (decided.length) await tx.insert(correctionReads).values(decided.map((d) => ({ employerId, correctionRequestId: d.id, userId: scope.userId }))).onConflictDoNothing();
+    });
+  }
+
+  /** Avisos no celular do funcionário; falha de envio nunca desfaz a operação. */
+  private notify(employerId: string, employeeId: string, title: string, body: string) {
+    void this.push.sendToEmployee(employerId, employeeId, { title, body, url: '/app/correcoes', tag: 'pedidos' }).catch(() => 0);
+  }
 
   private async views(tx: Tx, rows: RequestRow[], auth: AuthContext): Promise<CorrectionView[]> {
     if (!rows.length) return [];
@@ -155,6 +175,9 @@ export class CorrectionsService {
       });
       const [view] = await this.views(tx, [req!], scope);
       return view!;
+    }).then((view) => {
+      if (!fromEmployee) this.notify(employerId, employeeId, 'Seu empregador pediu um ajuste', 'Toque para ver e responder se concorda.');
+      return view;
     });
   }
 
@@ -208,6 +231,11 @@ export class CorrectionsService {
       const [row] = await tx.select().from(correctionRequests).where(eq(correctionRequests.id, id));
       const [view] = await this.views(tx, [row!], scope);
       return view!;
+    }).then((view) => {
+      if (view.initiatedBy === 'employee') {
+        this.notify(employerId, view.employeeId, decision === 'approve' ? 'Seu pedido foi aprovado' : 'Seu pedido foi recusado', 'Toque para ver a resposta do empregador.');
+      }
+      return view;
     });
   }
 

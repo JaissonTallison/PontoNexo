@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { and, asc, count, desc, eq, gte, inArray, isNull, lte, or } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, inArray, isNull, lte, notExists, or } from 'drizzle-orm';
 import {
   allowedNext,
   checkSequence,
@@ -25,6 +25,7 @@ import { sql } from 'drizzle-orm';
 import type { Env } from '../../config/env.js';
 import type { Database, Tx } from '../../db/client.js';
 import {
+  correctionReads,
   correctionRequests,
   employeeWorkLocations,
   employerCounters,
@@ -153,6 +154,17 @@ export class PunchService {
         .leftJoin(closingAcknowledgements, eq(closingAcknowledgements.closingId, monthlyClosings.id))
         .where(and(eq(monthlyClosings.employeeId, employeeId), eq(monthlyClosings.status, 'closed')));
       const contract = await activeContract(tx, employeeId, today);
+      const [unseen] = await tx
+        .select({ n: count() })
+        .from(correctionRequests)
+        .where(
+          and(
+            eq(correctionRequests.employeeId, employeeId),
+            eq(correctionRequests.initiatedBy, 'employee'),
+            inArray(correctionRequests.status, ['approved', 'rejected']),
+            notExists(tx.select({ x: correctionReads.id }).from(correctionReads).where(and(eq(correctionReads.correctionRequestId, correctionRequests.id), eq(correctionReads.userId, scope.userId)))),
+          ),
+        );
       return {
         employee: { id: emp.id, fullName: emp.fullName },
         employerName,
@@ -167,6 +179,7 @@ export class PunchService {
         hasActiveContract: contract !== null && emp.status === 'active',
         pendingCorrections: pending?.n ?? 0,
         pendingAcknowledgements: (awaiting?.n ?? 0) + closings.filter((c) => !c.ack).length,
+        unseenDecisions: unseen?.n ?? 0,
       };
     });
   }

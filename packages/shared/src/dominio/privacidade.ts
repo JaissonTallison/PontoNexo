@@ -3,7 +3,7 @@
  * Cada mudança de conteúdo exige nova versão: o funcionário registra ciência de novo.
  * Texto-base sujeito a revisão do encarregado (DPO) / advogado do empregador.
  */
-export const PRIVACY_NOTICE_VERSION = '2026-10-19.2';
+export const PRIVACY_NOTICE_VERSION = '2026-10-19.3';
 
 export const PRIVACY_NOTICE: Array<{ title: string; body: string }> = [
   {
@@ -16,7 +16,7 @@ export const PRIVACY_NOTICE: Array<{ title: string; body: string }> = [
     title: 'O que é coletado e para quê',
     body:
       'Nome, CPF, e-mail e telefone: identificar você e emitir comprovantes. Horário de cada marcação, feito pelo relógio do servidor: ' +
-      'registrar a jornada. Posição GPS e precisão informadas pelo celular, apenas no momento em que você toca para marcar: ' +
+      'registrar a jornada. Celular: enviar o código de acesso por SMS, se você entrar pelo celular. Posição GPS e precisão informadas pelo celular, apenas no momento em que você toca para marcar: ' +
       'indicar se a marcação foi feita num local autorizado. Endereço IP e navegador: segurança da conta.',
   },
   {
@@ -25,7 +25,9 @@ export const PRIVACY_NOTICE: Array<{ title: string; body: string }> = [
       'Não há rastreamento contínuo nem em segundo plano, reconhecimento facial, biometria, fotos, contatos ou dados de outros aplicativos. ' +
       'O navegador não informa o nome da rede Wi-Fi, e o sistema não tenta obtê-lo. ' +
       'Se você usar o botão “Falar o motivo”, a fala é transformada em texto pelo serviço de voz do próprio celular (Google ou Apple); ' +
-      'o PontoNexo recebe só o texto, nunca o áudio. O uso é opcional: você pode escrever ou escolher uma resposta pronta.',
+      'o PontoNexo recebe só o texto, nunca o áudio. O uso é opcional: você pode escrever ou escolher uma resposta pronta. ' +
+      'Se você ativar “Entrar com digital ou rosto”, a biometria fica só no seu celular; guardamos apenas uma chave pública. ' +
+      'Se ligar os lembretes, guardamos o endereço técnico de notificação do aparelho, que você pode desligar a qualquer momento.',
   },
   {
     title: 'Bases legais',
