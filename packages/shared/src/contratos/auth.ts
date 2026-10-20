@@ -6,6 +6,8 @@ import { cpf, email, password, uuid } from './comum.js';
 export const loginSchema = z.object({
   email,
   password: z.string().min(1, 'Informe a senha.').max(128),
+  /** "Manter conectado": sessão de 30 dias; sem marcar, termina ao fechar o navegador (ou em SESSION_TTL_HOURS). */
+  remember: z.boolean().default(false),
 });
 export type LoginInput = z.infer<typeof loginSchema>;
 

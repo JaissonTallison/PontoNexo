@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
-import { Button, Checkbox, cls, Input, Notice } from '@/components/ui';
+import { Button, Checkbox, cls, Input, Notice, PasswordInput } from '@/components/ui';
 import { api, ApiError } from '@/lib/api';
 
 export default function Cadastro() {
@@ -43,7 +43,7 @@ export default function Cadastro() {
       <form onSubmit={submit} className="mt-5 space-y-4" noValidate>
         <Input label="Seu nome completo" value={f.name} onChange={set('name')} error={fields.name} autoComplete="name" />
         <Input label="E-mail" type="email" value={f.email} onChange={set('email')} error={fields.email} autoComplete="email" />
-        <Input label="Senha" type="password" value={f.password} onChange={set('password')} error={fields.password} hint="Mínimo de 10 caracteres, com letras e números." autoComplete="new-password" />
+        <PasswordInput label="Senha" value={f.password} onChange={set('password')} error={fields.password} hint="Mínimo de 10 caracteres, com letras e números." autoComplete="new-password" />
         <Input label="Como identificar a residência" value={f.displayName} onChange={set('displayName')} error={fields['employer.displayName']} hint="Aparece para os funcionários. Ex.: Residência Silva" />
         <Input label="Nome do empregador (como no eSocial)" value={f.legalName} onChange={set('legalName')} error={fields['employer.legalName']} hint="Se for você, pode deixar em branco." />
         <Input label="CPF do empregador" inputMode="numeric" value={f.cpf} onChange={set('cpf')} error={fields['employer.cpf']} />

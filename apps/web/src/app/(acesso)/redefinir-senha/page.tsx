@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useState, type FormEvent } from 'react';
-import { Button, cls, Input, Notice } from '@/components/ui';
+import { Button, cls, Input, Notice, PasswordInput } from '@/components/ui';
 import { api, ApiError } from '@/lib/api';
 
 function Redefinir() {
@@ -43,8 +43,8 @@ function Redefinir() {
         </div>
       ) : (
         <form onSubmit={submit} className="mt-5 space-y-4" noValidate>
-          <Input label="Senha" type="password" value={password} onChange={(e) => setPassword(e.target.value)} hint="Mínimo de 10 caracteres, com letras e números." className="h-11" autoComplete="new-password" />
-          <Input label="Repita a senha" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className="h-11" autoComplete="new-password" />
+          <PasswordInput label="Senha" value={password} onChange={(e) => setPassword(e.target.value)} hint="Mínimo de 10 caracteres, com letras e números." className="h-11" autoComplete="new-password" />
+          <PasswordInput label="Repita a senha" value={confirm} onChange={(e) => setConfirm(e.target.value)} className="h-11" autoComplete="new-password" />
           {error ? <Notice tone="error">{error}</Notice> : null}
           <Button type="submit" size="lg" className="w-full" busy={busy}>
             Salvar senha

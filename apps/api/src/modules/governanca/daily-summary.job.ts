@@ -1,3 +1,4 @@
+import { firstName, plural, renderEmail } from '../../common/email-template.js';
 import { Inject, Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { DateTime } from 'luxon';
@@ -50,11 +51,11 @@ export class DailySummaryJob implements OnModuleInit, OnModuleDestroy {
         const b = await this.gov.badgesFor(employerId);
         const dash = await this.gov.dashboardFor(employerId);
         const lines = [
-          b.pendingCorrections ? `• ${b.pendingCorrections} pedido(s) de ajuste para decidir` : null,
-          b.openAlerts ? `• ${b.openAlerts} ocorrência(s) de marcação para revisar` : null,
-          b.overdueDataRequests ? `• ${b.overdueDataRequests} pedido(s) de dados pessoais com prazo vencido` : null,
-          b.openIncidents ? `• ${b.openIncidents} incidente(s) em aberto` : null,
-          dash.unclosed ? `• O mês ${dash.unclosed.month.split('-').reverse().join('/')} ainda não foi fechado para ${dash.unclosed.employees} funcionário(s)` : null,
+          b.pendingCorrections ? plural(b.pendingCorrections, 'pedido de ajuste para decidir', 'pedidos de ajuste para decidir') : null,
+          b.openAlerts ? plural(b.openAlerts, 'ocorrência de marcação para revisar', 'ocorrências de marcação para revisar') : null,
+          b.overdueDataRequests ? plural(b.overdueDataRequests, 'pedido de dados pessoais com prazo vencido', 'pedidos de dados pessoais com prazo vencido') : null,
+          b.openIncidents ? plural(b.openIncidents, 'incidente em aberto', 'incidentes em aberto') : null,
+          dash.unclosed ? `O mês ${dash.unclosed.month.split('-').reverse().join('/')} ainda não foi fechado (${plural(dash.unclosed.employees, 'funcionário', 'funcionários')})` : null,
         ].filter(Boolean) as string[];
         if (!lines.length) return null;
         const claimed = await tx.insert(dailySummariesSent).values({ employerId, date: local.toISODate()! }).onConflictDoNothing().returning({ id: dailySummariesSent.id });
@@ -68,11 +69,19 @@ export class DailySummaryJob implements OnModuleInit, OnModuleDestroy {
         .innerJoin(users, eq(users.id, userRoles.userId))
         .where(and(eq(userRoles.employerId, employerId), eq(userRoles.active, true), inArray(userRoles.roleCode, ['employer_owner', 'employer_manager']), eq(users.status, 'active')));
       for (const r of recipients) {
-        await this.mail.send({
-          to: r.email,
-          subject: `PontoNexo · ${plan.name}: há itens para você ver hoje`,
-          text: `Olá, ${r.name}.\n\nResumo de hoje em ${plan.name}:\n\n${plan.lines.join('\n')}\n\nAbra o painel: ${this.env.WEB_ORIGIN}/painel\n\nVocê recebe este e-mail só nos dias em que há algo pendente.`,
-        });
+        const body = renderEmail(
+          {
+            preheader: plan.lines.join(' · '),
+            title: 'Resumo de hoje',
+            greeting: `Olá, ${firstName(r.name)}.`,
+            paragraphs: [`Há ${plan.lines.length === 1 ? 'um item esperando' : 'itens esperando'} por você em ${plan.name}:`],
+            items: plan.lines,
+            button: { label: 'Abrir o painel', url: `${this.env.WEB_ORIGIN}/painel` },
+            reason: 'Você recebe este resumo só nos dias em que há algo pendente.',
+          },
+          this.env.WEB_ORIGIN,
+        );
+        await this.mail.send({ to: r.email, subject: `Resumo de hoje · ${plan.name}`, ...body });
         sent++;
       }
     }

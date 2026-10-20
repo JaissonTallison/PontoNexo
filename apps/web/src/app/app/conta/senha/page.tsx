@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { BackBar, Button, Input, Notice } from '@/components/ui';
+import { BackBar, Button, Input, Notice, PasswordInput } from '@/components/ui';
 import { api, ApiError } from '@/lib/api';
 
 export default function TrocarSenha() {
@@ -30,9 +30,9 @@ export default function TrocarSenha() {
     <div>
       <BackBar title="Trocar senha" fallback="/app/conta" />
       <div className="space-y-4 rounded-[8px] bg-card p-4 shadow-card">
-        <Input label="Senha atual" type="password" autoComplete="current-password" value={f.currentPassword} onChange={(e) => setF({ ...f, currentPassword: e.target.value })} error={fields.currentPassword} className="h-12" />
-        <Input label="Senha nova" type="password" autoComplete="new-password" value={f.newPassword} onChange={(e) => setF({ ...f, newPassword: e.target.value })} error={fields.newPassword} hint="Pelo menos 10 caracteres, com letras e números." className="h-12" />
-        <Input label="Repita a senha nova" type="password" autoComplete="new-password" value={f.confirm} onChange={(e) => setF({ ...f, confirm: e.target.value })} error={fields.confirm} className="h-12" />
+        <PasswordInput label="Senha atual" autoComplete="current-password" value={f.currentPassword} onChange={(e) => setF({ ...f, currentPassword: e.target.value })} error={fields.currentPassword} className="h-12" />
+        <PasswordInput label="Senha nova" autoComplete="new-password" value={f.newPassword} onChange={(e) => setF({ ...f, newPassword: e.target.value })} error={fields.newPassword} hint="Pelo menos 10 caracteres, com letras e números." className="h-12" />
+        <PasswordInput label="Repita a senha nova" autoComplete="new-password" value={f.confirm} onChange={(e) => setF({ ...f, confirm: e.target.value })} error={fields.confirm} className="h-12" />
         {msg ? <Notice tone={msg.tone}>{msg.text}</Notice> : null}
         <Button size="lg" className="w-full bg-marca hover:bg-marca-2" busy={busy} onClick={save} disabled={!f.currentPassword || !f.newPassword}>
           Salvar senha nova

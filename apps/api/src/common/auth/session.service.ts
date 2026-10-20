@@ -9,7 +9,8 @@ import type { RequestMeta } from '../http.js';
 import { DB, ENV } from '../tokens.js';
 import type { ActiveMembership, AuthContext } from './context.js';
 
-const EMPLOYEE_SESSION_DAYS = 30;
+/** "Manter conectado": vale para funcionário e empregador, no aparelho em que foi marcado. */
+const REMEMBER_DAYS = 30;
 const TOUCH_INTERVAL_MS = 5 * 60_000;
 
 interface MembershipRow extends Record<string, unknown> {
@@ -40,15 +41,15 @@ export class SessionService {
     }));
   }
 
-  expiryFor(role: RoleCode | null): Date {
-    const ms = role === 'employee' ? EMPLOYEE_SESSION_DAYS * 86_400_000 : this.env.SESSION_TTL_HOURS * 3_600_000;
+  expiryFor(remember: boolean): Date {
+    const ms = remember ? REMEMBER_DAYS * 86_400_000 : this.env.SESSION_TTL_HOURS * 3_600_000;
     return new Date(Date.now() + ms);
   }
 
-  async create(userId: string, membership: ActiveMembership | null, meta: RequestMeta) {
+  async create(userId: string, membership: ActiveMembership | null, meta: RequestMeta, remember = false) {
     const token = randomToken(32);
     const csrfToken = randomToken(24);
-    const expiresAt = this.expiryFor(membership?.role ?? null);
+    const expiresAt = this.expiryFor(remember);
     const [row] = await this.db
       .insert(sessions)
       .values({
