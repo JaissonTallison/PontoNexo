@@ -116,10 +116,12 @@ function Assistente() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        {/* volta para a tela principal (Ponto) a qualquer momento; "Voltar" embaixo volta um passo */}
-        <Link href="/app" aria-label="Voltar para a tela do ponto" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] bg-card text-marca shadow-card active:bg-realce">
-          <ArrowLeft size={22} aria-hidden />
-        </Link>
+        {/* só no 1º passo: nos outros o botão "Voltar" embaixo já faz esse papel */}
+        {step === 1 ? (
+          <Link href="/app" aria-label="Voltar para a tela do ponto" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] bg-card text-marca shadow-card active:bg-realce">
+            <ArrowLeft size={22} aria-hidden />
+          </Link>
+        ) : null}
         <div className="min-w-0">
           <p className="text-sm font-semibold text-texto-3">Passo {step} de 3</p>
           <h1 className="text-xl font-bold text-marca">{step === 1 ? 'O que aconteceu?' : step === 2 ? (caso === 'faltei' ? 'Qual dia você faltou?' : 'Conte os detalhes') : 'Confirme e envie'}</h1>
