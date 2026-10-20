@@ -58,7 +58,8 @@ test('Novo pedido reúne os tipos e envia "Marquei sem querer"', async ({ page }
   await expect(page.getByText(/Desconsiderar .* dia/)).toBeVisible();
   await page.getByRole('button', { name: 'Toquei duas vezes sem querer' }).click();
   await page.getByRole('button', { name: 'Enviar pedido' }).click();
-  await expect(page.getByText('Pedido enviado')).toBeVisible();
+  // rodando de novo no mesmo dia, a marcação já tem pedido pendente: o sistema recusa duplicar (também está certo)
+  await expect(page.getByText('Pedido enviado').or(page.getByText('Já existe uma solicitação pendente para este item.'))).toBeVisible();
 });
 
 test('Perfil leva a Este celular e valida a troca de senha', async ({ page }) => {

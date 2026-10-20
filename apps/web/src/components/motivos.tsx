@@ -2,13 +2,14 @@
 import { Check, Mic } from 'lucide-react';
 import { useState } from 'react';
 import { Textarea } from './ui';
-import { VoiceButton } from './voz';
+import { useVoiceSupported, VoiceButton } from './voz';
 
 /**
  * Motivo em um toque: respostas prontas em botões grandes e "Outro motivo" com texto livre.
  * O texto escolhido é enviado como está, então o empregador lê a mesma frase.
  */
 export function QuickReasons({ title, options, value, onChange }: { title: string; options: string[]; value: string; onChange: (v: string) => void }) {
+  const voice = useVoiceSupported();
   const [other, setOther] = useState(false);
   const picked = !other && options.includes(value);
   return (
@@ -47,9 +48,12 @@ export function QuickReasons({ title, options, value, onChange }: { title: strin
         <div className="space-y-2">
           <VoiceButton onText={(t) => onChange(value.trim() ? `${value.trim()} ${t}` : t)} />
           <Textarea label="Motivo" value={value} onChange={(e) => onChange(e.target.value)} rows={3} maxLength={500} />
-          <p className="flex items-center gap-1 text-sm text-texto-3">
-            <Mic size={16} aria-hidden /> Também dá para usar o microfone do teclado.
-          </p>
+          {/* só quando o botão "Falar o motivo" não existe neste navegador: aí o caminho é o microfone do teclado */}
+          {!voice ? (
+            <p className="flex items-center gap-1 text-sm text-texto-3">
+              <Mic size={16} aria-hidden /> Para falar em vez de digitar, use o microfone do teclado.
+            </p>
+          ) : null}
         </div>
       ) : null}
     </fieldset>

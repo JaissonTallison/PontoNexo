@@ -44,15 +44,21 @@ const ERRORS: Record<string, string> = {
  * Botão "Falar": grava e devolve o texto quando a pessoa termina.
  * A transcrição é feita pelo serviço de voz do navegador (Google/Apple); o PontoNexo não recebe nem guarda áudio.
  */
-export function VoiceButton({ onText }: { onText: (text: string) => void }) {
+/** O navegador transcreve fala? (Chrome/Android e Safari/iPhone sim; alguns navegadores não) */
+export function useVoiceSupported() {
   const [supported, setSupported] = useState(false);
+  useEffect(() => setSupported(getRecognizer() !== null), []);
+  return supported;
+}
+
+export function VoiceButton({ onText }: { onText: (text: string) => void }) {
+  const supported = useVoiceSupported();
   const [listening, setListening] = useState(false);
   const [live, setLive] = useState('');
   const [error, setError] = useState<string | null>(null);
   const rec = useRef<SpeechRecognizer | null>(null);
   const finalText = useRef('');
 
-  useEffect(() => setSupported(getRecognizer() !== null), []);
   useEffect(() => () => rec.current?.stop(), []);
 
   if (!supported) return null;
