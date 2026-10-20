@@ -11,4 +11,4 @@ backups/
 playwright-report/
 test-results/
 .turbo/
-e2e/.auth/
+apps/web/e2e/.auth/
