@@ -257,6 +257,9 @@ export class EmployeesService {
   async createJobRole(scope: EmployerScope, input: z.infer<typeof jobRoleSchema>, meta: RequestMeta) {
     const { employerId } = scope.membership;
     return this.tenant.run(employerId, async (tx) => {
+      // mesmo nome (sem diferenciar maiúsculas) devolve a função que já existe
+      const [existing] = await tx.select({ id: jobRoles.id }).from(jobRoles).where(and(eq(jobRoles.employerId, employerId), sql`lower(${jobRoles.name}) = lower(${input.name})`));
+      if (existing) return { id: existing.id };
       const [r] = await tx.insert(jobRoles).values({ employerId, name: input.name, description: input.description ?? null }).returning({ id: jobRoles.id });
       await this.audit.record(tx, { employerId, category: 'data', action: 'job_role.created', actorUserId: scope.userId, entityType: 'job_role', entityId: r!.id, summary: `Função "${input.name}" criada`, ip: meta.ip });
       return { id: r!.id };

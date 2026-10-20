@@ -4,6 +4,7 @@ import { ArrowRight, Check, SkipForward, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
+import { JobRoleSelect } from '@/components/funcao';
 import { useSession } from '@/components/session';
 import { Button, Card, Checkbox, Input, Notice, PageHeader, Select } from '@/components/ui';
 import { SECAO } from '@/components/secoes';
@@ -81,7 +82,6 @@ export default function NovoFuncionario() {
   const { me } = useSession();
   const tz = me.timezone;
   const today = hojeLocal(tz);
-  const roles = useResource<Array<{ id: string; name: string }>>('/job-roles');
   const scheds = useResource<Array<{ id: string; name: string; active: boolean }>>('/schedules');
   const locs = useResource<Loc[]>('/locations');
   const [step, setStep] = useState(0);
@@ -148,14 +148,7 @@ export default function NovoFuncionario() {
               <Input label="Nome completo" autoComplete="off" value={f.fullName} onChange={(e) => setF({ ...f, fullName: e.target.value })} error={st.fields.fullName} />
             </div>
             <Input label="CPF" inputMode="numeric" placeholder="000.000.000-00" value={f.cpf} onChange={(e) => setF({ ...f, cpf: mascaraCpf(e.target.value) })} error={st.fields.cpf} hint="Aparece no comprovante de cada marcação." />
-            <Select label="Função" value={f.jobRoleId} onChange={(e) => setF({ ...f, jobRoleId: e.target.value })} error={st.fields.jobRoleId}>
-              <option value="">Sem função definida</option>
-              {(roles.data ?? []).map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.name}
-                </option>
-              ))}
-            </Select>
+            <JobRoleSelect value={f.jobRoleId} onChange={(id) => setF({ ...f, jobRoleId: id })} error={st.fields.jobRoleId} />
             <Input label="Celular" type="tel" inputMode="tel" placeholder="(11) 98765-4321" value={f.phone} onChange={(e) => setF({ ...f, phone: mascaraTelefone(e.target.value) })} error={st.fields.phone} />
             <Input label="E-mail" type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} error={st.fields.email} hint="Para enviar o acesso ao app." />
           </div>

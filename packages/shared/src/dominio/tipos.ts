@@ -155,3 +155,17 @@ export const DATA_REQUEST_KIND_LABEL: Record<DataRequestKind, string> = {
 };
 export const DATA_REQUEST_STATUS = ['open', 'answered', 'denied'] as const;
 export type DataRequestStatus = (typeof DATA_REQUEST_STATUS)[number];
+
+/** Funções mais comuns do trabalho doméstico: toda conta nova já começa com elas (o empregador pode criar outras). */
+export const DEFAULT_JOB_ROLES = [
+  'Empregado(a) doméstico(a)',
+  'Cozinheiro(a)',
+  'Babá',
+  'Cuidador(a) de idosos',
+  'Caseiro(a)',
+  'Jardineiro(a)',
+  'Motorista particular',
+  'Governanta',
+  'Arrumador(a)',
+  'Lavador(a) e passador(a)',
+] as const;

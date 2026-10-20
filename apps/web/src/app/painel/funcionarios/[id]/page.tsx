@@ -20,6 +20,7 @@ import { SECAO } from '@/components/secoes';
 import { api, ApiError } from '@/lib/api';
 import { dataHora, hojeLocal } from '@/lib/formato';
 import { useResource } from '@/lib/hooks';
+import { JobRoleSelect } from '@/components/funcao';
 import { mascaraTelefone } from '@/lib/mascara';
 
 interface Detail {
@@ -123,7 +124,6 @@ function Detalhe() {
   const d = useResource<Detail>(`/employees/${id}`);
   const locs = useResource<Array<{ id: string; name: string; active: boolean }>>('/locations');
   const scheds = useResource<Array<{ id: string; name: string; active: boolean }>>('/schedules');
-  const roles = useResource<Array<{ id: string; name: string }>>('/job-roles');
   const a = useAction(d.reload);
   const [edit, setEdit] = useState(false);
   const [form, setForm] = useState({ fullName: '', email: '', phone: '', jobRoleId: '', status: 'active' as 'active' | 'inactive' });
@@ -175,14 +175,7 @@ function Detalhe() {
             </div>
             <Input label="E-mail" type="email" value={form.email} onChange={(x) => setForm({ ...form, email: x.target.value })} error={a.fields.email} />
             <Input label="Celular" type="tel" inputMode="tel" value={form.phone} onChange={(x) => setForm({ ...form, phone: mascaraTelefone(x.target.value) })} />
-            <Select label="Função" value={form.jobRoleId} onChange={(x) => setForm({ ...form, jobRoleId: x.target.value })}>
-              <option value="">Sem função definida</option>
-              {(roles.data ?? []).map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.name}
-                </option>
-              ))}
-            </Select>
+            <JobRoleSelect value={form.jobRoleId} onChange={(id) => setForm({ ...form, jobRoleId: id })} />
             <Select label="Situação" value={form.status} onChange={(x) => setForm({ ...form, status: x.target.value as 'active' | 'inactive' })} hint="Inativo perde o acesso ao app; o histórico é mantido.">
               <option value="active">Ativo</option>
               <option value="inactive">Inativo</option>
