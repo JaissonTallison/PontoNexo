@@ -1,5 +1,4 @@
 'use client';
-import { browserSupportsWebAuthn, startAuthentication, startRegistration } from '@simplewebauthn/browser';
 import { api } from './api';
 
 // ───── Notificações ─────
@@ -38,22 +37,6 @@ export async function disablePush() {
   if (!sub) return;
   await api.post('/me/push/unsubscribe', { endpoint: sub.endpoint }).catch(() => undefined);
   await sub.unsubscribe();
-}
-
-// ───── Biometria (passkey) ─────
-
-export const passkeySupported = () => typeof window !== 'undefined' && browserSupportsWebAuthn();
-
-export async function registerPasskey(deviceLabel: string) {
-  const { challengeId, options } = await api.post<{ challengeId: string; options: Parameters<typeof startRegistration>[0]['optionsJSON'] }>('/auth/passkeys/register/options');
-  const response = await startRegistration({ optionsJSON: options });
-  await api.post('/auth/passkeys/register', { challengeId, response, deviceLabel });
-}
-
-export async function loginWithPasskey() {
-  const { challengeId, options } = await api.post<{ challengeId: string; options: Parameters<typeof startAuthentication>[0]['optionsJSON'] }>('/auth/passkeys/login/options');
-  const response = await startAuthentication({ optionsJSON: options });
-  await api.post('/auth/passkeys/login', { challengeId, response });
 }
 
 // ───── Instalação (PWA) ─────

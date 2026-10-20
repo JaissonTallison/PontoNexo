@@ -39,12 +39,6 @@ const schema = z.object({
   VAPID_PRIVATE_KEY: z.string().default(''),
   VAPID_SUBJECT: z.string().default('mailto:suporte@pontonexo.local'),
   REMINDERS_ENABLED: bool.default(true),
-  OTP_PROVIDER: z.enum(['console', 'twilio']).default('console'),
-  TWILIO_ACCOUNT_SID: z.string().optional(),
-  TWILIO_AUTH_TOKEN: z.string().optional(),
-  TWILIO_FROM: z.string().optional(),
-  WEBAUTHN_RP_ID: z.string().default('localhost'),
-  WEBAUTHN_RP_NAME: z.string().default('PontoNexo'),
 });
 
 export type Env = z.infer<typeof schema>;

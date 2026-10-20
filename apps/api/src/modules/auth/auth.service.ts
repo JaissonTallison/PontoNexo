@@ -109,7 +109,7 @@ export class AuthService {
     return this.openSession(user.id, meta, 'auth.login');
   }
 
-  /** Abre sessão para o usuário já autenticado (senha, código por celular ou passkey). */
+  /** Abre sessão para o usuário já autenticado (senha). */
   async openSession(userId: string, meta: RequestMeta, auditAction: string | null) {
     const memberships = await this.sessions.memberships(userId);
     // empregador ativo: o primeiro vínculo do lado do empregador, senão o de funcionário

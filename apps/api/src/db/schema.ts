@@ -815,53 +815,6 @@ export const privacyAcknowledgements = pgTable(
 
 // ───────────────────────────── Acesso pelo celular, passkeys e notificações ─────────────────────────────
 
-/** Código de 6 dígitos para entrar pelo número de celular. Só o hash é guardado. */
-export const loginCodes = pgTable(
-  'login_codes',
-  {
-    id: id(),
-    userId: uuid()
-      .notNull()
-      .references(() => users.id),
-    phoneDigits: text().notNull(),
-    codeHash: text().notNull(),
-    attempts: integer().notNull().default(0),
-    expiresAt: ts().notNull(),
-    usedAt: ts(),
-    createdAt: createdAt(),
-  },
-  (t) => [index('login_codes_phone_idx').on(t.phoneDigits, t.createdAt)],
-);
-
-/** Passkeys (WebAuthn): a biometria fica no aparelho; aqui só a chave pública. */
-export const webauthnCredentials = pgTable(
-  'webauthn_credentials',
-  {
-    /** id da credencial em base64url */
-    id: text().primaryKey(),
-    userId: uuid()
-      .notNull()
-      .references(() => users.id),
-    publicKey: text().notNull(),
-    counter: bigint({ mode: 'number' }).notNull().default(0),
-    transports: text().array(),
-    deviceLabel: text(),
-    createdAt: createdAt(),
-    lastUsedAt: ts(),
-  },
-  (t) => [index('webauthn_user_idx').on(t.userId)],
-);
-
-export const webauthnChallenges = pgTable('webauthn_challenges', {
-  id: id(),
-  userId: uuid().references(() => users.id),
-  kind: text({ enum: ['register', 'login'] }).notNull(),
-  challenge: text().notNull(),
-  expiresAt: ts().notNull(),
-  usedAt: ts(),
-  createdAt: createdAt(),
-});
-
 /** Inscrições de notificação (Web Push) por aparelho. */
 export const pushSubscriptions = pgTable(
   'push_subscriptions',

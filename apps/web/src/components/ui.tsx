@@ -320,6 +320,7 @@ export function Segmented<T extends string>({ value, options, onChange, label }:
 
 export function Dialog({ open, title, onClose, children, footer }: { open: boolean; title: string; onClose: () => void; children: ReactNode; footer?: ReactNode }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
@@ -331,12 +332,13 @@ export function Dialog({ open, title, onClose, children, footer }: { open: boole
       ref={ref}
       onClose={onClose}
       onCancel={onClose}
+      aria-labelledby={titleId}
       className="m-auto w-[min(560px,calc(100vw-24px))] rounded-[8px] border border-borda bg-card p-0 text-texto shadow-flutuante backdrop:bg-marca/40"
     >
       {open ? (
         <div>
           <header className="flex items-center justify-between border-b border-borda px-4 py-3">
-            <h2 className="text-lg font-bold text-marca">{title}</h2>
+            <h2 id={titleId} className="text-lg font-bold text-marca">{title}</h2>
             <button onClick={onClose} className="rounded-[8px] p-1 text-texto-3 hover:bg-realce" aria-label="Fechar">
               <X size={18} />
             </button>
