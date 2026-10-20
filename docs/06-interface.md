@@ -26,3 +26,9 @@ Público majoritariamente idoso: linguagem do dia a dia, poucas decisões por te
 - As boas-vindas e as dicas automáticas de primeiro uso foram **retiradas** a pedido do cliente (não ficaram boas). Ficaram só as páginas de ajuda, abertas quando a pessoa procura: "Ajuda e explicações" no painel (textos em `components/secoes.ts`) e "Como usar o app" no funcionário, com o botão "Ouvir" (`components/ouvir.tsx`, voz do próprio aparelho).
 - **Responsividade:** tabelas viram cartões pela largura do próprio card (`@container`), não da tela. Auditoria de todas as telas do painel em 360, 390, 768, 820, 1024, 1280, 1366, 1920 e 2560 px: sem rolagem lateral nem tabela cortada.
 - Botões de ação com ícone (lucide, 18 px) à esquerda do texto; "Salvar e continuar" com a seta à direita.
+
+## Celular: tela fixa e aparelhos (20/10/2026)
+- A página nunca rola nem "estica" (`html, body { position: fixed; overflow: hidden }` só em tela; impressão normal). Cada área tem a altura da tela (`h-dvh`) e rola só no conteúdo (`overscroll-none`); topo e barra de baixo ficam parados.
+- Só tema claro (`color-scheme: light` + `viewport.colorScheme`): impede o modo escuro forçado do Samsung Internet e do navegador da Xiaomi.
+- Campos com 16 px no celular (evita zoom automático do iPhone) e data/hora sem largura mínima do Safari.
+- Auditoria em 7 tamanhos Android (320×640 a 412×915: Moto E, Galaxy A03/A14/S23, Moto G, Redmi Note, Xiaomi 13): login cabe sem rolar e nenhuma tela passa da largura.

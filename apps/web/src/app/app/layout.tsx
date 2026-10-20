@@ -2,7 +2,7 @@
 import { Bell, CalendarDays, CircleHelp, Clock, Inbox, UserRound } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { PunchContextProvider, usePunchContext } from '@/components/ponto-context';
 import { useOnline } from '@/lib/hooks';
 import { offlineQueue } from '@/lib/offline';
@@ -60,11 +60,22 @@ function HeaderStatus({ path }: { path: string }) {
 function Shell({ children }: { children: ReactNode }) {
   const { me, reload } = useSession();
   const path = usePathname();
+  const mainRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    mainRef.current?.scrollTo(0, 0);
+  }, [path]);
 
   if (me.active?.role !== 'employee') {
     return <Empty title="Este acesso é do painel do empregador" action={<Link href="/painel" className="font-semibold text-acao underline">Ir para o painel</Link>} />;
   }
-  if (!me.privacyAcknowledged) return <PrivacyGate onDone={reload} />;
+  if (!me.privacyAcknowledged) {
+    // a página é fixa: o aviso (que pode ser longo) rola por dentro
+    return (
+      <div className="h-dvh overflow-y-auto overscroll-none">
+        <PrivacyGate onDone={reload} />
+      </div>
+    );
+  }
   const firstName = me.user.name.split(' ')[0];
 
   const isActive = (href: string) => (href === '/app' ? path === '/app' || path.startsWith('/app/comprovante') : href === '/app/conta' ? path.startsWith('/app/conta') || path === '/app/privacidade' || path === '/app/ajuda' : path.startsWith(href));
@@ -94,8 +105,8 @@ function Shell({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div className="min-h-screen pb-[calc(76px+env(safe-area-inset-bottom))] print:p-0">
-      <header className="sticky top-0 z-20 flex items-center gap-3 bg-marca px-4 py-2.5 print:hidden">
+    <div className="flex h-dvh flex-col print:block print:h-auto">
+      <header className="z-20 flex shrink-0 items-center gap-3 bg-marca px-4 pt-[max(10px,env(safe-area-inset-top))] pb-2.5 print:hidden">
         <img src="/brand/pontonexo-simbolo-fundo-escuro.svg" alt="" className="h-10 w-auto shrink-0" />
         <span className="min-w-0 flex-1">
           <span className="block truncate text-md font-bold text-white">Olá, {firstName}</span>
@@ -103,8 +114,11 @@ function Shell({ children }: { children: ReactNode }) {
         </span>
         <HeaderStatus path={path} />
       </header>
-      <main className="mx-auto w-full max-w-[640px] px-4 py-4 print:max-w-none print:p-0">{children}</main>
-      <nav aria-label="Navegação" className="fixed inset-x-0 bottom-0 z-20 bg-marca pb-[env(safe-area-inset-bottom)] print:hidden">
+      {/* só o conteúdo rola; topo e barra de baixo ficam parados, como em aplicativo */}
+      <main ref={mainRef} className="sem-barra min-h-0 flex-1 overflow-y-auto overscroll-none print:overflow-visible">
+        <div className="mx-auto w-full max-w-[640px] px-4 py-4 print:max-w-none print:p-0">{children}</div>
+      </main>
+      <nav aria-label="Navegação" className="z-20 shrink-0 bg-marca pb-[env(safe-area-inset-bottom)] print:hidden">
         {tabs}
       </nav>
     </div>
@@ -121,11 +135,6 @@ function EmployeeOnly({ children }: { children: ReactNode }) {
 }
 
 export default function AppLayout({ children }: { children: ReactNode }) {
-  // barra de rolagem escondida só enquanto o app do funcionário está aberto
-  useEffect(() => {
-    document.documentElement.classList.add('app-sem-barra');
-    return () => document.documentElement.classList.remove('app-sem-barra');
-  }, []);
   return (
     <SessionProvider>
       <EmployeeOnly>

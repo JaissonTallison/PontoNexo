@@ -422,7 +422,7 @@ function Shell({ children }: { children: ReactNode }) {
       {/* a barra superior fica fixa; só o conteúdo rola, com a barra de rolagem abaixo dela */}
       <div className="flex h-dvh min-w-0 flex-col print:block print:h-auto">
         <TopBar onMenu={toggle} collapsed={collapsed} badges={badges.data} />
-        <main ref={mainRef} className="conteudo-rolagem min-h-0 flex-1 overflow-y-auto px-4 py-5 lg:px-6 print:overflow-visible print:p-0">
+        <main ref={mainRef} className="conteudo-rolagem min-h-0 flex-1 overflow-y-auto overscroll-none px-4 py-5 lg:px-6 print:overflow-visible print:p-0">
           {children}
         </main>
       </div>

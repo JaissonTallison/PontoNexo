@@ -46,7 +46,7 @@ export default function AcessoLayout({ children }: { children: ReactNode }) {
             <img src="/brand/pontonexo-logo-horizontal-fundo-escuro.svg" alt="PontoNexo" className="h-9 w-auto" />
           </Link>
         </header>
-        <main className="sem-barra flex min-h-0 flex-1 justify-center overflow-y-auto overscroll-contain px-4 py-4 sm:py-8 lg:px-10">
+        <main className="sem-barra flex min-h-0 flex-1 justify-center overflow-y-auto overscroll-none px-4 py-4 sm:py-8 lg:px-10">
           <div className="my-auto w-full max-w-[440px]">
             <BackToLogin />
             {children}

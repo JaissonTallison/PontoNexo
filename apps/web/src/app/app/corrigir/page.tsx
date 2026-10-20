@@ -1,6 +1,6 @@
 'use client';
 import { formatDateBR, localDate, localToInstant, type CorrectionKind, type PunchType, type PunchView } from '@pontonexo/shared';
-import { CalendarX, Clock3, PencilLine } from 'lucide-react';
+import { ArrowLeft, CalendarX, Clock3, PencilLine } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useState, type ReactNode } from 'react';
@@ -115,9 +115,15 @@ function Assistente() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <p className="text-sm font-semibold text-texto-3">Passo {step} de 3</p>
-        <h1 className="text-xl font-bold text-marca">{step === 1 ? 'O que aconteceu?' : step === 2 ? (caso === 'faltei' ? 'Qual dia você faltou?' : 'Conte os detalhes') : 'Confirme e envie'}</h1>
+      <div className="flex items-center gap-3">
+        {/* volta para a tela principal (Ponto) a qualquer momento; "Voltar" embaixo volta um passo */}
+        <Link href="/app" aria-label="Voltar para a tela do ponto" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] bg-card text-marca shadow-card active:bg-realce">
+          <ArrowLeft size={22} aria-hidden />
+        </Link>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-texto-3">Passo {step} de 3</p>
+          <h1 className="text-xl font-bold text-marca">{step === 1 ? 'O que aconteceu?' : step === 2 ? (caso === 'faltei' ? 'Qual dia você faltou?' : 'Conte os detalhes') : 'Confirme e envie'}</h1>
+        </div>
       </div>
 
       {step === 1 ? (
