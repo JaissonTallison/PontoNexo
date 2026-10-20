@@ -94,7 +94,7 @@ export function PrintableTimesheet({ t }: { t: TimesheetView }) {
             ];
             const extra = d.overtimeSeconds || d.restOrHolidaySeconds;
             return (
-              <tr key={d.date} className="border-b border-neutral-300 align-top">
+              <tr key={d.date} className="border-b border-neutral-300 align-top even:bg-neutral-100">
                 <td className="py-0.5 pr-1 whitespace-nowrap tabular-nums">
                   {formatDateBR(d.date).slice(0, 5)} {weekdayShort(d.date)}
                 </td>

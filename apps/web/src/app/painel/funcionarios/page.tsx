@@ -42,7 +42,7 @@ export default function Funcionarios() {
         title="Funcionários"
         actions={
           can('employees.write') ? (
-            <Link href="/painel/funcionarios/novo" className="inline-flex h-9 items-center rounded-[8px] bg-acao px-4 font-semibold text-white hover:bg-acao-hover">
+            <Link href="/painel/funcionarios/novo" className="inline-flex h-9 items-center rounded-[8px] bg-marca px-4 font-semibold text-white hover:bg-marca-2">
               Novo funcionário
             </Link>
           ) : null

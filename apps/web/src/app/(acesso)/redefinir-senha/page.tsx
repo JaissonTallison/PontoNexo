@@ -37,7 +37,7 @@ function Redefinir() {
       {done ? (
         <div className="mt-4 space-y-4">
           <p className="text-texto-2">Senha salva. Por segurança, sessões abertas em outros aparelhos foram encerradas.</p>
-          <Link href="/entrar" className="inline-flex h-12 w-full items-center justify-center rounded-[8px] bg-acao font-semibold text-white">
+          <Link href="/entrar" className="inline-flex h-12 w-full items-center justify-center rounded-[8px] bg-marca font-semibold text-white">
             Entrar
           </Link>
         </div>

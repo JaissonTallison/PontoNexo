@@ -89,7 +89,7 @@ export function TimesheetTable({ t }: { t: TimesheetView }) {
             const issues = d.issues.filter((i) => !INFO_ISSUES.has(i.code));
             const info = d.issues.filter((i) => INFO_ISSUES.has(i.code));
             return (
-              <tr key={d.date} className="border-b border-borda align-top even:bg-zebra">
+              <tr key={d.date} className="border-b border-borda align-top even:bg-zebra hover:bg-realce">
                 <td className="px-2 py-2 whitespace-nowrap tabular">
                   {formatDateBR(d.date).slice(0, 5)} <span className="text-texto-3">{weekdayShort(d.date)}</span>
                 </td>

@@ -4,7 +4,7 @@ import { Fingerprint } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState, type FormEvent } from 'react';
-import { Button, cls, Input, Notice, Segmented } from '@/components/ui';
+import { Button, Input, Notice, Segmented } from '@/components/ui';
 import { api, ApiError } from '@/lib/api';
 import { loginWithPasskey, passkeySupported } from '@/lib/dispositivo';
 
@@ -65,20 +65,25 @@ function Entrar() {
   };
 
   return (
-    <div className={`${cls.card} p-6`}>
-      <h1 className="text-xl font-bold text-marca">Entrar</h1>
+    <div className="cartao-3d rounded-[8px] bg-card p-6 sm:p-8">
+      <h1 className="text-2xl font-bold text-marca">Entrar no PontoNexo</h1>
+      <p className="mt-1 text-texto-2">Funcionário ou empregador, use o mesmo acesso.</p>
 
       {canPasskey ? (
         <>
           <Button size="lg" className="mt-5 w-full bg-marca hover:bg-marca-2" busy={busy} onClick={() => void run(async () => { await loginWithPasskey(); await goIn(); })}>
             <Fingerprint size={22} aria-hidden /> Entrar com digital ou rosto
           </Button>
-          <p className="mt-1 text-center text-xs text-texto-3">Funciona depois de ativar em Perfil › Este celular.</p>
-          <p className="my-4 text-center text-sm text-texto-3">ou</p>
+          <p className="mt-1.5 text-center text-xs text-texto-3">Funciona depois de ativar em Perfil › Este celular.</p>
+          <div className="my-5 flex items-center gap-3 text-sm text-texto-3" aria-hidden>
+            <span className="h-px flex-1 bg-borda" />
+            ou
+            <span className="h-px flex-1 bg-borda" />
+          </div>
         </>
       ) : null}
 
-      <div className={canPasskey ? '' : 'mt-5'}>
+      <div className={`[&>div]:grid [&>div]:w-full [&>div]:grid-cols-2 ${canPasskey ? '' : 'mt-6'}`}>
         <Segmented
           label="Como entrar"
           value={mode}

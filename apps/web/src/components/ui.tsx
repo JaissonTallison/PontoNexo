@@ -14,8 +14,8 @@ export const cls = {
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 const variants: Record<Variant, string> = {
-  primary: 'bg-acao text-white hover:bg-acao-hover disabled:bg-borda-forte',
-  secondary: 'border border-borda-forte bg-card text-marca hover:bg-realce',
+  primary: 'bg-marca text-white hover:bg-marca-2 disabled:bg-borda-forte',
+  secondary: 'border border-marca/70 bg-card text-marca hover:bg-marca-suave',
   ghost: 'text-marca hover:bg-realce',
   danger: 'border border-perigo bg-card text-perigo hover:bg-perigo-suave',
 };

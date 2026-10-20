@@ -41,6 +41,12 @@ export class GovernanceController {
     return this.gov.dashboard(requireEmployer(auth));
   }
 
+  @RequirePermission('employer.read')
+  @Get('dashboard/badges')
+  badges(@Auth() auth: AuthContext) {
+    return this.gov.badges(requireEmployer(auth));
+  }
+
   // ───── Auditoria ─────
 
   @RequirePermission('audit.read')

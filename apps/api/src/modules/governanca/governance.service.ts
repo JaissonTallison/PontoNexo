@@ -1,6 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { and, count, desc, eq, gte, inArray, lt, ne } from 'drizzle-orm';
 import {
+  calculatePeriod,
+  DEFAULT_RULES,
+  effectivePunches,
+  localDate,
+  resolveExpectedDay,
+  type DashboardBadges,
+  type DashboardTodayRow,
   addDays,
   localToInstant,
   PRIVACY_NOTICE,
@@ -22,8 +29,11 @@ import {
   correctionRequests,
   dataSubjectRequests,
   employees,
+  employers,
   incidents,
   incidentUpdates,
+  punchRecords,
+  treatments,
   privacyAcknowledgements,
   punchAlerts,
   retentionPolicies,
@@ -36,6 +46,7 @@ import { conflict, notFound } from '../../common/errors.js';
 import type { RequestMeta } from '../../common/http.js';
 import { TenantDb } from '../../common/tenant.js';
 import { offsetOf, toPage } from '../../common/util.js';
+import { loadHolidays, loadScheduleContext } from '../escalas/schedules.service.js';
 import { PunchService } from '../registrador/punch.service.js';
 import { TimeService } from '../time/time.service.js';
 
@@ -281,6 +292,65 @@ export class GovernanceService {
 
   // ───── Painel ─────
 
+  /** Números do sino da barra superior (consulta leve, chamada a cada troca de tela). */
+  async badges(scope: EmployerScope): Promise<DashboardBadges> {
+    const { employerId } = scope.membership;
+    return this.tenant.run(employerId, async (tx) => {
+      const one = async (q: Promise<Array<{ n: number }>>) => (await q)[0]?.n ?? 0;
+      return {
+        pendingCorrections: await one(tx.select({ n: count() }).from(correctionRequests).where(and(eq(correctionRequests.employerId, employerId), eq(correctionRequests.status, 'pending'), eq(correctionRequests.initiatedBy, 'employee')))),
+        openAlerts: await one(tx.select({ n: count() }).from(punchAlerts).where(and(eq(punchAlerts.employerId, employerId), eq(punchAlerts.status, 'open')))),
+        overdueDataRequests: await one(tx.select({ n: count() }).from(dataSubjectRequests).where(and(eq(dataSubjectRequests.employerId, employerId), eq(dataSubjectRequests.status, 'open'), lt(dataSubjectRequests.dueAt, new Date())))),
+        openIncidents: await one(tx.select({ n: count() }).from(incidents).where(and(eq(incidents.employerId, employerId), ne(incidents.status, 'resolved')))),
+      };
+    });
+  }
+
+  /** Situação de hoje de cada funcionário ativo: estado, entrada, horas até agora e ocorrências. */
+  private async todayRows(tx: Tx, employerId: string): Promise<{ rows: DashboardTodayRow[]; punchesToday: number }> {
+    const [employer] = await tx.select().from(employers).where(eq(employers.id, employerId));
+    const tz = employer!.timezone;
+    const now = new Date();
+    const today = localDate(now, tz);
+    const dayStart = localToInstant(today, '00:00', tz);
+    const emps = await tx.select({ id: employees.id, fullName: employees.fullName }).from(employees).where(and(eq(employees.employerId, employerId), eq(employees.status, 'active'))).orderBy(employees.fullName);
+    const holidays = await loadHolidays(tx, employerId, today, today);
+    const rows: DashboardTodayRow[] = [];
+    let punchesToday = 0;
+    for (const e of emps) {
+      const punches = await tx.select().from(punchRecords).where(and(eq(punchRecords.employeeId, e.id), gte(punchRecords.serverTime, new Date(dayStart.getTime() - 86_400_000))));
+      const todays = punches.filter((p) => p.serverTime >= dayStart);
+      punchesToday += todays.length;
+      const tr = await tx.select().from(treatments).where(eq(treatments.employeeId, e.id));
+      const dis = new Set(tr.filter((t) => t.kind === 'disregard' && t.punchRecordId).map((t) => t.punchRecordId!));
+      const eff = effectivePunches(punches.map((p) => ({ id: p.id, type: p.type, at: p.serverTime })), dis, []);
+      const sched = await loadScheduleContext(tx, e.id);
+      const expected = resolveExpectedDay(today, sched.assignments, sched.schedules, holidays);
+      const day = calculatePeriod({ dates: [today], tz, punches: eff, expected: () => expected, justifiedDates: new Set(), rules: DEFAULT_RULES, now }).days[0]!;
+      const [open] = await tx.select({ state: workSessions.state }).from(workSessions).where(and(eq(workSessions.employeeId, e.id), inArray(workSessions.state, ['working', 'on_break'])));
+      const alerts = todays.length ? (await tx.select({ n: count() }).from(punchAlerts).where(inArray(punchAlerts.punchRecordId, todays.map((p) => p.id))))[0]?.n ?? 0 : 0;
+      const firstIn = todays.find((p) => p.type === 'clock_in')?.serverTime ?? null;
+      const state: DashboardTodayRow['state'] = open
+        ? (open.state as 'working' | 'on_break')
+        : todays.length
+          ? 'done'
+          : expected.kind === 'workday' && expected.start && now >= localToInstant(today, expected.start, tz)
+            ? 'absent'
+            : 'off';
+      rows.push({
+        employeeId: e.id,
+        fullName: e.fullName,
+        state,
+        firstIn: firstIn?.toISOString() ?? null,
+        lastPunchAt: todays.at(-1)?.serverTime.toISOString() ?? null,
+        workedSeconds: day.workedSeconds,
+        expectedSeconds: expected.expectedSeconds,
+        alerts,
+      });
+    }
+    return { rows, punchesToday };
+  }
+
   async dashboard(scope: EmployerScope): Promise<DashboardView> {
     const { employerId } = scope.membership;
     const data = await this.tenant.run(employerId, async (tx) => {
@@ -291,7 +361,10 @@ export class GovernanceService {
         .where(and(eq(workSessions.employerId, employerId), inArray(workSessions.state, ['working', 'on_break']), gte(workSessions.startedAt, new Date(Date.now() - 20 * 3600_000))))
         .orderBy(employees.fullName);
       const one = async (q: Promise<Array<{ n: number }>>) => (await q)[0]?.n ?? 0;
+      const { rows, punchesToday } = await this.todayRows(tx, employerId);
       return {
+        today: rows,
+        punchesToday,
         working: working.map((w) => ({ employeeId: w.employeeId, fullName: w.fullName, state: w.state as 'working' | 'on_break', since: w.since.toISOString() })),
         activeEmployees: await one(tx.select({ n: count() }).from(employees).where(and(eq(employees.employerId, employerId), eq(employees.status, 'active')))),
         openAlerts: await one(tx.select({ n: count() }).from(punchAlerts).where(and(eq(punchAlerts.employerId, employerId), eq(punchAlerts.status, 'open')))),

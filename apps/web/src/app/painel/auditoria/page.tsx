@@ -27,7 +27,6 @@ export default function Auditoria() {
         title="Auditoria"
         actions={
           <Button
-            variant="secondary"
             busy={busy}
             onClick={async () => {
               setBusy(true);

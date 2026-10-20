@@ -145,12 +145,11 @@ function Detalhe() {
         alert={missing.length ? `Falta configurar: ${missing.join(', ')}` : null}
         actions={
           <>
-            <Link href={`/painel/espelho?funcionario=${e.id}`} className="inline-flex h-9 items-center rounded-[8px] border border-borda-forte bg-card px-4 font-semibold text-marca hover:bg-realce">
+            <Link href={`/painel/espelho?funcionario=${e.id}`} className="inline-flex h-9 items-center rounded-[8px] bg-marca px-4 font-semibold text-white hover:bg-marca-2">
               Espelho de ponto
             </Link>
             {write && !edit ? (
               <Button
-                variant="secondary"
                 onClick={() => {
                   setForm({ fullName: e.fullName, email: e.email ?? '', phone: e.phone ?? '', jobRoleId: e.jobRoleId ?? '', status: e.status });
                   setEdit(true);
@@ -207,7 +206,7 @@ function Detalhe() {
         )}
       </Card>
 
-      <Card title="Contrato" actions={write ? <Button size="sm" variant="secondary" onClick={() => setContractOpen(true)}>Registrar contrato</Button> : null}>
+      <Card title="Contrato" actions={write ? <Button size="sm" onClick={() => setContractOpen(true)}>Registrar contrato</Button> : null}>
         {e.contracts.length ? (
           <ul className="divide-y divide-borda">
             {e.contracts.map((c) => (
@@ -337,7 +336,7 @@ function Detalhe() {
           {e.access.lastLoginAt ? <span className="text-sm text-texto-3"> · último acesso {dataHora(e.access.lastLoginAt, tz)}</span> : null}
         </p>
         {write && e.status === 'active' ? (
-          <Button variant="secondary" size="sm" className="mt-3" busy={a.busy} onClick={() => a.run(() => api.post(`/employees/${e.id}/access`), 'Acesso enviado por e-mail.')}>
+          <Button size="sm" className="mt-3" busy={a.busy} onClick={() => a.run(() => api.post(`/employees/${e.id}/access`), 'Acesso enviado por e-mail.')}>
             {e.access.status === 'none' ? 'Enviar acesso por e-mail' : 'Reenviar acesso'}
           </Button>
         ) : null}

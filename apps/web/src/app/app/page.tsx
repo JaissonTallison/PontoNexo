@@ -233,7 +233,7 @@ export default function Ponto() {
         const st = statusParts(ctx, view.state, tz);
         const hhmmss = hora(now.toISOString(), tz, true);
         return (
-          <section className="rounded-[8px] border border-borda bg-card px-4 py-3 shadow-card" aria-live="polite">
+          <section className="cartao-3d rounded-[8px] bg-card px-4 py-3" aria-live="polite">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
                 <p className="leading-none text-marca tabular" aria-label={`Hora certa ${hhmmss.slice(0, 5)}`}>

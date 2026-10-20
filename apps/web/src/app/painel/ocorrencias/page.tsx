@@ -60,7 +60,7 @@ export default function Ocorrencias() {
                     {a.status === 'open' ? <Tone tone="warn">Aberta</Tone> : <Tone tone="muted">Revisada {a.reviewedAt ? dataHora(a.reviewedAt, tz) : ''}</Tone>}
                     {a.status === 'open' && can('alerts.review') ? (
                       <div className="mt-2">
-                        <Button size="sm" variant="secondary" onClick={() => { setReviewing(a); setNote(''); setErr(null); }}>
+                        <Button size="sm" onClick={() => { setReviewing(a); setNote(''); setErr(null); }}>
                           Registrar revisão
                         </Button>
                       </div>

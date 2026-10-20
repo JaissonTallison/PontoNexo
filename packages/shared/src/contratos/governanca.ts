@@ -123,7 +123,27 @@ export interface DataRequestView {
   response: string | null;
 }
 
+export interface DashboardTodayRow {
+  employeeId: string;
+  fullName: string;
+  state: 'working' | 'on_break' | 'done' | 'absent' | 'off';
+  firstIn: string | null;
+  lastPunchAt: string | null;
+  workedSeconds: number;
+  expectedSeconds: number;
+  alerts: number;
+}
+
+export interface DashboardBadges {
+  pendingCorrections: number;
+  openAlerts: number;
+  overdueDataRequests: number;
+  openIncidents: number;
+}
+
 export interface DashboardView {
+  today: DashboardTodayRow[];
+  punchesToday: number;
   working: Array<{ employeeId: string; fullName: string; state: 'working' | 'on_break'; since: string }>;
   activeEmployees: number;
   openAlerts: number;

@@ -67,7 +67,7 @@ export default function Incidentes() {
                       <Tone tone={i.status === 'resolved' ? 'muted' : i.severity === 'high' || i.severity === 'critical' ? 'error' : 'warn'}>{INCIDENT_STATUS_LABEL[i.status]}</Tone>
                       {i.status !== 'resolved' ? (
                         <div className="mt-2">
-                          <Button size="sm" variant="secondary" onClick={() => setUpd({ item: i, status: i.status === 'open' ? 'investigating' : 'resolved', note: '' })}>
+                          <Button size="sm" onClick={() => setUpd({ item: i, status: i.status === 'open' ? 'investigating' : 'resolved', note: '' })}>
                             Atualizar
                           </Button>
                         </div>

@@ -40,7 +40,7 @@ export default function Privacidade() {
                   </div>
                   <div className="text-right">
                     {r.status === 'open' ? <Tone tone={late ? 'error' : 'warn'}>{late ? `Vencido em ${dataCurta(r.dueAt, tz)}` : `Prazo ${dataCurta(r.dueAt, tz)}`}</Tone> : <Tone tone="muted">{r.status === 'answered' ? 'Respondido' : 'Negado'}</Tone>}
-                    {r.status === 'open' ? <div className="mt-2"><Button size="sm" variant="secondary" onClick={() => { setAnswering(r); setAnswer({ status: 'answered', response: '' }); }}>Responder</Button></div> : null}
+                    {r.status === 'open' ? <div className="mt-2"><Button size="sm" onClick={() => { setAnswering(r); setAnswer({ status: 'answered', response: '' }); }}>Responder</Button></div> : null}
                   </div>
                 </li>
               );

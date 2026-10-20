@@ -28,14 +28,14 @@
   --color-texto-3: #52606d;
   --color-borda: #d9e2ec;
   --color-borda-forte: #bcccdc;
-  --color-zebra: #f6f8fb;
+  --color-zebra: #eef2f8;
   --color-marca-suave: #e8edf7;
   /* blocos 1–4 do ponto: cores vivas, branco ≥ 4,5:1 */
   --color-bloco-entrada: #047857;
   --color-bloco-pausa: #1d4ed8;
   --color-bloco-retorno: #c2410c;
   --color-bloco-saida: #dc2626;
-  --color-realce: #eef3f8;
+  --color-realce: #e2e9f3;
 
   --radius-pn: 8px;
   --shadow-card: 0 1px 2px rgb(16 42 67 / 0.05), 0 4px 12px rgb(16 42 67 / 0.06);
@@ -122,4 +122,31 @@ html.app-sem-barra,
 html.app-sem-barra::-webkit-scrollbar,
 .sem-barra::-webkit-scrollbar {
   display: none;
+}
+
+/*
+ * Profundidade (sem degradê): blocos 1–4 com sombra na própria cor, filete de luz em cima
+ * e base mais escura embaixo; afundam 2 px ao tocar. --sombra = cor do bloco em "r g b".
+ */
+.bloco-3d {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.22),
+    inset 0 -4px 0 rgb(0 0 0 / 0.2),
+    0 10px 20px -8px rgb(var(--sombra) / 0.6),
+    0 2px 4px rgb(16 42 67 / 0.12);
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.08s ease;
+}
+.bloco-3d:not(:disabled):active {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.18),
+    inset 0 -2px 0 rgb(0 0 0 / 0.2),
+    0 4px 10px -6px rgb(var(--sombra) / 0.6);
+}
+.cartao-3d {
+  box-shadow:
+    0 1px 2px rgb(16 42 67 / 0.06),
+    0 8px 20px -6px rgb(16 42 67 / 0.16);
 }

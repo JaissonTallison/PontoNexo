@@ -52,10 +52,10 @@ function Espelho() {
         actions={
           employeeId && sheet.data ? (
             <>
-              <a className="inline-flex h-9 items-center rounded-[8px] border border-borda-forte bg-card px-4 font-semibold text-marca hover:bg-realce" href={`/api/exports/timesheet.csv${qs({ month, employeeId })}`}>
+              <a className="inline-flex h-9 items-center rounded-[8px] bg-marca px-4 font-semibold text-white hover:bg-marca-2" href={`/api/exports/timesheet.csv${qs({ month, employeeId })}`}>
                 Exportar CSV
               </a>
-              <Button variant="secondary" onClick={() => window.print()}>
+              <Button onClick={() => window.print()}>
                 Imprimir
               </Button>
               {can('closings.manage') && ended && !isClosed ? (
