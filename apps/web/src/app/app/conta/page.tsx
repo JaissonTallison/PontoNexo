@@ -45,7 +45,7 @@ export default function Perfil() {
       </section>
 
       <ul className="divide-y divide-borda overflow-hidden rounded-[8px] bg-card shadow-card">
-        <Option href="/app/conta/celular" icon={Smartphone} title="Este celular" hint="Lembretes, digital ou rosto e instalar o app" />
+        <Option href="/app/conta/celular" icon={Smartphone} title="Este celular" hint="Lembretes e instalar o app" />
         <Option href="/app/conta/senha" icon={KeyRound} title="Trocar senha" hint="Crie uma senha nova para entrar" />
         <Option href="/app/privacidade" icon={ShieldCheck} title="Meus dados e privacidade" hint="Baixar meus dados e fazer pedidos" />
         <Option href="/app/ajuda" icon={CircleHelp} title="Como usar o app" hint="Passo a passo simples" />

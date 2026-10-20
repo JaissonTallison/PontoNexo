@@ -9,20 +9,19 @@
 | Segurança | argon2id, sessão HttpOnly/SameSite=Strict, CSRF, limite por sessão/IP, bloqueio após 5 erros, cabeçalhos de segurança, segredos cifrados (AES-256-GCM), backups cifrados |
 | Logs | Auditoria sem coordenadas, CPF, senhas ou tokens (teste automatizado confere) |
 
-## Dados de acesso pelo celular (outubro/2026)
+## Dados de acesso e avisos (outubro/2026)
+
+O acesso é só por **e-mail e senha** (argon2id). Entrar por código SMS e por biometria (passkey) foi retirado em 19/10/2026; as tabelas desses dados foram apagadas (migração `0009`).
 
 | Dado | Finalidade | Guarda |
 |---|---|---|
-| Celular do funcionário | Enviar o código de acesso por SMS (opcional) | Enquanto houver vínculo |
-| Códigos de acesso | Só o hash, 10 minutos de validade, uso único | Apagáveis após vencer |
-| Passkey | Chave pública da credencial; a biometria fica no aparelho | Até o funcionário remover |
+| Celular do funcionário | Contato do empregador com o funcionário (opcional); não serve para entrar | Enquanto houver vínculo |
 | Inscrição de notificação | Endereço técnico do aparelho para lembretes | Até desligar ou o navegador invalidar |
 | Fala do "Falar o motivo" | Transcrita pelo serviço de voz do celular; o PontoNexo recebe só o texto | Não guardada |
-
 | Mapa da tela de locais | O navegador do empregador baixa imagens do OpenStreetMap da região exibida; a busca de endereço envia o texto digitado ao Nominatim (OpenStreetMap). Só quando o empregador usa a tela | Não guardado pelo PontoNexo |
 | Resumo diário por e-mail | Pendências do dia (nomes e contagens) para titular e gestores | Registro de envio por data, sem conteúdo |
 
-O provedor de SMS (se contratado) passa a ser operador e deve constar no contrato e no aviso de privacidade.
+O provedor de e-mail (em produção, Gmail) é operador: recebe endereço e texto dos convites, recuperações de senha e resumos; deve constar no aviso de privacidade.
 
 ## Direitos do titular (art. 18)
 

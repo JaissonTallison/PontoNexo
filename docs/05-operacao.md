@@ -19,9 +19,9 @@ Usuários do seed: `titular@`, `gestor@`, `contador@`, `maria@`, `jose@pontonexo
 ## Variáveis de ambiente
 Ver `.env.example` (comentado). Em produção: `NODE_ENV=production`, `COOKIE_SECURE=true` (obrigatório), `TRUST_PROXY=true` atrás de proxy, `WEB_ORIGIN` com o domínio HTTPS, SMTP real, chaves geradas por `pnpm chaves:gerar` guardadas num cofre.
 
-## Acesso pelo celular, biometria e lembretes
-- **Código por SMS:** `OTP_PROVIDER=console` só em desenvolvimento (o código aparece no log da API). Em produção, `console` desliga o login por celular. `OTP_PROVIDER=twilio` envia SMS pela Twilio (`TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM`); **adaptador implementado pela documentação pública e não testado com conta real**.
-- **Biometria (passkey):** `WEBAUTHN_RP_ID` precisa ser o domínio do site (sem protocolo nem porta) e `WEB_ORIGIN` o endereço exato. Trocar o domínio invalida as biometrias já cadastradas.
+## Acesso, e-mail e lembretes
+- **Entrar:** só e-mail e senha. O login por SMS e por biometria foi retirado (19/10/2026).
+- **E-mail (SMTP):** em produção, Gmail com senha de app (`SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=465`, `SMTP_SECURE=true`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM` com o mesmo Gmail). Em desenvolvimento, o Mailpit (`localhost:5576`) captura tudo.
 - **Lembretes (Web Push):** chaves `VAPID_*` geradas por `pnpm chaves:gerar`; a tarefa roda a cada 5 min e avisa 15 min após o início/fim previsto. Desligar com `REMINDERS_ENABLED=false`.
 - **Avisos ao empregador:** pedido de ajuste do funcionário gera notificação para titular e gestores que ligaram os avisos em Minha conta. O **resumo diário por e-mail** sai a partir das 8h (fuso do empregador), uma vez por dia e só quando há pendência; desliga junto com `JOBS_ENABLED=false`.
 - **Mapa dos locais:** usa tiles de `tile.openstreetmap.org` e busca no Nominatim (liberados no CSP de `next.config.ts`). Para volume alto, troque por um provedor de mapas próprio, conforme a política de uso do OpenStreetMap.

@@ -4,7 +4,7 @@ Os testes automáticos rodam num navegador simulado. Antes de entregar, faça es
 
 ## 1. Acesso em HTTPS (obrigatório)
 
-Celulares só liberam **localização, notificações, biometria e service worker** em HTTPS. Pelo IP da rede (`http://10.0.1.x:5571`) essas funções não aparecem.
+Celulares só liberam **localização, notificações e service worker** em HTTPS. Pelo IP da rede (`http://10.0.1.x:5571`) essas funções não aparecem.
 
 Opção rápida, com túnel temporário (Cloudflare, sem conta):
 
@@ -18,11 +18,10 @@ Ajuste o `.env` para o endereço do túnel e **reinicie o `pnpm dev`**:
 
 ```
 WEB_ORIGIN=https://<algo>.trycloudflare.com
-WEBAUTHN_RP_ID=<algo>.trycloudflare.com
 COOKIE_SECURE=true
 ```
 
-Ao terminar, volte os três valores para `http://localhost:5571`, `localhost` e `false`.
+Ao terminar, volte os dois valores para `http://localhost:5571` e `false`.
 
 ## 2. Roteiro
 
@@ -36,10 +35,8 @@ Ao terminar, volte os três valores para `http://localhost:5571`, `localhost` e 
 | 6 | Modo avião → marcar → tirar do modo avião | "esperando internet" → some sozinho e aparece no "Hoje" |
 | 7 | Perfil › Este celular › Instalar o app | Android: botão Instalar. iPhone: passo a passo (Safari › Compartilhar › Adicionar à Tela de Início) |
 | 8 | Abrir pelo ícone instalado › Perfil › Este celular › Ligar lembretes | Chega a notificação "Lembretes ligados" |
-| 9 | Perfil › Este celular › Ativar neste celular (biometria) | Pede digital/rosto; depois, sair e usar "Entrar com digital ou rosto" |
-| 10 | Esqueci de marcar › "Outro motivo" › Falar o motivo | O texto falado aparece no campo |
-| 11 | Comprovante › Baixar PDF | Abre o PDF do comprovante |
-| 12 | Entrar pelo celular (aba Celular) | O código aparece no **log da API** (provedor `console`); digitar e entrar |
+| 9 | Esqueci de marcar › "Outro motivo" › Falar o motivo | O texto falado aparece no campo |
+| 10 | Comprovante › Baixar PDF | Abre o PDF do comprovante |
 
 No iPhone, notificação só funciona com o app instalado na tela inicial (iOS 16.4 ou mais novo).
 

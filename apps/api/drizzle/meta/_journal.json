@@ -64,6 +64,13 @@
       "when": 1792459352952,
       "tag": "0008_resumo_diario_seguranca",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792464736210,
+      "tag": "0009_remove_acesso_celular",
+      "breakpoints": true
     }
   ]
 }

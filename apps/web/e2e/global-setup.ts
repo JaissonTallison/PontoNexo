@@ -11,7 +11,12 @@ export default async function globalSetup(config: FullConfig) {
     ['titular', 'titular@pontonexo.local'],
   ] as const) {
     const ctx = await request.newContext({ baseURL, extraHTTPHeaders: { origin: baseURL } });
-    const res = await ctx.post('/api/auth/login', { data: { email, password: 'PontoNexo2026' } });
+    let res = await ctx.post('/api/auth/login', { data: { email, password: 'PontoNexo2026' } });
+    // limite de 10 logins por minuto por endereço: se rodou outro teste há pouco, espera e repete
+    if (res.status() === 429) {
+      await new Promise((r) => setTimeout(r, 61_000));
+      res = await ctx.post('/api/auth/login', { data: { email, password: 'PontoNexo2026' } });
+    }
     if (!res.ok()) throw new Error(`login de ${email} falhou: ${res.status()} ${await res.text()}`);
     const path = `e2e/.auth/${file}.json`;
     await ctx.storageState({ path });

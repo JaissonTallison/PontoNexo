@@ -7,12 +7,9 @@ import { join } from 'node:path';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { RemindersJob } from '../src/modules/notificacoes/reminders.job.js';
-import { SMS_SENDER, type ConsoleSmsSender } from '../src/modules/auth/sms.js';
 import { bootApp, Client, ownerSql, punchBody, scenario, setClock, type Scenario } from './helpers.js';
 
-const PHONE = '11987650001';
-
-describe('acesso pelo celular, avisos e PDF', () => {
+describe('avisos e PDF', () => {
   let app: NestExpressApplication;
   let s: Scenario;
   beforeAll(async () => {
@@ -21,43 +18,6 @@ describe('acesso pelo celular, avisos e PDF', () => {
     await s.owner.put(`/employees/${s.employeeId}`, { fullName: 'Maria Fictícia', email: s.employeeEmail, phone: '(11) 98765-0001', status: 'active' });
   });
   afterAll(async () => app.close());
-
-  const lastCode = () => {
-    const sms = app.get<ConsoleSmsSender>(SMS_SENDER);
-    return /(\d{6})/.exec(sms.sent.at(-1)?.text ?? '')?.[1] ?? '';
-  };
-
-  it('entra com código enviado ao celular cadastrado e recusa código errado', async () => {
-    const c = new Client(app);
-    const start = await c.post('/auth/phone/start', { phone: '(11) 98765-0001' });
-    expect(start.status).toBe(200);
-    const code = lastCode();
-    expect(code).toMatch(/^\d{6}$/);
-    const wrong = await c.post('/auth/phone/verify', { phone: PHONE, code: code === '000000' ? '111111' : '000000' });
-    expect(wrong.status).toBe(401);
-    const ok = await c.post('/auth/phone/verify', { phone: PHONE, code });
-    expect(ok.status).toBe(200);
-    expect((await c.get('/auth/me')).body.active.role).toBe('employee');
-    // código é de uso único
-    expect((await new Client(app).post('/auth/phone/verify', { phone: PHONE, code })).status).toBe(401);
-  });
-
-  it('não revela se o número existe e bloqueia após 5 tentativas', async () => {
-    const sms = app.get<ConsoleSmsSender>(SMS_SENDER);
-    const before = sms.sent.length;
-    const unknown = await new Client(app).post('/auth/phone/start', { phone: '11900000000' });
-    expect(unknown.body.message).toContain('Se o número estiver cadastrado');
-    expect(sms.sent.length).toBe(before);
-
-    const ownerSqlConn = ownerSql();
-    await ownerSqlConn`update login_codes set created_at = now() - interval '2 minutes' where phone_digits = ${PHONE}`;
-    await ownerSqlConn.end();
-    await new Client(app).post('/auth/phone/start', { phone: PHONE });
-    const code = lastCode();
-    const c = new Client(app);
-    for (let i = 0; i < 5; i++) await c.post('/auth/phone/verify', { phone: PHONE, code: '999999' === code ? '888888' : '999999' });
-    expect((await c.post('/auth/phone/verify', { phone: PHONE, code })).status).toBe(401);
-  });
 
   it('gera o comprovante em PDF no servidor', async () => {
     setClock(app, '2026-10-15T08:00:00');

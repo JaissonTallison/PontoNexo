@@ -13,12 +13,12 @@ async function abrirApp(page: Page) {
 
 test.beforeEach(({}, info) => test.skip(info.project.name !== 'celular'));
 
-test('login começa pelo celular e alterna para e-mail', async ({ page }) => {
+test('login é só por e-mail e senha', async ({ page }) => {
   await page.goto('/entrar');
-  await expect(page.getByLabel('Seu celular com DDD')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Receber código por SMS' })).toBeDisabled();
-  await page.getByRole('tab', { name: 'E-mail e senha' }).click();
   await expect(page.getByLabel('E-mail')).toBeVisible();
+  await expect(page.getByLabel('Senha')).toBeVisible();
+  await expect(page.getByText(/Receber código|código por SMS|digital ou rosto/i)).toHaveCount(0);
+  await expect(page.getByRole('tab')).toHaveCount(0);
 });
 
 test.describe('com sessão da Maria', () => {
@@ -45,6 +45,7 @@ test('Perfil leva a Este celular e valida a troca de senha', async ({ page }) =>
   await page.getByRole('link', { name: 'Perfil' }).click();
   await page.getByRole('link', { name: /Este celular/ }).click();
   await expect(page.getByRole('heading', { name: 'Lembretes' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /digital ou rosto/ })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'Instalar o app' })).toBeVisible();
   await page.getByRole('button', { name: 'Voltar' }).click();
   await page.getByRole('link', { name: /Trocar senha/ }).click();
